@@ -1,9 +1,13 @@
 import { Note } from "../notes/note";
 import { ScalePattern } from "./scale-pattern";
-import { DEGREE_MAPPING } from "../intervals/degree-mapping";
 import { Chord } from "../chords/chord";
 import { DOMINANT_7, HALF_DIMINISHED, MAJOR_7, MINOR_7 } from "../chords/chord-qualities";
 import { ChordQuality } from "../chords/chord-quality";
+
+import { DOMINANT, SUBDOMINANT, TONIC } from "../harmony/harmonic-functions";
+import { Degree } from "./degree";
+
+import { createEleven, createNine, createSharpEleven, createThirteen } from "../harmony/tensions";
 
 export class Scale {
   constructor(
@@ -26,12 +30,10 @@ export class Scale {
   }
 
   degrees() {
-    return this.notes().map((note) => {
-      const distance = this.root.distanceTo(note);
-
+    return this.notes().map((note, index) => {
       return {
         note,
-        degree: DEGREE_MAPPING[distance],
+        degree: this.pattern.degrees[index],
       };
     });
   }
@@ -100,7 +102,42 @@ export class Scale {
         quality = HALF_DIMINISHED;
       }
 
-      return new Chord(root, quality, item.degree, [root, third, fifth, seventh]);
+      const second = scaleDegrees[(index + 1) % scaleDegrees.length].note;
+
+      const fourth = scaleDegrees[(index + 3) % scaleDegrees.length].note;
+
+      const sixth = scaleDegrees[(index + 5) % scaleDegrees.length].note;
+
+      const isLydian = this.pattern.name === "Lydian";
+
+      const tensions = [
+        createNine(second),
+
+        isLydian ? createSharpEleven(fourth) : createEleven(fourth),
+
+        createThirteen(sixth),
+      ];
+
+      return new Chord(
+        root,
+        quality,
+        item.degree,
+        [root, third, fifth, seventh],
+        this.harmonicFunctionForDegree(item.degree),
+        tensions,
+      );
     });
+  }
+
+  private harmonicFunctionForDegree(degree: Degree) {
+    if (["1", "3", "6"].includes(degree.toString())) {
+      return TONIC;
+    }
+
+    if (["2", "4"].includes(degree.toString())) {
+      return SUBDOMINANT;
+    }
+
+    return DOMINANT;
   }
 }

@@ -1,6 +1,5 @@
 export * from "./intervals/interval";
 export * from "./scales/scale";
-export * from "./scales/create-major-scale";
 export * from "./notes/chromatic-scale";
 export * from "./notes/note";
 export * from "./scales/scale-pattern";
@@ -9,3 +8,9 @@ export * from "./scales/create-scale";
 export * from "./chords/chord";
 export * from "./chords/chord-quality";
 export * from "./chords/chord-qualities";
+export * from "./harmony/harmonic-function";
+export * from "./harmony/harmonic-functions";
+export * from "./harmony/chord-progression";
+export * from "./harmony/detect-two-five-one";
+export * from "./harmony/tension";
+export * from "./harmony/tensions";

@@ -2,6 +2,8 @@ import { Degree } from "../scales/degree";
 import { Note } from "../notes/note";
 
 import { ChordQuality } from "./chord-quality";
+import { HarmonicFunction } from "../harmony/harmonic-function";
+import { Tension } from "../harmony/tension";
 
 export class Chord {
   constructor(
@@ -9,9 +11,11 @@ export class Chord {
     public readonly quality: ChordQuality,
     public readonly degree: Degree,
     public readonly notes: Note[],
+    public readonly harmonicFunction?: HarmonicFunction,
+    public readonly tensions: Tension[] = [],
   ) {}
 
-  name() {
+  get name() {
     return `${this.root}${this.quality}`;
   }
 }

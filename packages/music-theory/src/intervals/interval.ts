@@ -8,4 +8,8 @@ export class Interval {
   static halfStep() {
     return new Interval(1);
   }
+
+  static wholeStepAndHalf() {
+    return new Interval(3);
+  }
 }

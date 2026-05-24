@@ -9,6 +9,7 @@ const {
   selectedPattern,
 
   scale,
+  progressions,
 
   selectRoot,
   selectPattern
@@ -60,22 +61,43 @@ const {
       <h2>Harmonic Field</h2>
 
       <ul>
-        <li v-for="chord in scale.triads()" :key="chord.name()">
+        <li v-for="chord in scale.triads()" :key="chord.name">
           {{ chord.degree.toString() }}
           —
-          {{ chord.name() }}
+          {{ chord.name }}
         </li>
+
       </ul>
+
     </section>
 
     <section>
       <h2>Seventh Chords</h2>
 
       <ul>
-        <li v-for="chord in scale.seventhChords()" :key="chord.name()">
+        <li v-for="chord in scale.seventhChords()" :key="chord.name">
           {{ chord.degree.toString() }}
           —
-          {{ chord.name() }}
+          {{ chord.name }}
+          —
+          {{ chord.harmonicFunction }}
+        </li>
+      </ul>
+
+
+    </section>
+    <section>
+      <h2>Detected Progressions</h2>
+
+      <ul>
+        <li v-for="progression in progressions" :key="progression.name">
+          {{ progression.name }}
+
+          —
+
+          <span v-for="chord in progression.chords" :key="chord.name">
+            {{ chord.name }}
+          </span>
         </li>
       </ul>
     </section>
