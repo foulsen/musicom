@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { AppLayout } from "@/layouts/app-layout";
+</script>
+
 <template>
-  <RouterView />
+  <app-layout />
 </template>
