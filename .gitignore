@@ -3,3 +3,5 @@ dist
 .turbo
 .env
 coverage
+*.tsbuildinfo
+.claude/settings.local.json
