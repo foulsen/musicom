@@ -52,7 +52,7 @@ export class Scale {
 
       const rootToFifth = root.distanceTo(fifth);
 
-      let quality = new ChordQuality("M");
+      let quality = new ChordQuality("");
 
       if (rootToThird === 3 && rootToFifth === 7) {
         quality = new ChordQuality("m");
@@ -60,6 +60,10 @@ export class Scale {
 
       if (rootToThird === 3 && rootToFifth === 6) {
         quality = new ChordQuality("dim");
+      }
+
+      if (rootToThird === 4 && rootToFifth === 8) {
+        quality = new ChordQuality("aug");
       }
 
       return new Chord(root, quality, item.degree, [root, third, fifth]);

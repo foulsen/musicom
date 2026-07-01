@@ -3,6 +3,10 @@ import { CHROMATIC_SCALE, SingleNote } from "./chromatic-scale";
 export class Note {
   constructor(public readonly value: SingleNote) {}
 
+  static from(value: SingleNote): Note {
+    return new Note(value);
+  }
+
   index(): number {
     return CHROMATIC_SCALE.indexOf(this.value);
   }

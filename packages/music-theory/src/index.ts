@@ -1,5 +1,6 @@
 export * from "./intervals/interval";
 export * from "./scales/scale";
+export * from "./scales/degree";
 export * from "./notes/chromatic-scale";
 export * from "./notes/note";
 export * from "./scales/scale-pattern";
