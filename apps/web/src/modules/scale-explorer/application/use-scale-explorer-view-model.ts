@@ -15,13 +15,14 @@ import {
   MIXOLYDIAN_SCALE_PATTERN,
   PHRYGIAN_SCALE_PATTERN,
   Note,
+  ScalePattern,
   detectTwoFiveOne,
 } from "@music-workspace/music-theory";
 
-export function useScaleExplorer() {
-  const selectedRoot = ref(new Note("C"));
+export function useScaleExplorerViewModel() {
+  const selectedRoot = ref<Note>(Note.from("C"));
 
-  const availablePatterns = [
+  const availablePatterns: ScalePattern[] = [
     MAJOR_SCALE_PATTERN,
 
     NATURAL_MINOR_SCALE_PATTERN,
@@ -37,31 +38,23 @@ export function useScaleExplorer() {
     PHRYGIAN_SCALE_PATTERN,
   ];
 
-  const selectedPattern = ref(MAJOR_SCALE_PATTERN);
+  const selectedPattern = ref<ScalePattern>(MAJOR_SCALE_PATTERN);
 
-  const scale = computed(() => {
-    return createScale(selectedRoot.value, selectedPattern.value);
-  });
+  const scale = computed(() => createScale(selectedRoot.value, selectedPattern.value));
 
-  const notes = computed(() => {
-    return scale.value.notes();
-  });
+  const notes = computed(() => scale.value.notes());
 
-  const progressions = computed(() => {
-    return detectTwoFiveOne(scale.value.seventhChords());
-  });
+  const degrees = computed(() => scale.value.degrees());
 
-  function selectRoot(note: string) {
-    selectedRoot.value = new Note(note as any);
+  const triads = computed(() => scale.value.triads());
+
+  const progressions = computed(() => detectTwoFiveOne(scale.value.seventhChords()));
+
+  function selectRoot(note: Note) {
+    selectedRoot.value = note;
   }
 
-  function selectPattern(name: string) {
-    const pattern = availablePatterns.find((pattern) => pattern.name === name);
-
-    if (!pattern) {
-      return;
-    }
-
+  function selectPattern(pattern: ScalePattern) {
     selectedPattern.value = pattern;
   }
 
@@ -75,9 +68,11 @@ export function useScaleExplorer() {
 
     scale,
     notes,
+    degrees,
+    triads,
+    progressions,
 
     selectRoot,
     selectPattern,
-    progressions,
   };
 }
