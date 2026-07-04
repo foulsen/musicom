@@ -6,10 +6,9 @@
 ## Resumo
 - Última fase concluída: **Fase 6 (Fretboard) — passos 1–5** (modelo → SVG → 3 estilos →
   layout 2 colunas → hover + áudio). Fretboard completo e verificado.
-- Próximo: polimento opcional do fretboard (inlays das casas, seletor de afinação na UI,
-  áudio string-accurate via `Pitch` no domínio). Pendências gerais: hex exato do `--brand`,
-  spelling enarmônico.
-- Atualizado em: 2026-07-03
+- Próximo: polimento opcional do fretboard (inlays das casas). Pendências gerais: hex exato
+  do `--brand`, spelling enarmônico.
+- Atualizado em: 2026-07-04
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
@@ -73,10 +72,11 @@
   porta 5173) para o painel de preview.
 
 ## Fretboard (Fase 6 — passos 1–5)
-- **Domínio** (`packages/music-theory/src/instruments/`): `Tuning` (configurável) +
-  `STANDARD_GUITAR_TUNING`; `Fretboard` (`noteAt`, `positions()` → matriz cordas×casas 0..12).
-  Helpers `Note.equals` e `Scale.contains`. Exportados no `index`. Removido `baseUrl` do
-  `tsconfig.json` do pacote (deprecado no TS 6.0).
+- **Domínio** (`packages/music-theory/`): `Pitch` (nota + oitava; `midi`/`frequency`/`transpose`);
+  `Tuning` octave-aware (`strings: Pitch[]`) + presets `TUNINGS` (Standard, Drop D, Half Step
+  Down); `Fretboard` (`pitchAt`, `positions()` → matriz cordas×casas 0..12 de `Pitch`). Helpers
+  `Note.equals`, `Scale.contains`, `Interval.name()`. Removido `baseUrl` do `tsconfig.json` do
+  pacote (deprecado no TS 6.0).
 - **Categorização no view-model**: `fretboardPositions` (computed) anota cada posição com
   `isTonic`/`inScale` (tipo em `modules/scale-explorer/types/fretboard-note.ts`). O
   `FretboardDiagram` é presentation-only, não acopla com `Scale`.
@@ -93,12 +93,17 @@
   (grave→aguda) do domínio ao renderizar.
 - **Passo 5 (hover + áudio)**: hover destaca a nota (aumenta) e mostra tooltip
   `nota · intervalo` (`Interval.name()` por semitons em relação à tônica). Clique toca a nota:
-  `application/use-note-audio.ts` (Web Audio, oscilador + envelope); o `FretboardDiagram` só
-  **emite `note-click`**, a página toca. ⚠️ **`ref(objeto)` faz proxy reativo** — comparar o
-  hover por `key`, não por identidade (`hovered === cell` dava sempre falso). Áudio toca a
-  **classe de altura em oitava fixa** (domínio sem oitava; string-accurate exigiria `Pitch`).
-- **Pendências (opcional)**: inlays das casas, seletor de afinação na UI (o modelo já é
-  configurável), áudio string-accurate.
+  `application/use-note-audio.ts` (Web Audio, oscilador + envelope, `pitch.frequency()`); o
+  `FretboardDiagram` só **emite `note-play`** com o `Pitch`, a página toca. ⚠️ **`ref(objeto)`
+  faz proxy reativo** — comparar o hover por `key`, não por identidade (`hovered === cell` dava
+  sempre falso). Áudio é **string-accurate** (altura real por corda/casa via `Pitch`).
+- **Seletor de afinação**: `TuningSelector` com o **shadcn Select** (dropdown). ⚠️ `<select>`
+  colide com o elemento nativo → root importado com alias (`Select as SelectRoot` →
+  `<select-root>`). `fretboard` é computed reativo a `selectedTuning` no view-model.
+- **Gotcha do CLI shadcn**: `add <componente>` re-injeta o `@import` de fonte (JetBrains Mono)
+  no `style.css` conforme `components.json` (`font: jetbrains-mono`). Remover após rodar o CLI —
+  o app usa Cascadia Code.
+- **Pendências (opcional)**: inlays das casas.
 
 ## Decisões arquiteturais registradas (gerais)
 - **Estado**: composable view-model domain-first; Pinia configurado porém **não utilizado** —
