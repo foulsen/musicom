@@ -4,11 +4,12 @@
 > "Onde paramos". Plano completo: ../plans/WEB_IMPLEMENTATION_PLAN.md
 
 ## Resumo
-- Última fase concluída: **Fase 5 — Campo Harmônico** ✅ **1º milestone completo** (Seletores +
-  Notas + Campo Harmônico).
-- Próxima fase: **Fase 6 — Fretboard** (milestone próprio). Pendências de polimento: ajustar
-  layout Notes×Fretboard (2 colunas) e hex exato do `--brand`.
-- Atualizado em: 2026-06-29
+- Última fase concluída: **Fase 6 (Fretboard) — passos 1–5** (modelo → SVG → 3 estilos →
+  layout 2 colunas → hover + áudio). Fretboard completo e verificado.
+- Próximo: polimento opcional do fretboard (inlays das casas, seletor de afinação na UI,
+  áudio string-accurate via `Pitch` no domínio). Pendências gerais: hex exato do `--brand`,
+  spelling enarmônico.
+- Atualizado em: 2026-07-03
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
@@ -20,7 +21,7 @@
 | 3 — Seletor de Escala/Modo                 | ✅ concluída | 2026-06-29 | `ScalePatternSelector` (11 patterns) + restyle `RootNoteSelector` (pill). Build + UI verificados. |
 | 4 — Notas & Graus (mockup)                 | ✅ concluída | 2026-06-29 | `Degree.intervalName()` no domínio + componente `ScaleNotes`. Verificado (C maior e C harmônica menor). |
 | 5 — Campo Harmônico (mockup)               | ✅ concluída | 2026-06-29 | Domínio: `Degree.position/functionName` + tríade maior `""`/`aug`; componente `HarmonicField` (triads). Verificado. |
-| 6 — Fretboard (milestone futuro)           | ⬜ pendente | — | Placeholder mantido na página. |
+| 6 — Fretboard                              | ✅ passos 1–5 | 2026-07-03 | Domínio `instruments/` + `FretboardDiagram` SVG (3 estilos, hover+tooltip, áudio) + layout 2 colunas. Polimento extra opcional. |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -71,6 +72,34 @@
 - **Preview/launch**: `.claude/launch.json` define o server `web` (`pnpm --filter web dev`,
   porta 5173) para o painel de preview.
 
+## Fretboard (Fase 6 — passos 1–5)
+- **Domínio** (`packages/music-theory/src/instruments/`): `Tuning` (configurável) +
+  `STANDARD_GUITAR_TUNING`; `Fretboard` (`noteAt`, `positions()` → matriz cordas×casas 0..12).
+  Helpers `Note.equals` e `Scale.contains`. Exportados no `index`. Removido `baseUrl` do
+  `tsconfig.json` do pacote (deprecado no TS 6.0).
+- **Categorização no view-model**: `fretboardPositions` (computed) anota cada posição com
+  `isTonic`/`inScale` (tipo em `modules/scale-explorer/types/fretboard-note.ts`). O
+  `FretboardDiagram` é presentation-only, não acopla com `Scale`.
+- **Componente**: `components/fretboard-diagram/FretboardDiagram.vue` (SVG). ⚠️ Nomeado
+  `FretboardDiagram` (não `Fretboard`) por **colisão**: a tag `<fretboard>` resolvia para o
+  *valor* `fretboard` do domínio em vez do componente → nada renderizava. Manter nomes de
+  model e componente distintos.
+- **Estilos das notas** (`Freatboard-Note.png`): tônica = `fill-brand-soft stroke-brand`
+  (rosa-claro; novo token `--brand-soft`); na escala = `fill-muted stroke-brand`; fora =
+  `fill-muted stroke-transparent`. Cores via utilitários `fill-*`/`stroke-*` do tema.
+- **Densidade** por `ref` interno `showOutOfScale` (default `true`), SEM UI (pedido do
+  usuário; controle na interface fica pro futuro).
+- **Ordem das cordas**: aguda (1ª/e) no topo — o componente inverte a ordem física
+  (grave→aguda) do domínio ao renderizar.
+- **Passo 5 (hover + áudio)**: hover destaca a nota (aumenta) e mostra tooltip
+  `nota · intervalo` (`Interval.name()` por semitons em relação à tônica). Clique toca a nota:
+  `application/use-note-audio.ts` (Web Audio, oscilador + envelope); o `FretboardDiagram` só
+  **emite `note-click`**, a página toca. ⚠️ **`ref(objeto)` faz proxy reativo** — comparar o
+  hover por `key`, não por identidade (`hovered === cell` dava sempre falso). Áudio toca a
+  **classe de altura em oitava fixa** (domínio sem oitava; string-accurate exigiria `Pitch`).
+- **Pendências (opcional)**: inlays das casas, seletor de afinação na UI (o modelo já é
+  configurável), áudio string-accurate.
+
 ## Decisões arquiteturais registradas (gerais)
 - **Estado**: composable view-model domain-first; Pinia configurado porém **não utilizado** —
   introduzir só ao compartilhar entre rotas.
@@ -88,3 +117,6 @@
   verificação feita via `preview_eval` lendo o DOM + build limpo.)
 - Fase 5: Campo Harmônico derivado de `scale.triads()`. C maior → C/Dm/Em/F/G/Am/Bdim com
   tonic…leading tone; C harmônica menor → Cm/Ddim/D#aug/Fm/G/G#/Bdim. Sem erros no console.
+- Fase 6 (Fretboard): braço SVG derivado do domínio; C maior → 6 tônicas / 42 na escala /
+  30 fora (total 78). Hover mostra `nota · intervalo` (ex.: `G · perfect fifth`) e aumenta a
+  nota; clique dispara o áudio sem erro no console.
