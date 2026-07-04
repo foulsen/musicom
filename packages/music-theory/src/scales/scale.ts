@@ -29,6 +29,10 @@ export class Scale {
     return notes;
   }
 
+  contains(note: Note): boolean {
+    return this.notes().some((scaleNote) => scaleNote.equals(note));
+  }
+
   degrees() {
     return this.notes().map((note, index) => {
       return {

@@ -21,6 +21,10 @@ export class Note {
     return (note.index() - this.index() + 12) % 12;
   }
 
+  equals(note: Note): boolean {
+    return this.value === note.value;
+  }
+
   toString(): string {
     return this.value;
   }

@@ -15,3 +15,6 @@ export * from "./harmony/chord-progression";
 export * from "./harmony/detect-two-five-one";
 export * from "./harmony/tension";
 export * from "./harmony/tensions";
+export * from "./instruments/tuning";
+export * from "./instruments/tunings";
+export * from "./instruments/fretboard";
