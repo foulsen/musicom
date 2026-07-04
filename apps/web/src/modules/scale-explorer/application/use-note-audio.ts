@@ -1,21 +1,9 @@
-import type { Note } from "@music-workspace/music-theory";
-
-/**
- * Oitava fixa usada para sonorizar a nota. O domínio trabalha com classes de
- * altura (sem oitava); tocar a altura real de cada corda/casa exigiria um
- * conceito de `Pitch` no domínio — melhoria futura.
- */
-const OCTAVE = 4;
-
-function frequencyOf(note: Note): number {
-  const midi = 12 * (OCTAVE + 1) + note.index(); // C4 = 60
-  return 440 * 2 ** ((midi - 69) / 12);
-}
+import type { Pitch } from "@music-workspace/music-theory";
 
 export function useNoteAudio() {
   let context: AudioContext | null = null;
 
-  function play(note: Note) {
+  function play(pitch: Pitch) {
     context ??= new AudioContext();
 
     if (context.state === "suspended") {
@@ -26,7 +14,7 @@ export function useNoteAudio() {
 
     const oscillator = context.createOscillator();
     oscillator.type = "triangle";
-    oscillator.frequency.value = frequencyOf(note);
+    oscillator.frequency.value = pitch.frequency();
 
     const gain = context.createGain();
     gain.gain.setValueAtTime(0.0001, now);

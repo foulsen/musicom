@@ -20,6 +20,8 @@ import {
   ScalePattern,
   Fretboard,
   Interval,
+  Tuning,
+  TUNINGS,
   STANDARD_GUITAR_TUNING,
   detectTwoFiveOne,
 } from "@music-workspace/music-theory";
@@ -55,15 +57,20 @@ export function useScaleExplorerViewModel() {
 
   const progressions = computed(() => detectTwoFiveOne(scale.value.seventhChords()));
 
-  const fretboard = new Fretboard(STANDARD_GUITAR_TUNING);
+  const availableTunings = TUNINGS;
+
+  const selectedTuning = ref<Tuning>(STANDARD_GUITAR_TUNING);
+
+  const fretboard = computed(() => new Fretboard(selectedTuning.value));
 
   const fretboardPositions = computed<FretboardNote[][]>(() =>
-    fretboard.positions().map((row) =>
+    fretboard.value.positions().map((row) =>
       row.map((position) => ({
         ...position,
-        isTonic: position.note.equals(scale.value.root),
-        inScale: scale.value.contains(position.note),
-        intervalName: new Interval(scale.value.root.distanceTo(position.note)).name(),
+        note: position.pitch.note,
+        isTonic: position.pitch.note.equals(scale.value.root),
+        inScale: scale.value.contains(position.pitch.note),
+        intervalName: new Interval(scale.value.root.distanceTo(position.pitch.note)).name(),
       })),
     ),
   );
@@ -74,6 +81,10 @@ export function useScaleExplorerViewModel() {
 
   function selectPattern(pattern: ScalePattern) {
     selectedPattern.value = pattern;
+  }
+
+  function selectTuning(tuning: Tuning) {
+    selectedTuning.value = tuning;
   }
 
   return {
@@ -90,9 +101,13 @@ export function useScaleExplorerViewModel() {
     triads,
     progressions,
 
+    availableTunings,
+    selectedTuning,
+
     fretboardPositions,
 
     selectRoot,
     selectPattern,
+    selectTuning,
   };
 }

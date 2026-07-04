@@ -6,6 +6,7 @@ import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { ScaleNotes } from "../components/scale-notes";
 import { HarmonicField } from "../components/harmonic-field";
 import { FretboardDiagram } from "../components/fretboard-diagram";
+import { TuningSelector } from "../components/tuning-selector";
 
 const {
   selectedRoot,
@@ -14,6 +15,8 @@ const {
   degrees,
   triads,
   fretboardPositions,
+  availableTunings,
+  selectedTuning,
 } = useScaleExplorerViewModel();
 
 const { play } = useNoteAudio();
@@ -37,11 +40,17 @@ const { play } = useNoteAudio();
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" />
 
-      <div class="min-w-0 lg:flex-1">
+      <div class="min-w-0 space-y-4 lg:flex-1">
+        <tuning-selector
+          v-model="selectedTuning"
+          :tunings="availableTunings"
+          class="max-w-xs"
+        />
+
         <fretboard-diagram
           :positions="fretboardPositions"
           class="max-w-3xl"
-          @note-click="play"
+          @note-play="play"
         />
       </div>
     </div>

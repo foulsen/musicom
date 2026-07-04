@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-import type { Note } from "@music-workspace/music-theory";
+import type { Pitch } from "@music-workspace/music-theory";
 
 import type { FretboardNote } from "../../types/fretboard-note";
 
@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  noteClick: [note: Note];
+  notePlay: [pitch: Pitch];
 }>();
 
 /**
@@ -53,7 +53,7 @@ interface Cell {
   cy: number;
   label: string;
   intervalName: string;
-  note: Note;
+  pitch: Pitch;
   circleClass: string;
   textClass: string;
 }
@@ -98,7 +98,7 @@ const cells = computed<Cell[]>(() => {
         cy,
         label: position.note.toString(),
         intervalName: position.intervalName,
-        note: position.note,
+        pitch: position.pitch,
         circleClass: CIRCLE_CLASS[category],
         textClass: TEXT_CLASS[category],
       });
@@ -188,7 +188,7 @@ const tooltip = computed(() => {
       class="cursor-pointer"
       @mouseenter="hovered = cell"
       @mouseleave="hovered = null"
-      @click="emit('noteClick', cell.note)"
+      @click="emit('notePlay', cell.pitch)"
     >
       <circle
         :cx="cell.cx"
