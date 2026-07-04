@@ -1,4 +1,5 @@
 import { Note } from "../notes/note";
+import { SpelledNote } from "../notes/spelled-note";
 import { ScalePattern } from "./scale-pattern";
 import { Chord } from "../chords/chord";
 import { DOMINANT_7, HALF_DIMINISHED, MAJOR_7, MINOR_7 } from "../chords/chord-qualities";
@@ -34,12 +35,21 @@ export class Scale {
   }
 
   degrees() {
+    const rootSpelling = SpelledNote.fromNote(this.root);
+
     return this.notes().map((note, index) => {
+      const degree = this.pattern.degrees[index];
+
       return {
         note,
-        degree: this.pattern.degrees[index],
+        degree,
+        spelled: SpelledNote.spell(rootSpelling, degree.position() - 1, note.index()),
       };
     });
+  }
+
+  spelledNotes(): SpelledNote[] {
+    return this.degrees().map((item) => item.spelled);
   }
 
   triads(): Chord[] {
@@ -70,7 +80,7 @@ export class Scale {
         quality = new ChordQuality("aug");
       }
 
-      return new Chord(root, quality, item.degree, [root, third, fifth]);
+      return new Chord(root, quality, item.degree, [root, third, fifth], item.spelled);
     });
   }
 
@@ -131,6 +141,7 @@ export class Scale {
         quality,
         item.degree,
         [root, third, fifth, seventh],
+        item.spelled,
         this.harmonicFunctionForDegree(item.degree),
         tensions,
       );

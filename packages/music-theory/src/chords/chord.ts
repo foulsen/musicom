@@ -1,5 +1,6 @@
 import { Degree } from "../scales/degree";
 import { Note } from "../notes/note";
+import { SpelledNote } from "../notes/spelled-note";
 
 import { ChordQuality } from "./chord-quality";
 import { HarmonicFunction } from "../harmony/harmonic-function";
@@ -11,11 +12,12 @@ export class Chord {
     public readonly quality: ChordQuality,
     public readonly degree: Degree,
     public readonly notes: Note[],
+    public readonly spelledRoot?: SpelledNote,
     public readonly harmonicFunction?: HarmonicFunction,
     public readonly tensions: Tension[] = [],
   ) {}
 
   get name() {
-    return `${this.root}${this.quality}`;
+    return `${this.spelledRoot ?? this.root}${this.quality}`;
   }
 }
