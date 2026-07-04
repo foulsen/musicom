@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useScaleExplorerViewModel } from "../application/use-scale-explorer-view-model";
+import { useNoteAudio } from "../application/use-note-audio";
 import { RootNoteSelector } from "../components/root-note-selector";
 import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { ScaleNotes } from "../components/scale-notes";
 import { HarmonicField } from "../components/harmonic-field";
+import { FretboardDiagram } from "../components/fretboard-diagram";
 
 const {
   selectedRoot,
@@ -11,7 +13,10 @@ const {
   availablePatterns,
   degrees,
   triads,
+  fretboardPositions,
 } = useScaleExplorerViewModel();
+
+const { play } = useNoteAudio();
 </script>
 
 <template>
@@ -29,11 +34,17 @@ const {
       :patterns="availablePatterns"
     />
 
-    <scale-notes :degrees="degrees" />
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" />
 
-    <section>
-      <!-- Fretboard (milestone futuro) -->
-    </section>
+      <div class="min-w-0 lg:flex-1">
+        <fretboard-diagram
+          :positions="fretboardPositions"
+          class="max-w-3xl"
+          @note-click="play"
+        />
+      </div>
+    </div>
 
     <harmonic-field :chords="triads" />
   </section>

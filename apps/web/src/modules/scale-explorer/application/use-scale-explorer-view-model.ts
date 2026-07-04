@@ -1,5 +1,7 @@
 import { computed, ref } from "vue";
 
+import type { FretboardNote } from "../types/fretboard-note";
+
 import {
   CHROMATIC_SCALE,
   createScale,
@@ -16,6 +18,9 @@ import {
   PHRYGIAN_SCALE_PATTERN,
   Note,
   ScalePattern,
+  Fretboard,
+  Interval,
+  STANDARD_GUITAR_TUNING,
   detectTwoFiveOne,
 } from "@music-workspace/music-theory";
 
@@ -50,6 +55,19 @@ export function useScaleExplorerViewModel() {
 
   const progressions = computed(() => detectTwoFiveOne(scale.value.seventhChords()));
 
+  const fretboard = new Fretboard(STANDARD_GUITAR_TUNING);
+
+  const fretboardPositions = computed<FretboardNote[][]>(() =>
+    fretboard.positions().map((row) =>
+      row.map((position) => ({
+        ...position,
+        isTonic: position.note.equals(scale.value.root),
+        inScale: scale.value.contains(position.note),
+        intervalName: new Interval(scale.value.root.distanceTo(position.note)).name(),
+      })),
+    ),
+  );
+
   function selectRoot(note: Note) {
     selectedRoot.value = note;
   }
@@ -71,6 +89,8 @@ export function useScaleExplorerViewModel() {
     degrees,
     triads,
     progressions,
+
+    fretboardPositions,
 
     selectRoot,
     selectPattern,
