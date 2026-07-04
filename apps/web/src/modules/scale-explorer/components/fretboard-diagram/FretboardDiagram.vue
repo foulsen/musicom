@@ -96,7 +96,7 @@ const cells = computed<Cell[]>(() => {
         key: `${stringIndex}-${position.fret}`,
         cx,
         cy,
-        label: position.note.toString(),
+        label: position.label,
         intervalName: position.intervalName,
         pitch: position.pitch,
         circleClass: CIRCLE_CLASS[category],

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { Degree, Note } from "@music-workspace/music-theory";
+import type { Degree, Note, SpelledNote } from "@music-workspace/music-theory";
 
 interface ScaleNote {
   note: Note;
   degree: Degree;
+  spelled: SpelledNote;
 }
 
 defineProps<{
@@ -26,7 +27,7 @@ defineProps<{
         class="leading-tight"
       >
         <p class="text-lg font-semibold text-foreground">
-          {{ item.note }}
+          {{ item.spelled }}
         </p>
 
         <p class="text-sm text-muted-foreground">

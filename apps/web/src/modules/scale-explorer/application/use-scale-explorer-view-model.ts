@@ -63,17 +63,26 @@ export function useScaleExplorerViewModel() {
 
   const fretboard = computed(() => new Fretboard(selectedTuning.value));
 
-  const fretboardPositions = computed<FretboardNote[][]>(() =>
-    fretboard.value.positions().map((row) =>
-      row.map((position) => ({
-        ...position,
-        note: position.pitch.note,
-        isTonic: position.pitch.note.equals(scale.value.root),
-        inScale: scale.value.contains(position.pitch.note),
-        intervalName: new Interval(scale.value.root.distanceTo(position.pitch.note)).name(),
-      })),
-    ),
-  );
+  const fretboardPositions = computed<FretboardNote[][]>(() => {
+    const spelledByPitchClass = new Map<number, string>();
+    scale.value.spelledNotes().forEach((spelled) => {
+      spelledByPitchClass.set(spelled.pitchClass(), spelled.toString());
+    });
+
+    return fretboard.value.positions().map((row) =>
+      row.map((position) => {
+        const note = position.pitch.note;
+
+        return {
+          ...position,
+          label: spelledByPitchClass.get(note.index()) ?? note.toString(),
+          isTonic: note.equals(scale.value.root),
+          inScale: scale.value.contains(note),
+          intervalName: new Interval(scale.value.root.distanceTo(note)).name(),
+        };
+      }),
+    );
+  });
 
   function selectRoot(note: Note) {
     selectedRoot.value = note;
