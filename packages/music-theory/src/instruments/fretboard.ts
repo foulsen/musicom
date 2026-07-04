@@ -1,4 +1,4 @@
-import { Note } from "../notes/note";
+import { Pitch } from "../notes/pitch";
 import { Tuning } from "./tuning";
 
 export interface FretPosition {
@@ -6,7 +6,7 @@ export interface FretPosition {
   string: number;
   /** Casa; 0 = corda solta. */
   fret: number;
-  note: Note;
+  pitch: Pitch;
 }
 
 export class Fretboard {
@@ -15,17 +15,17 @@ export class Fretboard {
     public readonly fretCount: number = 12,
   ) {}
 
-  noteAt(stringIndex: number, fret: number): Note {
+  pitchAt(stringIndex: number, fret: number): Pitch {
     return this.tuning.strings[stringIndex].transpose(fret);
   }
 
   /** Matriz de posições: uma linha por corda, colunas de 0..fretCount. */
   positions(): FretPosition[][] {
-    return this.tuning.strings.map((openNote, string) =>
+    return this.tuning.strings.map((openPitch, string) =>
       Array.from({ length: this.fretCount + 1 }, (_, fret) => ({
         string,
         fret,
-        note: openNote.transpose(fret),
+        pitch: openPitch.transpose(fret),
       })),
     );
   }

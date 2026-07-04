@@ -3,6 +3,7 @@ export * from "./scales/scale";
 export * from "./scales/degree";
 export * from "./notes/chromatic-scale";
 export * from "./notes/note";
+export * from "./notes/pitch";
 export * from "./scales/scale-pattern";
 export * from "./scales/scale-patterns";
 export * from "./scales/create-scale";
