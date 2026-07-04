@@ -4,10 +4,10 @@
 > "Onde paramos". Plano completo: ../plans/WEB_IMPLEMENTATION_PLAN.md
 
 ## Resumo
-- Última fase concluída: **Fase 6 (Fretboard) — passos 1–5** (modelo → SVG → 3 estilos →
-  layout 2 colunas → hover + áudio). Fretboard completo e verificado.
-- Próximo: polimento opcional do fretboard (inlays das casas). Pendências gerais: hex exato
-  do `--brand`, spelling enarmônico.
+- Última fase concluída: **Fase 6 (Fretboard) — passos 1–5**; depois, no domínio: **seletor
+  de afinação**, **áudio string-accurate** e **spelling enarmônico**. Tudo verificado.
+- Próximo: polimento opcional do fretboard (inlays das casas). Pendência geral: hex exato
+  do `--brand`.
 - Atualizado em: 2026-07-04
 
 ## Histórico de fases
@@ -21,6 +21,7 @@
 | 4 — Notas & Graus (mockup)                 | ✅ concluída | 2026-06-29 | `Degree.intervalName()` no domínio + componente `ScaleNotes`. Verificado (C maior e C harmônica menor). |
 | 5 — Campo Harmônico (mockup)               | ✅ concluída | 2026-06-29 | Domínio: `Degree.position/functionName` + tríade maior `""`/`aug`; componente `HarmonicField` (triads). Verificado. |
 | 6 — Fretboard                              | ✅ passos 1–5 | 2026-07-03 | Domínio `instruments/` + `FretboardDiagram` SVG (3 estilos, hover+tooltip, áudio) + layout 2 colunas. Polimento extra opcional. |
+| + Afinação, áudio real e spelling          | ✅ concluído | 2026-07-04 | Seletor de afinação (shadcn Select), `Pitch`/áudio string-accurate, `SpelledNote` (grafia enarmônica). |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -54,14 +55,17 @@
   `interval.semitones` (apresentação, não regra musical).
 - **Nomes de intervalo (Fase 4)**: `Degree.intervalName()` no domínio (mapa símbolo→nome) e
   `Degree` exportado no `index`. UI consome via `scale.degrees()[i].degree.intervalName()`.
-- **Spelling enarmônico (limitação conhecida)**: `CHROMATIC_SCALE` só tem sustenidos, então
-  C harmônica menor mostra `D#`/`G#` em vez de `Eb`/`Ab`. Os nomes de intervalo continuam
-  corretos. Melhoria futura no domínio (escolher bemol/sustenido conforme o grau).
+- **Spelling enarmônico (resolvido)**: novo `SpelledNote` (letra + acidente) no domínio; a
+  altura é **derivada** da grafia (`Note` segue como classe de altura). `Scale.degrees()` carrega
+  `spelled` e `Scale.spelledNotes()` aplica a regra **uma-letra-por-grau**; `Chord.spelledRoot`
+  grafa o nome do acorde. UI (Notes, Harmonic Field, fretboard) usa a grafia. **Raízes ainda só
+  com sustenido** (decisão) — tons de sustenido saem corretos porém exóticos (ex.: C# maior →
+  E#/B#; D# menor harmônica → C##). Bemóis nas raízes ficam para depois.
 - **Layout Notes × Fretboard**: hoje a seção Notes é uma lista vertical full-width; no mockup
   ela fica ao lado do fretboard. Ajustar para 2 colunas quando o fretboard for construído.
 - **Campo Harmônico (Fase 5)**: usa `scale.triads()`. Domínio ganhou `Degree.position()` e
   `Degree.functionName()`; `triads()` agora gera tríade maior **sem sufixo** (`"C"`),
-  `dim`, `m` e **`aug`** (ex.: C harmônica menor → `D#aug` no III). O 7º grau é nomeado
+  `dim`, `m` e **`aug`** (ex.: C harmônica menor → `Ebaug` no III). O 7º grau é nomeado
   `leading tone` (7 natural) ou `subtonic` (b7) — musicalmente correto; o mockup mostrava
   `subtonic` para C maior como placeholder.
 - **Tríade aumentada**: detecção adicionada (`rootToThird=4 && rootToFifth=8`). Outras
@@ -121,7 +125,9 @@
   fifth, minor sixth, major seventh. (Screenshot do preview ficou instável nesta sessão;
   verificação feita via `preview_eval` lendo o DOM + build limpo.)
 - Fase 5: Campo Harmônico derivado de `scale.triads()`. C maior → C/Dm/Em/F/G/Am/Bdim com
-  tonic…leading tone; C harmônica menor → Cm/Ddim/D#aug/Fm/G/G#/Bdim. Sem erros no console.
+  tonic…leading tone; C harmônica menor → Cm/Ddim/Ebaug/Fm/G/Ab/Bdim. Sem erros no console.
 - Fase 6 (Fretboard): braço SVG derivado do domínio; C maior → 6 tônicas / 42 na escala /
   30 fora (total 78). Hover mostra `nota · intervalo` (ex.: `G · perfect fifth`) e aumenta a
   nota; clique dispara o áudio sem erro no console.
+- Spelling enarmônico: C menor harmônica → Notes C/D/Eb/F/G/Ab/B; Harmonic Field
+  Cm/Ddim/Ebaug/Fm/G/Ab/Bdim; fretboard grafa Eb/Ab nas notas da escala (fora seguem #).
