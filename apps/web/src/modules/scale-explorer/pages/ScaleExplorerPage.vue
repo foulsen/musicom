@@ -23,7 +23,7 @@ const { play } = useNoteAudio();
 </script>
 
 <template>
-  <section class="flex h-full flex-col gap-8 p-8">
+  <section class="flex h-full flex-col gap-8 overflow-auto p-8">
     <header>
       <h1 class="text-2xl font-medium tracking-wide uppercase">
         Scale Explorer
