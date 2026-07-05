@@ -25,14 +25,18 @@ const openPosition = computed(() => props.shape.openPosition);
 const fretCount = computed(() => props.shape.fretCount);
 const baseFret = computed(() => props.shape.baseFret);
 
-const nutX = computed(() => PAD.left + (openPosition.value ? OPEN_COL : 0));
+// Reserva sempre a coluna de cordas soltas (à esquerda da pestana) e a faixa de
+// números, mesmo quando não são usadas, para que todas as posições de um mesmo
+// acorde tenham exatamente o mesmo tamanho (tendo soltas ou não).
+const NUMBERS_ROW = 22;
+
+const nutX = PAD.left + OPEN_COL;
 const topY = PAD.top;
 const bottomY = PAD.top + (STRING_COUNT - 1) * STRING_GAP;
-const rightX = computed(() => nutX.value + fretCount.value * FRET_WIDTH);
+const rightX = computed(() => nutX + fretCount.value * FRET_WIDTH);
 
-const bottomPad = computed(() => (openPosition.value ? 10 : 22));
 const width = computed(() => rightX.value + PAD.right);
-const height = computed(() => bottomY + bottomPad.value);
+const height = bottomY + NUMBERS_ROW;
 
 const stringYs = computed(() =>
   Array.from({ length: STRING_COUNT }, (_, row) => PAD.top + row * STRING_GAP),
@@ -40,13 +44,13 @@ const stringYs = computed(() =>
 
 const fretLines = computed(() =>
   // Linhas de traste: da esquerda (nut/janela) até a direita, uma por casa.
-  Array.from({ length: fretCount.value + 1 }, (_, i) => nutX.value + i * FRET_WIDTH),
+  Array.from({ length: fretCount.value + 1 }, (_, i) => nutX + i * FRET_WIDTH),
 );
 
 const fretNumbers = computed(() =>
   Array.from({ length: fretCount.value }, (_, i) => ({
     label: baseFret.value + i,
-    x: nutX.value + (i + 0.5) * FRET_WIDTH,
+    x: nutX + (i + 0.5) * FRET_WIDTH,
   })),
 );
 
@@ -67,7 +71,7 @@ const cells = computed<Cell[]>(() =>
     const cx =
       note.fret === 0
         ? PAD.left + OPEN_COL / 2
-        : nutX.value + (note.fret - baseFret.value + 0.5) * FRET_WIDTH;
+        : nutX + (note.fret - baseFret.value + 0.5) * FRET_WIDTH;
 
     return {
       key: `${note.string}-${note.fret}`,

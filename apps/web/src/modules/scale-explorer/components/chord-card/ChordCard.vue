@@ -24,7 +24,7 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
 </script>
 
 <template>
-  <figure class="space-y-4 rounded-3xl bg-muted p-6">
+  <figure class="space-y-4 rounded-3xl bg-muted p-4">
     <figcaption class="text-center text-3xl font-medium text-muted-foreground">
       {{ name }}
     </figcaption>
@@ -34,7 +34,7 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
         v-for="(shape, index) in visibleShapes"
         :key="index"
         :shape="shape"
-        class="max-w-[180px] flex-1"
+        class="max-w-45 flex-1"
         @note-play="emit('notePlay', $event)"
       />
     </div>
