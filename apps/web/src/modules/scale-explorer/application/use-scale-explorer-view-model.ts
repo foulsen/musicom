@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 
 import type { FretboardNote } from "../types/fretboard-note";
-import type { ChordNote } from "../types/chord-note";
+import type { ChordCardData, ChordShape } from "../types/chord-shape";
 
 import {
   CHROMATIC_SCALE,
@@ -25,7 +25,51 @@ import {
   TUNINGS,
   STANDARD_GUITAR_TUNING,
   detectTwoFiveOne,
+  PREDEFINED_CHORDS,
+  ChordVoicing,
+  GuitarChord,
 } from "@music-workspace/music-theory";
+
+/** Casas exibidas por padrão em cada diagrama de digitação. */
+const CHORD_DIAGRAM_FRETS = 5;
+
+/** Braço em afinação padrão: os voicings do banco assumem EADGBE. */
+const standardFretboard = new Fretboard(STANDARD_GUITAR_TUNING);
+
+function toChordShape(voicing: ChordVoicing, chord: GuitarChord): ChordShape {
+  const openPosition = voicing.isOpenPosition();
+  const baseFret = openPosition ? 1 : voicing.lowestFret();
+  const span = Math.max(1, voicing.highestFret() - baseFret + 1);
+
+  const notes = voicing.frets.flatMap((fret, string) => {
+    if (fret === null) return [];
+
+    const pitch = standardFretboard.pitchAt(string, fret);
+    const note = pitch.note;
+
+    return [
+      {
+        string,
+        fret,
+        label: note.toString(),
+        isRoot: note.equals(chord.root),
+        pitch,
+      },
+    ];
+  });
+
+  return {
+    notes,
+    baseFret,
+    fretCount: Math.max(CHORD_DIAGRAM_FRETS, span),
+    openPosition,
+  };
+}
+
+const PREDEFINED_CHORD_CARDS: ChordCardData[] = PREDEFINED_CHORDS.map((chord) => ({
+  name: chord.name,
+  shapes: chord.voicings.map((voicing) => toChordShape(voicing, chord)),
+}));
 
 export function useScaleExplorerViewModel() {
   const selectedRoot = ref<Note>(Note.from("C"));
@@ -95,23 +139,12 @@ export function useScaleExplorerViewModel() {
     () => triads.value[selectedTriadIndex.value] ?? triads.value[0],
   );
 
-  const chordPositions = computed<ChordNote[][]>(() => {
-    const chord = selectedChord.value;
-
-    return fretboard.value.positions().map((row) =>
-      row.map((position) => {
-        const note = position.pitch.note;
-
-        return {
-          ...position,
-          label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
-          isRoot: note.equals(chord.root),
-          inChord: chord.notes.some((chordNote) => chordNote.equals(note)),
-          intervalName: new Interval(chord.root.distanceTo(note)).name(),
-        };
-      }),
-    );
-  });
+  /** Cartão de digitações do acorde selecionado, se houver um no banco. */
+  const selectedChordCard = computed<ChordCardData | null>(
+    () =>
+      PREDEFINED_CHORD_CARDS.find((card) => card.name === selectedChord.value.name) ??
+      null,
+  );
 
   function selectRoot(note: Note) {
     selectedRoot.value = note;
@@ -150,7 +183,7 @@ export function useScaleExplorerViewModel() {
 
     selectedTriadIndex,
     selectedChord,
-    chordPositions,
+    selectedChordCard,
 
     selectRoot,
     selectPattern,

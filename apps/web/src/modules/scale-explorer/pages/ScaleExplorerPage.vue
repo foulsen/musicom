@@ -6,7 +6,7 @@ import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { ScaleNotes } from "../components/scale-notes";
 import { HarmonicField } from "../components/harmonic-field";
 import { FretboardDiagram } from "../components/fretboard-diagram";
-import { ChordDiagram } from "../components/chord-diagram";
+import { ChordCard } from "../components/chord-card";
 import { TuningSelector } from "../components/tuning-selector";
 
 const {
@@ -20,7 +20,7 @@ const {
   selectedTuning,
   selectedTriadIndex,
   selectedChord,
-  chordPositions,
+  selectedChordCard,
   selectChord,
 } = useScaleExplorerViewModel();
 
@@ -68,12 +68,20 @@ const { play } = useNoteAudio();
         @select="selectChord"
       />
 
-      <chord-diagram
-        :positions="chordPositions"
-        :caption="selectedChord.name"
-        class="min-w-0 max-w-xl lg:flex-1"
+      <chord-card
+        v-if="selectedChordCard"
+        :name="selectedChordCard.name"
+        :shapes="selectedChordCard.shapes"
+        class="min-w-0 max-w-2xl lg:flex-1"
         @note-play="play"
       />
+
+      <p
+        v-else
+        class="text-sm text-muted-foreground lg:flex-1"
+      >
+        Sem digitação predefinida para {{ selectedChord.name }}.
+      </p>
     </div>
   </section>
 </template>

@@ -4,8 +4,11 @@
 > "Onde paramos". Plano completo: ../plans/WEB_IMPLEMENTATION_PLAN.md
 
 ## Resumo
-- Última fase concluída: **Diagrama de acorde** (`ChordDiagram`) — mini-braço reutilizando a
-  linguagem do fretboard, notas do acorde selecionável no Harmonic Field. Verificado.
+- Última fase concluída: **Cartão de acorde** (`ChordCard` + `ChordVoicingDiagram`) —
+  digitações hardcoded (banco em `instruments/chord-voicings.ts`) no formato do mockup;
+  exibe o cartão do acorde selecionado no Harmonic Field, no lugar do antigo mini-fretboard
+  (removido). Também: **banco de fórmulas de acorde** (`chords/chord-patterns.ts`) para a
+  futura página de estudo. Verificado.
 - Antes: **Fase 6 (Fretboard) — passos 1–5**; no domínio: **seletor de afinação**, **áudio
   string-accurate** e **spelling enarmônico**. Tudo verificado.
 - Próximo: polimento opcional do fretboard (inlays das casas). Pendência geral: hex exato
@@ -24,7 +27,9 @@
 | 5 — Campo Harmônico (mockup)               | ✅ concluída | 2026-06-29 | Domínio: `Degree.position/functionName` + tríade maior `""`/`aug`; componente `HarmonicField` (triads). Verificado. |
 | 6 — Fretboard                              | ✅ passos 1–5 | 2026-07-03 | Domínio `instruments/` + `FretboardDiagram` SVG (3 estilos, hover+tooltip, áudio) + layout 2 colunas. Polimento extra opcional. |
 | + Afinação, áudio real e spelling          | ✅ concluído | 2026-07-04 | Seletor de afinação (shadcn Select), `Pitch`/áudio string-accurate, `SpelledNote` (grafia enarmônica). |
-| + Diagrama de acorde                        | ✅ concluído | 2026-07-05 | `ChordDiagram` (SVG menor que o fretboard), `ChordNote`, seleção via Harmonic Field, áudio reaproveitado. |
+| + Diagrama de acorde (substituído)          | ↩︎ removido  | 2026-07-05 | `ChordDiagram` (notas do acorde no braço) — trocado pelo cartão de acorde abaixo. |
+| + Banco de fórmulas de acorde               | ✅ concluído | 2026-07-05 | `ChordPattern` + `chord-patterns.ts` (tríades, sextas, sétimas) no domínio; para a página de estudo. |
+| + Cartão de acorde                          | ✅ concluído | 2026-07-05 | Banco de voicings hardcoded (`instruments/chord-voicing(s).ts`) + `ChordCard`/`ChordVoicingDiagram`; dirigido pela seleção do Harmonic Field. |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -112,28 +117,36 @@
   o app usa Cascadia Code.
 - **Pendências (opcional)**: inlays das casas.
 
-## Diagrama de acorde (ChordDiagram)
-- **Componente**: `components/chord-diagram/ChordDiagram.vue` (SVG), presentation-only, mesma
-  linguagem visual do `FretboardDiagram` porém **geometria menor** (nota `r=8.5` vs `14`;
-  `STRING_GAP=22`, `FRET_WIDTH=30`, fontes ~8.5–9). Mostra **apenas as notas do acorde**
-  (tônica em `fill-brand-soft stroke-brand`; demais em `fill-muted stroke-brand`); o resto do
-  braço não é desenhado. Tem `<figcaption>` com o nome do acorde, hover+tooltip
-  (`nota · intervalo` relativo à fundamental) e emite `note-play` (áudio reaproveitado da página).
-- **Tipo**: `types/chord-note.ts` (`ChordNote`: `isRoot`/`inChord`/`intervalName`), análogo a
-  `FretboardNote`.
-- **View-model**: `selectedTriadIndex`/`selectedChord`/`chordPositions` + `selectChord(i)`.
-  `chordPositions` categoriza `fretboard.positions()` contra `chord.notes`; a grafia enarmônica
-  saiu para um computed reutilizável `spelledByPitchClass` (compartilhado com `fretboardPositions`).
-- **Integração**: `HarmonicField` virou **selecionável** (itens `<button>` com `aria-pressed`,
-  emite `select`; item ativo em `bg-brand-soft`); a página mostra o `ChordDiagram` do acorde
-  selecionado ao lado, em `flex` 2 colunas. Default = tônica (índice 0).
-- **Verificado**: C maior → tônica C, notas C/E/G no braço; selecionar G → G/B/D; caption e
-  `aria-pressed` acompanham; sem erros no console. Nota do acorde renderiza menor que a do
-  fretboard (24.2px vs 28.5px na viewport atual). Screenshot do preview instável (timeout);
-  verificação por leitura de DOM + bounding boxes.
-- **Preview/porta**: `vite.config` passou a honrar `process.env.PORT` (fallback 5173) e
-  `.claude/launch.json` ganhou `autoPort: true` — necessário para o painel de preview quando a
-  5173 já está ocupada por outra sessão (Vite não lê `PORT` sozinho).
+## Cartão de acorde (ChordCard) — mockup `apps/web/mockups/Chord-Card.png`
+- **O que é**: cartão com o nome do acorde no topo e N **diagramas de digitação (voicings)** —
+  posições reais no braço. Substituiu o `ChordDiagram` anterior (mapa de notas do acorde no
+  braço), **removido** junto com `types/chord-note.ts` e o computed `chordPositions`.
+- **Banco de voicings (hardcoded)**: domínio `instruments/chord-voicing.ts` (`ChordVoicing`
+  = casa por corda 6ª→1ª, `null` abafada / `0` solta; helpers `isOpenPosition`/`lowestFret`/
+  `highestFret`; `GuitarChord` = nome+fundamental+voicings) e `instruments/chord-voicings.ts`
+  (`PREDEFINED_CHORDS`: C com as 3 variações do mockup + G/D/A/E/Am/Em/Dm, afinação padrão).
+- **Componentes** (presentation-only): `chord-voicing-diagram/ChordVoicingDiagram.vue`
+  (um voicing: braço horizontal pequeno `r=7.5`, janela de casas via `baseFret`/`fretCount`;
+  pestana + cordas soltas à esquerda **só em posição aberta**; números de casa nas formas
+  móveis; notas em `fill-brand-soft stroke-brand` + texto `fill-brand-foreground`, como a
+  tônica do fretboard; clique emite `note-play`). `chord-card/ChordCard.vue` (fundo `bg-muted`
+  `rounded-3xl`, título centralizado, linha de diagramas; prop **`maxVariations` default 3**).
+- **View-model**: `toChordShape(voicing, chord)` resolve cada digitação em notas usando um
+  `Fretboard` de **afinação padrão** (voicings assumem EADGBE, independem de `selectedTuning`);
+  `selectedChordCard` busca em `PREDEFINED_CHORD_CARDS` pelo **nome** do acorde selecionado.
+- **Integração**: `HarmonicField` selecionável (mantido); a página mostra **só** o cartão do
+  acorde selecionado, no lugar do antigo mini-fretboard. Acorde sem digitação no banco (ex.: F,
+  Bdim) → texto de fallback "Sem digitação predefinida para …".
+- **Divergência do mockup**: números de casa aparecem em **todas** as formas móveis (o mockup
+  mostrava só na 3ª) — mais consistente; fácil reverter se quiser.
+- **Verificado**: C → 3 voicings (aberto + casas 3–7 e 8–12), notas C·E·G; Dm → D·F·A; F →
+  fallback; typecheck limpo (pkg + web); sem erros no console; screenshot confere o mockup.
+- **Fórmulas de acorde (domínio, para depois)**: `chords/chord-pattern.ts` + `chord-patterns.ts`
+  (tríades, sextas, sétimas por intervalos da fundamental) + símbolos em `chord-qualities.ts` e
+  fatores nomeados em `interval.ts`. **Não** usado pelo cartão; reservado para a página de estudo.
+- **Preview/porta**: `vite.config` honra `process.env.PORT` (fallback 5173) e `.claude/launch.json`
+  tem `autoPort: true` — necessário para o preview quando a 5173 já está ocupada (Vite não lê
+  `PORT` sozinho).
 
 ## Decisões arquiteturais registradas (gerais)
 - **Estado**: composable view-model domain-first; Pinia configurado porém **não utilizado** —
