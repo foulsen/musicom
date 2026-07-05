@@ -24,7 +24,7 @@ const STRING_GAP = 36;
 const FRET_WIDTH = 54;
 const OPEN_COL = 44;
 const RADIUS = 14;
-const PAD = { top: 24, bottom: 40, left: 12, right: 20 };
+const PAD = { top: 24, bottom: 50, left: 12, right: 20 };
 
 const stringCount = computed(() => props.positions.length);
 const fretCount = computed(() => (props.positions[0]?.length ?? 1) - 1);
@@ -173,7 +173,7 @@ const tooltip = computed(() => {
       v-for="fret in frets"
       :key="`label-${fret.fret}`"
       :x="fret.labelX"
-      :y="bottomY + 26"
+      :y="bottomY + 36"
       text-anchor="middle"
       font-size="13"
       class="fill-muted-foreground"
