@@ -11,6 +11,8 @@ export * from "./scales/create-scale";
 export * from "./chords/chord";
 export * from "./chords/chord-quality";
 export * from "./chords/chord-qualities";
+export * from "./chords/chord-pattern";
+export * from "./chords/chord-patterns";
 export * from "./harmony/harmonic-function";
 export * from "./harmony/harmonic-functions";
 export * from "./harmony/chord-progression";
