@@ -22,3 +22,5 @@ export * from "./harmony/tensions";
 export * from "./instruments/tuning";
 export * from "./instruments/tunings";
 export * from "./instruments/fretboard";
+export * from "./instruments/chord-voicing";
+export * from "./instruments/chord-voicings";
