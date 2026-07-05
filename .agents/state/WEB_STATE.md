@@ -4,11 +4,13 @@
 > "Onde paramos". Plano completo: ../plans/WEB_IMPLEMENTATION_PLAN.md
 
 ## Resumo
-- Última fase concluída: **Fase 6 (Fretboard) — passos 1–5**; depois, no domínio: **seletor
-  de afinação**, **áudio string-accurate** e **spelling enarmônico**. Tudo verificado.
+- Última fase concluída: **Diagrama de acorde** (`ChordDiagram`) — mini-braço reutilizando a
+  linguagem do fretboard, notas do acorde selecionável no Harmonic Field. Verificado.
+- Antes: **Fase 6 (Fretboard) — passos 1–5**; no domínio: **seletor de afinação**, **áudio
+  string-accurate** e **spelling enarmônico**. Tudo verificado.
 - Próximo: polimento opcional do fretboard (inlays das casas). Pendência geral: hex exato
   do `--brand`.
-- Atualizado em: 2026-07-04
+- Atualizado em: 2026-07-05
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
@@ -22,6 +24,7 @@
 | 5 — Campo Harmônico (mockup)               | ✅ concluída | 2026-06-29 | Domínio: `Degree.position/functionName` + tríade maior `""`/`aug`; componente `HarmonicField` (triads). Verificado. |
 | 6 — Fretboard                              | ✅ passos 1–5 | 2026-07-03 | Domínio `instruments/` + `FretboardDiagram` SVG (3 estilos, hover+tooltip, áudio) + layout 2 colunas. Polimento extra opcional. |
 | + Afinação, áudio real e spelling          | ✅ concluído | 2026-07-04 | Seletor de afinação (shadcn Select), `Pitch`/áudio string-accurate, `SpelledNote` (grafia enarmônica). |
+| + Diagrama de acorde                        | ✅ concluído | 2026-07-05 | `ChordDiagram` (SVG menor que o fretboard), `ChordNote`, seleção via Harmonic Field, áudio reaproveitado. |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -108,6 +111,29 @@
   no `style.css` conforme `components.json` (`font: jetbrains-mono`). Remover após rodar o CLI —
   o app usa Cascadia Code.
 - **Pendências (opcional)**: inlays das casas.
+
+## Diagrama de acorde (ChordDiagram)
+- **Componente**: `components/chord-diagram/ChordDiagram.vue` (SVG), presentation-only, mesma
+  linguagem visual do `FretboardDiagram` porém **geometria menor** (nota `r=8.5` vs `14`;
+  `STRING_GAP=22`, `FRET_WIDTH=30`, fontes ~8.5–9). Mostra **apenas as notas do acorde**
+  (tônica em `fill-brand-soft stroke-brand`; demais em `fill-muted stroke-brand`); o resto do
+  braço não é desenhado. Tem `<figcaption>` com o nome do acorde, hover+tooltip
+  (`nota · intervalo` relativo à fundamental) e emite `note-play` (áudio reaproveitado da página).
+- **Tipo**: `types/chord-note.ts` (`ChordNote`: `isRoot`/`inChord`/`intervalName`), análogo a
+  `FretboardNote`.
+- **View-model**: `selectedTriadIndex`/`selectedChord`/`chordPositions` + `selectChord(i)`.
+  `chordPositions` categoriza `fretboard.positions()` contra `chord.notes`; a grafia enarmônica
+  saiu para um computed reutilizável `spelledByPitchClass` (compartilhado com `fretboardPositions`).
+- **Integração**: `HarmonicField` virou **selecionável** (itens `<button>` com `aria-pressed`,
+  emite `select`; item ativo em `bg-brand-soft`); a página mostra o `ChordDiagram` do acorde
+  selecionado ao lado, em `flex` 2 colunas. Default = tônica (índice 0).
+- **Verificado**: C maior → tônica C, notas C/E/G no braço; selecionar G → G/B/D; caption e
+  `aria-pressed` acompanham; sem erros no console. Nota do acorde renderiza menor que a do
+  fretboard (24.2px vs 28.5px na viewport atual). Screenshot do preview instável (timeout);
+  verificação por leitura de DOM + bounding boxes.
+- **Preview/porta**: `vite.config` passou a honrar `process.env.PORT` (fallback 5173) e
+  `.claude/launch.json` ganhou `autoPort: true` — necessário para o painel de preview quando a
+  5173 já está ocupada por outra sessão (Vite não lê `PORT` sozinho).
 
 ## Decisões arquiteturais registradas (gerais)
 - **Estado**: composable view-model domain-first; Pinia configurado porém **não utilizado** —

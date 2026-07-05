@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 
 import type { FretboardNote } from "../types/fretboard-note";
+import type { ChordNote } from "../types/chord-note";
 
 import {
   CHROMATIC_SCALE,
@@ -63,11 +64,39 @@ export function useScaleExplorerViewModel() {
 
   const fretboard = computed(() => new Fretboard(selectedTuning.value));
 
-  const fretboardPositions = computed<FretboardNote[][]>(() => {
-    const spelledByPitchClass = new Map<number, string>();
+  /** Grafia enarmônica por classe de altura, derivada da escala selecionada. */
+  const spelledByPitchClass = computed(() => {
+    const map = new Map<number, string>();
     scale.value.spelledNotes().forEach((spelled) => {
-      spelledByPitchClass.set(spelled.pitchClass(), spelled.toString());
+      map.set(spelled.pitchClass(), spelled.toString());
     });
+    return map;
+  });
+
+  const fretboardPositions = computed<FretboardNote[][]>(() => {
+    return fretboard.value.positions().map((row) =>
+      row.map((position) => {
+        const note = position.pitch.note;
+
+        return {
+          ...position,
+          label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
+          isTonic: note.equals(scale.value.root),
+          inScale: scale.value.contains(note),
+          intervalName: new Interval(scale.value.root.distanceTo(note)).name(),
+        };
+      }),
+    );
+  });
+
+  const selectedTriadIndex = ref(0);
+
+  const selectedChord = computed(
+    () => triads.value[selectedTriadIndex.value] ?? triads.value[0],
+  );
+
+  const chordPositions = computed<ChordNote[][]>(() => {
+    const chord = selectedChord.value;
 
     return fretboard.value.positions().map((row) =>
       row.map((position) => {
@@ -75,10 +104,10 @@ export function useScaleExplorerViewModel() {
 
         return {
           ...position,
-          label: spelledByPitchClass.get(note.index()) ?? note.toString(),
-          isTonic: note.equals(scale.value.root),
-          inScale: scale.value.contains(note),
-          intervalName: new Interval(scale.value.root.distanceTo(note)).name(),
+          label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
+          isRoot: note.equals(chord.root),
+          inChord: chord.notes.some((chordNote) => chordNote.equals(note)),
+          intervalName: new Interval(chord.root.distanceTo(note)).name(),
         };
       }),
     );
@@ -94,6 +123,10 @@ export function useScaleExplorerViewModel() {
 
   function selectTuning(tuning: Tuning) {
     selectedTuning.value = tuning;
+  }
+
+  function selectChord(index: number) {
+    selectedTriadIndex.value = index;
   }
 
   return {
@@ -115,8 +148,13 @@ export function useScaleExplorerViewModel() {
 
     fretboardPositions,
 
+    selectedTriadIndex,
+    selectedChord,
+    chordPositions,
+
     selectRoot,
     selectPattern,
     selectTuning,
+    selectChord,
   };
 }

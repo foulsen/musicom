@@ -6,6 +6,7 @@ import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { ScaleNotes } from "../components/scale-notes";
 import { HarmonicField } from "../components/harmonic-field";
 import { FretboardDiagram } from "../components/fretboard-diagram";
+import { ChordDiagram } from "../components/chord-diagram";
 import { TuningSelector } from "../components/tuning-selector";
 
 const {
@@ -17,6 +18,10 @@ const {
   fretboardPositions,
   availableTunings,
   selectedTuning,
+  selectedTriadIndex,
+  selectedChord,
+  chordPositions,
+  selectChord,
 } = useScaleExplorerViewModel();
 
 const { play } = useNoteAudio();
@@ -55,6 +60,20 @@ const { play } = useNoteAudio();
       </div>
     </div>
 
-    <harmonic-field :chords="triads" />
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <harmonic-field
+        :chords="triads"
+        :selected-index="selectedTriadIndex"
+        class="lg:w-56 lg:shrink-0"
+        @select="selectChord"
+      />
+
+      <chord-diagram
+        :positions="chordPositions"
+        :caption="selectedChord.name"
+        class="min-w-0 max-w-xl lg:flex-1"
+        @note-play="play"
+      />
+    </div>
   </section>
 </template>
