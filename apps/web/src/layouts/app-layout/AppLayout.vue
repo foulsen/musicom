@@ -9,7 +9,9 @@ import { AppSidebar } from "@/modules/navigation/components/app-sidebar";
     <app-sidebar />
 
     <main class="flex-1 overflow-auto">
-      <router-view />
+      <div class="mx-auto max-w-6xl">
+        <router-view />
+      </div>
     </main>
   </div>
 </template>
