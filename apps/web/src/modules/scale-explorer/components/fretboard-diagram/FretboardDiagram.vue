@@ -17,7 +17,7 @@ const emit = defineEmits<{
  * Configurável por ref (sem UI por ora): quando true, também desenha as notas
  * fora da escala (esmaecidas). No futuro isso vira um controle na interface.
  */
-const showOutOfScale = ref(true);
+const showOutOfScale = ref(false);
 
 // Geometria em unidades do viewBox.
 const STRING_GAP = 36;
