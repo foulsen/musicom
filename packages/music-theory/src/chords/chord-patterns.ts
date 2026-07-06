@@ -1,4 +1,4 @@
-import { Interval } from "../intervals/interval";
+import { Degree } from "../scales/degree";
 
 import { ChordPattern } from "./chord-pattern";
 import {
@@ -18,107 +18,77 @@ import {
   SUS4,
 } from "./chord-qualities";
 
-// ── Tríades ────────────────────────────────────────────────────────────────
+const degrees = (...values: string[]): Degree[] => values.map((value) => new Degree(value));
 
-export const MAJOR_CHORD_PATTERN = new ChordPattern("Major", MAJOR, [
-  Interval.unison(),
-  Interval.majorThird(),
-  Interval.perfectFifth(),
-]);
+// ── Tríades ──────────────────────────────────────────────────────────────────
 
-export const MINOR_CHORD_PATTERN = new ChordPattern("Minor", MINOR, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.perfectFifth(),
-]);
+export const MAJOR_CHORD_PATTERN = new ChordPattern("Major", MAJOR, degrees("1", "3", "5"));
 
-export const DIMINISHED_CHORD_PATTERN = new ChordPattern("Diminished", DIMINISHED, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.tritone(),
-]);
+export const MINOR_CHORD_PATTERN = new ChordPattern("Minor", MINOR, degrees("1", "b3", "5"));
 
-export const AUGMENTED_CHORD_PATTERN = new ChordPattern("Augmented", AUGMENTED, [
-  Interval.unison(),
-  Interval.majorThird(),
-  Interval.minorSixth(),
-]);
+export const DIMINISHED_CHORD_PATTERN = new ChordPattern(
+  "Diminished",
+  DIMINISHED,
+  degrees("1", "b3", "b5"),
+);
 
-export const SUS2_CHORD_PATTERN = new ChordPattern("Suspended 2nd", SUS2, [
-  Interval.unison(),
-  Interval.majorSecond(),
-  Interval.perfectFifth(),
-]);
+export const AUGMENTED_CHORD_PATTERN = new ChordPattern(
+  "Augmented",
+  AUGMENTED,
+  degrees("1", "3", "#5"),
+);
 
-export const SUS4_CHORD_PATTERN = new ChordPattern("Suspended 4th", SUS4, [
-  Interval.unison(),
-  Interval.perfectFourth(),
-  Interval.perfectFifth(),
-]);
+export const SUS2_CHORD_PATTERN = new ChordPattern("Suspended 2nd", SUS2, degrees("1", "2", "5"));
+
+export const SUS4_CHORD_PATTERN = new ChordPattern("Suspended 4th", SUS4, degrees("1", "4", "5"));
 
 // ── Sextas ───────────────────────────────────────────────────────────────────
 
-export const SIXTH_CHORD_PATTERN = new ChordPattern("Sixth", SIXTH, [
-  Interval.unison(),
-  Interval.majorThird(),
-  Interval.perfectFifth(),
-  Interval.majorSixth(),
-]);
+export const SIXTH_CHORD_PATTERN = new ChordPattern("Sixth", SIXTH, degrees("1", "3", "5", "6"));
 
-export const MINOR_SIXTH_CHORD_PATTERN = new ChordPattern("Minor Sixth", MINOR_SIXTH, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.perfectFifth(),
-  Interval.majorSixth(),
-]);
+export const MINOR_SIXTH_CHORD_PATTERN = new ChordPattern(
+  "Minor Sixth",
+  MINOR_SIXTH,
+  degrees("1", "b3", "5", "6"),
+);
 
 // ── Sétimas ──────────────────────────────────────────────────────────────────
 
-export const MAJOR_7_CHORD_PATTERN = new ChordPattern("Major 7th", MAJOR_7, [
-  Interval.unison(),
-  Interval.majorThird(),
-  Interval.perfectFifth(),
-  Interval.majorSeventh(),
-]);
+export const MAJOR_7_CHORD_PATTERN = new ChordPattern(
+  "Major 7th",
+  MAJOR_7,
+  degrees("1", "3", "5", "7"),
+);
 
-export const MINOR_7_CHORD_PATTERN = new ChordPattern("Minor 7th", MINOR_7, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.perfectFifth(),
-  Interval.minorSeventh(),
-]);
+export const MINOR_7_CHORD_PATTERN = new ChordPattern(
+  "Minor 7th",
+  MINOR_7,
+  degrees("1", "b3", "5", "b7"),
+);
 
-export const DOMINANT_7_CHORD_PATTERN = new ChordPattern("Dominant 7th", DOMINANT_7, [
-  Interval.unison(),
-  Interval.majorThird(),
-  Interval.perfectFifth(),
-  Interval.minorSeventh(),
-]);
+export const DOMINANT_7_CHORD_PATTERN = new ChordPattern(
+  "Dominant 7th",
+  DOMINANT_7,
+  degrees("1", "3", "5", "b7"),
+);
 
 export const HALF_DIMINISHED_CHORD_PATTERN = new ChordPattern(
   "Half-diminished 7th",
   HALF_DIMINISHED,
-  [
-    Interval.unison(),
-    Interval.minorThird(),
-    Interval.tritone(),
-    Interval.minorSeventh(),
-  ],
+  degrees("1", "b3", "b5", "b7"),
 );
 
-export const DIMINISHED_7_CHORD_PATTERN = new ChordPattern("Diminished 7th", DIMINISHED_7, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.tritone(),
-  Interval.majorSixth(),
-]);
+export const DIMINISHED_7_CHORD_PATTERN = new ChordPattern(
+  "Diminished 7th",
+  DIMINISHED_7,
+  degrees("1", "b3", "b5", "bb7"),
+);
 
-export const MINOR_MAJOR_7_CHORD_PATTERN = new ChordPattern("Minor-major 7th", MINOR_MAJOR_7, [
-  Interval.unison(),
-  Interval.minorThird(),
-  Interval.perfectFifth(),
-  Interval.majorSeventh(),
-]);
+export const MINOR_MAJOR_7_CHORD_PATTERN = new ChordPattern(
+  "Minor-major 7th",
+  MINOR_MAJOR_7,
+  degrees("1", "b3", "5", "7"),
+);
 
 /** Todos os padrões do banco, na ordem de exibição (tríades → sextas → sétimas). */
 export const CHORD_PATTERNS: ChordPattern[] = [

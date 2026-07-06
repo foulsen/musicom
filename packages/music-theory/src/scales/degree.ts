@@ -26,6 +26,25 @@ const FUNCTION_NAMES: Record<number, string> = {
   6: "submediant",
 };
 
+const DEGREE_SEMITONES: Record<string, number> = {
+  "1": 0,
+  "b2": 1,
+  "2": 2,
+  "#2": 3,
+  "b3": 3,
+  "3": 4,
+  "4": 5,
+  "#4": 6,
+  "b5": 6,
+  "5": 7,
+  "#5": 8,
+  "b6": 8,
+  "6": 9,
+  "bb7": 9,
+  "b7": 10,
+  "7": 11,
+};
+
 export class Degree {
   constructor(public readonly value: string) {}
 
@@ -35,6 +54,11 @@ export class Degree {
 
   intervalName(): string {
     return INTERVAL_NAMES[this.value] ?? this.value;
+  }
+
+  /** Distância em semitons a partir da tônica (ex.: "b3" -> 3, "bb7" -> 9). */
+  semitones(): number {
+    return DEGREE_SEMITONES[this.value] ?? 0;
   }
 
   functionName(): string {
