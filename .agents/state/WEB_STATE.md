@@ -1,19 +1,20 @@
 # WEB_STATE — Estado do Desenvolvimento (apps/web)
 
 > Arquivo vivo. Atualizar ao final de CADA fase concluída.
-> "Onde paramos". Plano completo: ../plans/WEB_IMPLEMENTATION_PLAN.md
+> "Onde paramos". Planos: ../plans/WEB_IMPLEMENTATION_PLAN.md (Scale Explorer) e
+> ../plans/CHORD_STUDY_PAGE_PLAN.md (Página de Estudo de Acordes).
 
 ## Resumo
-- Última fase concluída: **Cartão de acorde** (`ChordCard` + `ChordVoicingDiagram`) —
-  digitações hardcoded (banco em `instruments/chord-voicings.ts`) no formato do mockup;
-  exibe o cartão do acorde selecionado no Harmonic Field, no lugar do antigo mini-fretboard
-  (removido). Também: **banco de fórmulas de acorde** (`chords/chord-patterns.ts`) para a
-  futura página de estudo. Verificado.
-- Antes: **Fase 6 (Fretboard) — passos 1–5**; no domínio: **seletor de afinação**, **áudio
-  string-accurate** e **spelling enarmônico**. Tudo verificado.
-- Próximo: polimento opcional do fretboard (inlays das casas). Pendência geral: hex exato
-  do `--brand`.
-- Atualizado em: 2026-07-05
+- Última fase concluída: **Página de Estudo de Acordes — Fase 2** (rota + navegação + estado
+  local). Módulo `chord-explorer` com rota `/chords`, item na sidebar (ícone `Guitar`) e
+  view-model local (tônica independente do Scale Explorer, sem Pinia). Placeholder já deriva o
+  acorde via `createChord`. Verificado no preview.
+- Antes: **Fases 0–1** (domínio `createChord` + grafia); **Cartão de acorde** dirigido pelo
+  Harmonic Field; banco de voicings e de fórmulas de acorde. Verificado.
+- Próximo: **fases visuais 3–6** da página de acordes (seletor de qualidade → fórmula & notas →
+  mapa no braço reusando `FretboardDiagram` → voicings), guiadas por mockup no subdiretório de
+  `apps/web/mockups/` indicado no prompt. Pendências gerais: inlays do fretboard, hex do `--brand`.
+- Atualizado em: 2026-07-06
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
@@ -30,6 +31,10 @@
 | + Diagrama de acorde (substituído)          | ↩︎ removido  | 2026-07-05 | `ChordDiagram` (notas do acorde no braço) — trocado pelo cartão de acorde abaixo. |
 | + Banco de fórmulas de acorde               | ✅ concluído | 2026-07-05 | `ChordPattern` + `chord-patterns.ts` (tríades, sextas, sétimas) no domínio; para a página de estudo. |
 | + Cartão de acorde                          | ✅ concluído | 2026-07-05 | Banco de voicings hardcoded (`instruments/chord-voicing(s).ts`) + `ChordCard`/`ChordVoicingDiagram`; dirigido pela seleção do Harmonic Field. |
+| + Layout responsivo (cap de largura)        | ✅ concluído | 2026-07-06 | `max-w-6xl` centralizado no `AppLayout` (scroll no `main`); cap das pills; 4ª coluna do Scale Type em `2xl`. |
+| Acordes — Fase 0 (Revisão & Baseline)       | ✅ concluída | 2026-07-06 | Inventário de reuso + decisões (ver `CHORD_STUDY_PAGE_PLAN.md`); rota `/chords` (a criar na Fase 2). |
+| Acordes — Fase 1 (Domínio `createChord`)    | ✅ concluída | 2026-07-06 | `createChord` + `Degree.semitones` + `ChordPattern` por graus + `Chord.spelledNotes`. Verificado (14 qualidades). |
+| Acordes — Fase 2 (Rota e navegação)         | ✅ concluída | 2026-07-06 | Módulo `chord-explorer`, rota `/chords`, nav (`Guitar`), VM local; placeholder deriva o acorde. Estado separado do Scale Explorer. |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -147,6 +152,45 @@
 - **Preview/porta**: `vite.config` honra `process.env.PORT` (fallback 5173) e `.claude/launch.json`
   tem `autoPort: true` — necessário para o preview quando a 5173 já está ocupada (Vite não lê
   `PORT` sozinho).
+
+## Página de Estudo de Acordes (Fase 2 — rota e navegação)
+- **Módulo `modules/chord-explorer/`**: `pages/ChordExplorerPage.vue` + `application/
+  use-chord-explorer-view-model.ts` (estado local: `selectedRoot`, `selectedQuality` default
+  Major, `availableQualities` = `CHORD_PATTERNS`, `chord` = `computed(createChord(...))`).
+- **Rota `/chords`** em `router/index.ts` (lazy import) + item na sidebar em `navigation.ts`
+  (`Guitar` do `@lucide/vue`). Página usa o layout `p-8` como o Scale Explorer (o `AppLayout`
+  já centraliza em `max-w-6xl`).
+- **Estado separado por página** (decisão): a tônica do chord-explorer é independente; sem Pinia.
+  O estado do composable **reseta ao navegar** (comportamento normal, sem persistência) — ok por ora.
+- **`RootNoteSelector` reaproveitado cross-módulo** (importado de `scale-explorer`). ⚠️ É um
+  acoplamento entre features; **candidato a promover para um módulo/local compartilhado** quando
+  fizer sentido (decisão de convenção adiada).
+- **Placeholder da Fase 2**: só header + seletor de tônica + nome/notas do acorde (prova o
+  `createChord` ao vivo). Qualidade, fórmula, mapa no braço e voicings vêm nas fases 3–6.
+
+## Página de Estudo de Acordes (domínio — Fase 1)
+- **`createChord(root, ChordPattern): Chord`** (`chords/create-chord.ts`) — espelho do
+  `createScale`: deriva as notas (`Note.transpose(degree.semitones())`) e a **grafia**
+  (`SpelledNote.spell(rootSpelling, degree.position()-1, …)`, regra uma-letra-por-grau). A UI
+  não reimplementa a regra.
+- **`ChordPattern` agora usa graus, não intervalos.** Trocado `intervals: Interval[]` por
+  `degrees: Degree[]` (`"1"`, `"b3"`, `"b5"`, `"bb7"`…). Motivo: o `Degree` já dá altura
+  (`semitones`), grafia (`position`) e nome de fórmula (`intervalName`) — e nomeia o `bb7`
+  corretamente, o que `Interval.name()` (por semitons) não faz. `ChordPattern.intervals` não
+  era consumido em lugar nenhum, então a troca foi livre.
+- **`Degree.semitones()`** novo (mapa `DEGREE_SEMITONES` em `scales/degree.ts`).
+- **Fatores de intervalo por-nota removidos** do `Interval` (`unison`…`majorSeventh`) — eram só
+  do banco antigo por intervalos; `wholeStep/halfStep/wholeStepAndHalf` (escalas) permanecem.
+- **`Chord.spelledNotes`** novo (opcional, default `[]`) — grafia de cada nota, populada pelo
+  `createChord`. Acordes de escala (`triads`/`seventhChords`) não preenchem por ora.
+- **`Chord.degree` num acorde isolado**: `createChord` passa `new Degree("1")` (o acorde é
+  construído sobre a própria fundamental). Evitou tornar `degree` opcional e mexer no
+  `HarmonicField`. A página de estudo ignora esse campo.
+- **Verificado (script `tsx` temporário, sem UI)**: C→C·E·G, Cm→C·Eb·G, Cdim→C·Eb·Gb,
+  Caug→C·E·G#, Csus4→C·F·G, Cmaj7→C·E·G·B, Cm7b5→C·Eb·Gb·Bb, Cdim7→C·Eb·Gb·**Bbb**;
+  raiz sustenida F#→F#·A#·C#. Grafia correta em todas as 14 qualidades.
+- **Limitação herdada**: raízes só em sustenido (`Note` é sustenido); acorde de nome bemol
+  (ex.: Bb) sai como raiz `A#`. Igual às escalas.
 
 ## Decisões arquiteturais registradas (gerais)
 - **Estado**: composable view-model domain-first; Pinia configurado porém **não utilizado** —
