@@ -13,6 +13,7 @@ export * from "./chords/chord-quality";
 export * from "./chords/chord-qualities";
 export * from "./chords/chord-pattern";
 export * from "./chords/chord-patterns";
+export * from "./chords/create-chord";
 export * from "./harmony/harmonic-function";
 export * from "./harmony/harmonic-functions";
 export * from "./harmony/chord-progression";

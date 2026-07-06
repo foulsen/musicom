@@ -15,6 +15,8 @@ export class Chord {
     public readonly spelledRoot?: SpelledNote,
     public readonly harmonicFunction?: HarmonicFunction,
     public readonly tensions: Tension[] = [],
+    /** Grafia enarmônica de cada nota do acorde (mesma ordem de `notes`). */
+    public readonly spelledNotes: SpelledNote[] = [],
   ) {}
 
   get name() {
