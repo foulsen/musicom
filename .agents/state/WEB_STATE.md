@@ -5,15 +5,17 @@
 > ../plans/CHORD_STUDY_PAGE_PLAN.md (Página de Estudo de Acordes).
 
 ## Resumo
-- Última fase concluída: **Página de Estudo de Acordes — Fase 2** (rota + navegação + estado
-  local). Módulo `chord-explorer` com rota `/chords`, item na sidebar (ícone `Guitar`) e
-  view-model local (tônica independente do Scale Explorer, sem Pinia). Placeholder já deriva o
-  acorde via `createChord`. Verificado no preview.
-- Antes: **Fases 0–1** (domínio `createChord` + grafia); **Cartão de acorde** dirigido pelo
-  Harmonic Field; banco de voicings e de fórmulas de acorde. Verificado.
-- Próximo: **fases visuais 3–6** da página de acordes (seletor de qualidade → fórmula & notas →
-  mapa no braço reusando `FretboardDiagram` → voicings), guiadas por mockup no subdiretório de
-  `apps/web/mockups/` indicado no prompt. Pendências gerais: inlays do fretboard, hex do `--brand`.
+- Última fase concluída: **Página de Estudo de Acordes — Fases 3–6** (completa). Chord Explorer
+  com seletores Root/Family/Chord, lista Notes, cartão de voicings e mapa das notas no braço.
+  Guiada pelos mockups em `apps/web/mockups/chord-explorer/`. Verificada no preview.
+- Antes: **Fases 0–2** (domínio `createChord` + rota/nav + estado local); cartão de acorde no
+  Scale Explorer; bancos de voicings e de fórmulas. Verificado.
+- **Módulo compartilhado criado** (`modules/shared/`): promovido o que as duas páginas usam
+  (RootNoteSelector, ScaleNotes, ChordCard, ChordVoicingDiagram, FretboardDiagram, `use-note-audio`,
+  `chord-cards`, tipos `fretboard-note`/`chord-shape`). Débito de acoplamento resolvido.
+- Próximo: preencher as famílias Extended/Altered/Add (formula bank) para ativá-las na UI;
+  **em andamento (subagent)**: expansão massiva do banco de voicings (`chord-voicings.ts`).
+  Pendências gerais: inlays do fretboard, hex do `--brand`.
 - Atualizado em: 2026-07-06
 
 ## Histórico de fases
@@ -35,6 +37,7 @@
 | Acordes — Fase 0 (Revisão & Baseline)       | ✅ concluída | 2026-07-06 | Inventário de reuso + decisões (ver `CHORD_STUDY_PAGE_PLAN.md`); rota `/chords` (a criar na Fase 2). |
 | Acordes — Fase 1 (Domínio `createChord`)    | ✅ concluída | 2026-07-06 | `createChord` + `Degree.semitones` + `ChordPattern` por graus + `Chord.spelledNotes`. Verificado (14 qualidades). |
 | Acordes — Fase 2 (Rota e navegação)         | ✅ concluída | 2026-07-06 | Módulo `chord-explorer`, rota `/chords`, nav (`Guitar`), VM local; placeholder deriva o acorde. Estado separado do Scale Explorer. |
+| Acordes — Fases 3–6 (Página completa)       | ✅ concluída | 2026-07-06 | Family/Chord selectors, Notes, cartão de voicings e mapa no braço (reuso do `FretboardDiagram`). Guiada pelos mockups `chord-explorer/`. |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic
@@ -152,6 +155,37 @@
 - **Preview/porta**: `vite.config` honra `process.env.PORT` (fallback 5173) e `.claude/launch.json`
   tem `autoPort: true` — necessário para o preview quando a 5173 já está ocupada (Vite não lê
   `PORT` sozinho).
+
+## Página de Estudo de Acordes (Fases 3–6 — página completa)
+- **Mockups**: `apps/web/mockups/chord-explorer/` (`Chord-Explorer-Page.png`,
+  `-Content.png`). Dados do mockup são placeholder (fórmulas erradas de propósito); a UI deriva
+  tudo do domínio via `createChord`.
+- **Famílias** (`chords/chord-family.ts` + `chord-families.ts`): `ChordFamily` (nome + patterns;
+  `isEmpty`). `CHORD_FAMILIES` = Triads, Seventh, **Extended/Altered/Add (vazias)**. Decisão do
+  usuário: mostrar as 5 do mockup com as 3 vazias **desabilitadas** ("em breve"). Sextas ficaram
+  de fora por ora (irão para "Add" quando expandirmos).
+- **Componentes novos** (`chord-explorer/components/`): `ChordFamilySelector` (pills reka-ui;
+  itens de família vazia `:disabled` + `opacity-40`) e `ChordQualitySelector` (grade nome +
+  fórmula, valor = `pattern.name`, como o `ScalePatternSelector`).
+- **View-model** (`use-chord-explorer-view-model.ts`): `selectedFamily`/`selectedQuality`
+  (um `watch` reseta a qualidade ao trocar de família), `chordOptions` (nome via
+  `createChord(...).name` + fórmula via `degree.toString()`), `chordNotes` (formato do
+  `ScaleNotes`), `selectedChordCard` (via `resolveChordCard`), `fretboardPositions` (categoriza o
+  braço padrão contra o acorde; `isTonic`=raiz, `inScale`=nota do acorde).
+- **Mapa no braço = reuso do `FretboardDiagram`** (sem alterar o componente): recebe
+  `FretboardNote[][]` categorizado; `showOutOfScale=false` (padrão) oculta o não-acorde. Confirma
+  a decisão de não recriar um `ChordDiagram`.
+- **Extração compartilhada**: `scale-explorer/application/chord-cards.ts` (movido do VM do
+  scale-explorer) exporta `PREDEFINED_CHORD_CARDS`, `toChordShape` e `resolveChordCard(name)`.
+  Ambas as páginas usam.
+- **⚠️ Débito de acoplamento**: o `chord-explorer` importa **cross-módulo** do `scale-explorer`:
+  `RootNoteSelector`, `ScaleNotes`, `ChordCard`, `FretboardDiagram`, `useNoteAudio`, `chord-cards`,
+  e os tipos `FretboardNote`/`ChordShape`. Funciona, mas o acoplamento entre features cresceu —
+  **forte candidato a promover para um módulo compartilhado** (ex.: `modules/shared` ou `@/lib`).
+- **Áudio**: clicar numa nota (cartão ou braço) toca (`note-play` → `useNoteAudio`). Não há
+  "tocar acorde inteiro" (strum) — opcional, o mockup não pede.
+- **Verificado**: C → Notes C·E·G, cartão C (3 voicings), braço C·E·G; Csus2 → C·D·G, cartão em
+  fallback; troca p/ Seventh reseta em Cmaj7; fórmulas corretas (Cdim7 `1-b3-b5-bb7`). Sem erros.
 
 ## Página de Estudo de Acordes (Fase 2 — rota e navegação)
 - **Módulo `modules/chord-explorer/`**: `pages/ChordExplorerPage.vue` + `application/
