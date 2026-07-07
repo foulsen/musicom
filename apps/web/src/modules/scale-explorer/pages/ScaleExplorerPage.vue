@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useScaleExplorerViewModel } from "../application/use-scale-explorer-view-model";
-import { useNoteAudio } from "../application/use-note-audio";
-import { RootNoteSelector } from "../components/root-note-selector";
 import { ScalePatternSelector } from "../components/scale-pattern-selector";
-import { ScaleNotes } from "../components/scale-notes";
 import { HarmonicField } from "../components/harmonic-field";
-import { FretboardDiagram } from "../components/fretboard-diagram";
-import { ChordCard } from "../components/chord-card";
 import { TuningSelector } from "../components/tuning-selector";
+
+import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
+import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
+import { ScaleNotes } from "@/modules/shared/components/scale-notes";
+import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
+import { ChordCard } from "@/modules/shared/components/chord-card";
 
 const {
   selectedRoot,
