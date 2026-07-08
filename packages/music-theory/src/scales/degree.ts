@@ -15,6 +15,11 @@ const INTERVAL_NAMES: Record<string, string> = {
   "bb7": "diminished seventh",
   "b7": "minor seventh",
   "7": "major seventh",
+  "b9": "minor ninth",
+  "9": "major ninth",
+  "#9": "augmented ninth",
+  "11": "perfect eleventh",
+  "13": "major thirteenth",
 };
 
 const FUNCTION_NAMES: Record<number, string> = {
@@ -43,6 +48,11 @@ const DEGREE_SEMITONES: Record<string, number> = {
   "bb7": 9,
   "b7": 10,
   "7": 11,
+  "b9": 1,
+  "9": 2,
+  "#9": 3,
+  "11": 5,
+  "13": 9,
 };
 
 export class Degree {
