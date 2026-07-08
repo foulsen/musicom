@@ -13,10 +13,12 @@
 - **Módulo compartilhado criado** (`modules/shared/`): promovido o que as duas páginas usam
   (RootNoteSelector, ScaleNotes, ChordCard, ChordVoicingDiagram, FretboardDiagram, `use-note-audio`,
   `chord-cards`, tipos `fretboard-note`/`chord-shape`). Débito de acoplamento resolvido.
-- Próximo: preencher as famílias Extended/Altered/Add (formula bank) para ativá-las na UI;
-  **em andamento (subagent)**: expansão massiva do banco de voicings (`chord-voicings.ts`).
-  Pendências gerais: inlays do fretboard, hex do `--brand`.
-- Atualizado em: 2026-07-06
+- **Banco de voicings expandido** (+83, via subagent) e **famílias Extended/Altered/Add
+  preenchidas** (formula bank): 11 novas qualidades/padrões (9, maj9, m9, 11, 13; 7b9, 7#9, 7b5,
+  7#5; add9, add11) + graus compostos (9/11/13/b9/#9) no `Degree`. As 5 famílias agora ativas na UI.
+- Próximo: cobrir mais raízes nos voicings extended/altered/add (hoje parciais → alguns caem no
+  fallback). Pendências gerais: inlays do fretboard, hex do `--brand`.
+- Atualizado em: 2026-07-07
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
