@@ -30,7 +30,7 @@ const selectedNote = computed<string>({
     <toggle-group-root
       v-model="selectedNote"
       type="single"
-      class="flex w-full max-w-2xl gap-1 rounded-xl border border-border bg-card/40 p-2"
+      class="flex w-full gap-1 rounded-xl border border-border bg-card/40 p-2"
     >
       <toggle-group-item
         v-for="note in CHROMATIC_SCALE"

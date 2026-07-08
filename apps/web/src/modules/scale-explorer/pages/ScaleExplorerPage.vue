@@ -38,51 +38,34 @@ const { play } = useNoteAudio();
 
     <root-note-selector v-model="selectedRoot" />
 
-    <scale-pattern-selector
-      v-model="selectedPattern"
-      :patterns="availablePatterns"
-    />
+    <scale-pattern-selector v-model="selectedPattern" :patterns="availablePatterns" />
 
-    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" />
 
-      <div class="min-w-0 space-y-4 lg:flex-1">
-        <tuning-selector
+      <div class="min-w-0 space-y-4 lg:flex-1 flex-1">
+        <!-- <tuning-selector
           v-model="selectedTuning"
           :tunings="availableTunings"
           class="max-w-xs"
-        />
+        /> -->
 
-        <fretboard-diagram
-          :positions="fretboardPositions"
-          class="max-w-3xl"
-          @note-play="play"
-        />
+        <fretboard-diagram :positions="fretboardPositions" class="max-w-3xl mx-auto" @note-play="play" />
       </div>
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-      <harmonic-field
-        :chords="triads"
-        :selected-index="selectedTriadIndex"
-        class="lg:w-56 lg:shrink-0"
-        @select="selectChord"
-      />
+      <harmonic-field :chords="triads" :selected-index="selectedTriadIndex" class="lg:w-56 lg:shrink-0"
+        @select="selectChord" />
 
-      <chord-card
-        v-if="selectedChordCard"
-        :name="selectedChordCard.name"
-        :shapes="selectedChordCard.shapes"
-        class="min-w-0 max-w-2xl lg:flex-1"
-        @note-play="play"
-      />
+      <div class="flex-1">
+        <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes"
+          class="min-w-0 lg:flex-1" @note-play="play" />
 
-      <p
-        v-else
-        class="text-sm text-muted-foreground lg:flex-1"
-      >
-        Sem digitação predefinida para {{ selectedChord.name }}.
-      </p>
+        <p v-else class="text-sm text-muted-foreground lg:flex-1">
+          Sem digitação predefinida para {{ selectedChord.name }}.
+        </p>
+      </div>
     </div>
   </section>
 </template>

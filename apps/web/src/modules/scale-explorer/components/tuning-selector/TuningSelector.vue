@@ -34,7 +34,7 @@ const selectedName = computed<string>({
 <template>
   <section class="space-y-3">
     <header>
-      <h2 class="text-xl font-medium text-muted-foreground">
+      <h2 class="text-md font-medium text-muted-foreground">
         Tuning
       </h2>
     </header>

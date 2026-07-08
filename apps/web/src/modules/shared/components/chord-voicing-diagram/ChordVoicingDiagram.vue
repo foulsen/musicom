@@ -19,7 +19,7 @@ const STRING_GAP = 19;
 const FRET_WIDTH = 25;
 const OPEN_COL = 20;
 const RADIUS = 7.5;
-const PAD = { top: 12, right: 10, left: 6 };
+const PAD = { top: 12, right: OPEN_COL, left: 0 };
 
 const openPosition = computed(() => props.shape.openPosition);
 const fretCount = computed(() => props.shape.fretCount);

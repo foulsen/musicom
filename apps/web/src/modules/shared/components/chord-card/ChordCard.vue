@@ -24,7 +24,7 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
 </script>
 
 <template>
-  <figure class="space-y-4 rounded-3xl bg-muted p-4">
+  <figure class="space-y-4 rounded-3xl bg-transparent p-4">
     <figcaption class="text-center text-3xl font-medium text-muted-foreground">
       {{ name }}
     </figcaption>

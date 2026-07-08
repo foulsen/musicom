@@ -53,7 +53,7 @@ function intervalLabel(interval: Interval): string {
     <toggle-group-root
       v-model="selectedName"
       type="single"
-      class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+      class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
     >
       <toggle-group-item
         v-for="pattern in patterns"

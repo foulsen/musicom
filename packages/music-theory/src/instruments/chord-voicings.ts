@@ -20,6 +20,7 @@ export const C_MAJOR_CHORD = new GuitarChord("C", Note.from("C"), [
   new ChordVoicing([null, 3, 2, 0, 1, 0]), // posição aberta
   new ChordVoicing([null, 3, 5, 5, 5, 3]), // forma de A, 3ª casa
   new ChordVoicing([8, 10, 10, 9, 8, 8]), // forma de E, 8ª casa
+  new ChordVoicing([8, 7, 5, 5, 5, 8]), // forma de E, 8ª casa
 ]);
 
 export const D_MAJOR_CHORD = new GuitarChord("D", Note.from("D"), [

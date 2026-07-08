@@ -5,6 +5,12 @@ import type { Pitch } from "@music-workspace/music-theory";
 
 import type { FretboardNote } from "../../types/fretboard-note";
 
+import {
+  Toggle
+} from "@/components/ui/toggle";
+
+import { Check, X } from "@lucide/vue";
+
 const props = defineProps<{
   positions: FretboardNote[][];
 }>();
@@ -24,7 +30,7 @@ const STRING_GAP = 36;
 const FRET_WIDTH = 54;
 const OPEN_COL = 44;
 const RADIUS = 14;
-const PAD = { top: 24, bottom: 50, left: 12, right: 20 };
+const PAD = { top: 24, bottom: 50, left: 0, right: 0 };
 
 const stringCount = computed(() => props.positions.length);
 const fretCount = computed(() => (props.positions[0]?.length ?? 1) - 1);
@@ -128,108 +134,56 @@ const tooltip = computed(() => {
 </script>
 
 <template>
-  <svg
-    :viewBox="`0 0 ${width} ${height}`"
-    class="w-full"
-    role="img"
-    aria-label="Fretboard"
-  >
-    <!-- Cordas -->
-    <line
-      v-for="(y, row) in stringYs"
-      :key="`string-${row}`"
-      :x1="nutX"
-      :y1="y"
-      :x2="rightX"
-      :y2="y"
-      class="stroke-border"
-      stroke-width="1"
-    />
-
-    <!-- Trastes -->
-    <line
-      v-for="fret in frets"
-      :key="`fret-${fret.fret}`"
-      :x1="fret.x"
-      :y1="topY"
-      :x2="fret.x"
-      :y2="bottomY"
-      class="stroke-border"
-      stroke-width="1"
-    />
-
-    <!-- Pestana (nut) -->
-    <line
-      :x1="nutX"
-      :y1="topY"
-      :x2="nutX"
-      :y2="bottomY"
-      class="stroke-muted-foreground"
-      stroke-width="3"
-    />
-
-    <!-- Números das casas -->
-    <text
-      v-for="fret in frets"
-      :key="`label-${fret.fret}`"
-      :x="fret.labelX"
-      :y="bottomY + 36"
-      text-anchor="middle"
-      font-size="13"
-      class="fill-muted-foreground"
+  <div class="flex flex-col items-end gap-4">
+    <toggle 
+      v-model="showOutOfScale" 
+      class="w-fit px-4" 
+      variant="outline" 
+      aria-label="Toggle small" 
+      size="sm"
     >
-      {{ fret.fret }}
-    </text>
+    <check v-if="showOutOfScale" />
+    <x v-else />
+      Show notes out of scale
+    </toggle>
+    <svg :viewBox="`0 0 ${width} ${height}`" class="w-full" role="img" aria-label="Fretboard">
+      <!-- Cordas -->
+      <line v-for="(y, row) in stringYs" :key="`string-${row}`" :x1="nutX" :y1="y" :x2="rightX" :y2="y"
+        class="stroke-border" stroke-width="1" />
 
-    <!-- Notas -->
-    <g
-      v-for="cell in cells"
-      :key="cell.key"
-      class="cursor-pointer"
-      @mouseenter="hovered = cell"
-      @mouseleave="hovered = null"
-      @click="emit('notePlay', cell.pitch)"
-    >
-      <circle
-        :cx="cell.cx"
-        :cy="cell.cy"
-        :r="hovered?.key === cell.key ? RADIUS + 3 : RADIUS"
-        :class="cell.circleClass"
-        stroke-width="2"
-      />
-      <text
-        :x="cell.cx"
-        :y="cell.cy"
-        text-anchor="middle"
-        dominant-baseline="central"
-        font-size="13"
-        :class="cell.textClass"
-      >
-        {{ cell.label }}
-      </text>
-    </g>
+      <!-- Trastes -->
+      <line v-for="fret in frets" :key="`fret-${fret.fret}`" :x1="fret.x" :y1="topY" :x2="fret.x" :y2="bottomY"
+        class="stroke-border" stroke-width="1" />
 
-    <!-- Tooltip (hover) -->
-    <g v-if="tooltip" style="pointer-events: none">
-      <rect
-        :x="tooltip.x"
-        :y="tooltip.y"
-        :width="tooltip.width"
-        :height="tooltip.height"
-        rx="6"
-        class="fill-popover stroke-border"
-        stroke-width="1"
-      />
-      <text
-        :x="tooltip.cx"
-        :y="tooltip.cy"
-        text-anchor="middle"
-        dominant-baseline="central"
-        font-size="12"
-        class="fill-popover-foreground"
-      >
-        {{ tooltip.text }}
+      <!-- Pestana (nut) -->
+      <line :x1="nutX" :y1="topY" :x2="nutX" :y2="bottomY" class="stroke-muted-foreground" stroke-width="3" />
+
+      <!-- Números das casas -->
+      <text v-for="fret in frets" :key="`label-${fret.fret}`" :x="fret.labelX" :y="bottomY + 36" text-anchor="middle"
+        font-size="13" class="fill-muted-foreground">
+        {{ fret.fret }}
       </text>
-    </g>
-  </svg>
+
+      <!-- Notas -->
+      <g v-for="cell in cells" :key="cell.key" class="cursor-pointer" @mouseenter="hovered = cell"
+        @mouseleave="hovered = null" @click="emit('notePlay', cell.pitch)">
+        <circle :cx="cell.cx" :cy="cell.cy" :r="hovered?.key === cell.key ? RADIUS + 3 : RADIUS"
+          :class="cell.circleClass" stroke-width="2" />
+        <text :x="cell.cx" :y="cell.cy" text-anchor="middle" dominant-baseline="central" font-size="13"
+          :class="cell.textClass">
+          {{ cell.label }}
+        </text>
+      </g>
+
+      <!-- Tooltip (hover) -->
+      <g v-if="tooltip" style="pointer-events: none">
+        <rect :x="tooltip.x" :y="tooltip.y" :width="tooltip.width" :height="tooltip.height" rx="6"
+          class="fill-popover stroke-border" stroke-width="1" />
+        <text :x="tooltip.cx" :y="tooltip.cy" text-anchor="middle" dominant-baseline="central" font-size="12"
+          class="fill-popover-foreground">
+          {{ tooltip.text }}
+        </text>
+      </g>
+    </svg>
+  </div>
 </template>
