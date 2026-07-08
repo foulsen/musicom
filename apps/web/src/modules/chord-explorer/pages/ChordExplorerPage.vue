@@ -34,39 +34,35 @@ const { play } = useNoteAudio();
 
     <root-note-selector v-model="selectedRoot" />
 
-    <chord-family-selector
-      v-model="selectedFamily"
-      :families="availableFamilies"
-    />
+    <chord-family-selector v-model="selectedFamily" :families="availableFamilies" />
 
-    <chord-quality-selector
-      v-model="selectedQuality"
-      :chords="chordOptions"
-    />
+    <chord-quality-selector v-model="selectedQuality" :chords="chordOptions" />
 
-    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+    <div class="flex flex-col gap-8 lg:gap-16 lg:flex-row lg:items-start">
       <scale-notes :degrees="chordNotes" class="lg:w-44 lg:shrink-0" />
-
-      <chord-card
-        v-if="selectedChordCard"
-        :name="selectedChordCard.name"
-        :shapes="selectedChordCard.shapes"
-        class="min-w-0 max-w-2xl lg:flex-1"
-        @note-play="play"
-      />
-
-      <p
-        v-else
-        class="text-sm text-muted-foreground lg:flex-1"
-      >
-        Sem digitação predefinida para {{ chord.name }}.
-      </p>
+      <section class="space-y-3">
+        <header>
+          <h2 class="text-xl font-medium text-muted-foreground">
+            Shapes
+          </h2>
+        </header>
+        
+        <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes" :show-title="false"
+          class="min-w-0 lg:flex-1" @note-play="play" />
+        <p v-else class="text-sm text-muted-foreground lg:flex-1">
+          Sem digitação predefinida para {{ chord.name }}.
+        </p>
+      </section>
     </div>
+    <section class="space-y-3">
+      <header>
+        <h2 class="text-xl font-medium text-muted-foreground">
+          Fretboard with chord notes
+        </h2>
+      </header>
 
-    <fretboard-diagram
-      :positions="fretboardPositions"
-      class="max-w-3xl"
-      @note-play="play"
-    />
+      <fretboard-diagram :positions="fretboardPositions" class="max-w-3xl flex-1 mx-auto" @note-play="play" />
+    </section>
+
   </section>
 </template>

@@ -10,10 +10,11 @@ const props = withDefaults(
   defineProps<{
     name: string;
     shapes: ChordShape[];
+    showTitle?: boolean;
     /** Máximo de variações exibidas; ajustável por chamada. */
     maxVariations?: number;
   }>(),
-  { maxVariations: 3 },
+  { maxVariations: 3, showTitle: true },
 );
 
 const emit = defineEmits<{
@@ -24,9 +25,9 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
 </script>
 
 <template>
-  <figure class="space-y-4 rounded-3xl bg-transparent p-4">
-    <figcaption class="text-center text-3xl font-medium text-muted-foreground">
-      {{ name }}
+  <figure class="space-y-4 rounded-3xl bg-transparent p-2">
+    <figcaption v-if="props.showTitle" class="text-center text-3xl font-medium text-muted-foreground">
+      {{ props.name }}
     </figcaption>
 
     <div class="flex items-start justify-center gap-6">
