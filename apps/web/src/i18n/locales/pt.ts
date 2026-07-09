@@ -16,6 +16,7 @@ export const pt: MessageSchema = {
     shapes: "Digitações",
     fretRange: "Faixa de casas",
     frets: "{count} casas",
+    masterVolume: "Volume",
   },
   scaleExplorer: {
     title: "Explorador de Escalas",

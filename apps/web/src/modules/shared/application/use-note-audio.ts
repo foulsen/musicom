@@ -1,4 +1,8 @@
+import { storeToRefs } from "pinia";
+
 import type { Pitch } from "@music-workspace/music-theory";
+
+import { useAudioSettingsStore } from "./use-audio-settings-store";
 
 /**
  * `AudioContext` único para o app inteiro (escopo de módulo, não do composable).
@@ -18,15 +22,18 @@ function ensureContext(): AudioContext {
 }
 
 export function useNoteAudio() {
+  const settings = useAudioSettingsStore();
+  const { masterVolume, waveform } = storeToRefs(settings);
+
   /** Agenda uma nota isolada em `startTime` (segundos do relógio do `AudioContext`). */
   function scheduleNote(ctx: AudioContext, pitch: Pitch, startTime: number, duration = 0.5) {
     const oscillator = ctx.createOscillator();
-    oscillator.type = "triangle";
+    oscillator.type = waveform.value;
     oscillator.frequency.value = pitch.frequency();
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, startTime);
-    gain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(Math.max(masterVolume.value, 0.0001), startTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
     oscillator.connect(gain).connect(ctx.destination);
@@ -56,5 +63,5 @@ export function useNoteAudio() {
     pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * gap, duration));
   }
 
-  return { play, playChord, playSequence };
+  return { play, playChord, playSequence, masterVolume, waveform };
 }

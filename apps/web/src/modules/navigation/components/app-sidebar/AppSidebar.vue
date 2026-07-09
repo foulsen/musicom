@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { AudioWaveform } from "@lucide/vue";
+import { useI18n } from "vue-i18n";
+
+import { AudioWaveform, Volume2 } from "@lucide/vue";
 
 import { Separator } from "@/components/ui/separator";
+
+import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import { NavigationItem } from "../navigation-item";
 
@@ -18,6 +22,9 @@ withDefaults(
 const emit = defineEmits<{
   navigate: [];
 }>();
+
+const { masterVolume } = useNoteAudio();
+const { t } = useI18n();
 </script>
 
 <template>
@@ -44,5 +51,20 @@ const emit = defineEmits<{
         :item="item"
       />
     </nav>
+
+    <separator />
+
+    <footer class="flex items-center gap-2 px-6 py-4">
+      <volume-2 class="size-4 shrink-0 text-sidebar-foreground/70" />
+      <input
+        v-model.number="masterVolume"
+        type="range"
+        min="0"
+        max="0.5"
+        step="0.01"
+        :aria-label="t('common.masterVolume')"
+        class="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-sidebar-foreground/20 accent-brand"
+      />
+    </footer>
   </aside>
 </template>

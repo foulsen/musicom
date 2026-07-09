@@ -14,6 +14,7 @@ export const en = {
     shapes: "Shapes",
     fretRange: "Fret range",
     frets: "{count} frets",
+    masterVolume: "Volume",
   },
   scaleExplorer: {
     title: "Scale Explorer",
