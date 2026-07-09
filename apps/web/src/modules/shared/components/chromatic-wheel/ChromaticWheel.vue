@@ -2,9 +2,8 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
-
 import { CHROMATIC_SCALE, Interval, Note, Pitch } from "@music-workspace/music-theory";
+import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 const props = withDefaults(
   defineProps<{
@@ -31,6 +30,7 @@ const SIZE = 300;
 const CENTER = SIZE / 2;
 const RING_RADIUS = 118;
 const NOTE_RADIUS = 20;
+const ROOT_NOTE_RADIUS = 24;
 
 /** Posição do rótulo de intervalo ao longo do raio tônica->nota (0 = na tônica, 1 = na nota). */
 const LABEL_ALONG_SPOKE = 0.62;
@@ -129,6 +129,15 @@ const spokes = computed<Spoke[]>(() => {
 const playedNote = ref<string | null>(null);
 let playedTimeout: ReturnType<typeof setTimeout> | undefined;
 
+/** Raio base do nó: a tônica é maior para se distinguir por forma, não só por cor (WCAG 1.4.1). */
+function baseRadius(node: WheelNote) {
+  return node.isRoot ? ROOT_NOTE_RADIUS : NOTE_RADIUS;
+}
+
+function noteRadius(node: WheelNote) {
+  return playedNote.value === node.note.value ? baseRadius(node) + 3 : baseRadius(node);
+}
+
 function play(note: Note) {
   emit("notePlay", Pitch.from(note.value, props.playbackOctave));
 
@@ -147,25 +156,18 @@ function play(note: Note) {
         {{ t("chromaticWheel.title") }}
       </h2>
 
-      <toggle-group-root
+      <chip-toggle-group
         v-model="mode"
         type="single"
         :aria-label="t('chromaticWheel.title')"
-        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
       >
-        <toggle-group-item
-          value="chromatic"
-          class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        <chip-toggle-item value="chromatic" class="px-3 py-1 text-xs">
           {{ t("chromaticWheel.chromaticMode") }}
-        </toggle-group-item>
-        <toggle-group-item
-          value="interval"
-          class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        </chip-toggle-item>
+        <chip-toggle-item value="interval" class="px-3 py-1 text-xs">
           {{ t("chromaticWheel.intervalMode") }}
-        </toggle-group-item>
-      </toggle-group-root>
+        </chip-toggle-item>
+      </chip-toggle-group>
     </header>
 
     <svg
@@ -200,7 +202,7 @@ function play(note: Note) {
       <g
         v-for="node in nodes"
         :key="node.note.toString()"
-        class="cursor-pointer outline-none"
+        class="group cursor-pointer outline-none"
         tabindex="0"
         role="button"
         :aria-label="`${node.label} · ${node.intervalName}`"
@@ -208,10 +210,27 @@ function play(note: Note) {
         @keydown.enter="play(node.note)"
         @keydown.space.prevent="play(node.note)"
       >
+        <!-- Anel de foco visível (teclado) -->
         <circle
           :cx="node.cx"
           :cy="node.cy"
-          :r="playedNote === node.note.value ? NOTE_RADIUS + 3 : NOTE_RADIUS"
+          :r="baseRadius(node) + 5"
+          class="pointer-events-none fill-none stroke-ring opacity-0 transition-opacity group-focus-visible:opacity-100"
+          stroke-width="2"
+        />
+        <!-- Anel duplo da tônica: distingue por forma, não só por cor -->
+        <circle
+          v-if="node.isRoot"
+          :cx="node.cx"
+          :cy="node.cy"
+          :r="baseRadius(node) + 3.5"
+          class="fill-none stroke-brand"
+          stroke-width="1.5"
+        />
+        <circle
+          :cx="node.cx"
+          :cy="node.cy"
+          :r="noteRadius(node)"
           :class="[
             node.isRoot
               ? 'fill-brand stroke-brand'
@@ -226,12 +245,12 @@ function play(note: Note) {
           v-if="playedNote === node.note.value"
           :cx="node.cx"
           :cy="node.cy"
-          :r="NOTE_RADIUS + 3"
+          :r="baseRadius(node) + 3"
           class="fill-none stroke-brand"
           stroke-width="2"
           opacity="0.6"
         >
-          <animate attributeName="r" :from="NOTE_RADIUS + 3" :to="NOTE_RADIUS + 12" dur="0.3s" fill="freeze" />
+          <animate attributeName="r" :from="baseRadius(node) + 3" :to="baseRadius(node) + 12" dur="0.3s" fill="freeze" />
           <animate attributeName="opacity" from="0.6" to="0" dur="0.3s" fill="freeze" />
         </circle>
         <text
@@ -252,5 +271,9 @@ function play(note: Note) {
         </text>
       </g>
     </svg>
+
+    <p v-if="shapePath" class="text-center text-xs text-muted-foreground">
+      {{ t("chromaticWheel.shapeCaption") }}
+    </p>
   </section>
 </template>
