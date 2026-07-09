@@ -1,18 +1,23 @@
 import type { Pitch } from "@music-workspace/music-theory";
 
-export function useNoteAudio() {
-  let context: AudioContext | null = null;
+/**
+ * `AudioContext` único para o app inteiro (escopo de módulo, não do composable).
+ * Browsers limitam contextos simultâneos (~6 no Chrome); cada página que montasse
+ * o seu próprio esgotava o limite ao navegar entre elas e silenciava o app.
+ */
+let sharedContext: AudioContext | null = null;
 
-  function ensureContext(): AudioContext {
-    context ??= new AudioContext();
+function ensureContext(): AudioContext {
+  sharedContext ??= new AudioContext();
 
-    if (context.state === "suspended") {
-      context.resume().catch(() => {});
-    }
-
-    return context;
+  if (sharedContext.state === "suspended") {
+    sharedContext.resume().catch(() => {});
   }
 
+  return sharedContext;
+}
+
+export function useNoteAudio() {
   /** Agenda uma nota isolada em `startTime` (segundos do relógio do `AudioContext`). */
   function scheduleNote(ctx: AudioContext, pitch: Pitch, startTime: number, duration = 0.5) {
     const oscillator = ctx.createOscillator();
