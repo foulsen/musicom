@@ -88,10 +88,22 @@ export const pt: MessageSchema = {
     correct: "Certo!",
     incorrect: "Quase — a resposta destacada era a correta.",
     score: "Placar: {correct}/{total}",
+    streak: "sequência {streak}",
+    resetScore: "Zerar placar",
+    difficulty: "Dificuldade",
+    intervalPlaybackMode: "Modo de playback",
+    melodic: "Melódico",
+    harmonic: "Harmônico",
+    clickPlayHint: "Clique em Play para ouvir (1-4 para responder, R para repetir).",
     kinds: {
       interval: "Intervalos",
       chordQuality: "Qualidade de Acorde",
       scale: "Escalas",
+    },
+    difficulties: {
+      easy: "Fácil",
+      medium: "Médio",
+      hard: "Difícil",
     },
     prompts: {
       interval: "Qual intervalo você ouviu?",

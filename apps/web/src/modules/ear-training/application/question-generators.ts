@@ -9,10 +9,8 @@ import {
   MINOR_7_CHORD_PATTERN,
   MINOR_CHORD_PATTERN,
   AUGMENTED_CHORD_PATTERN,
-  AEOLIAN_SCALE_PATTERN,
   DORIAN_SCALE_PATTERN,
   HARMONIC_MINOR_SCALE_PATTERN,
-  IONIAN_SCALE_PATTERN,
   LOCRIAN_SCALE_PATTERN,
   LYDIAN_SCALE_PATTERN,
   MAJOR_SCALE_PATTERN,
@@ -22,41 +20,70 @@ import {
   PHRYGIAN_SCALE_PATTERN,
   Note,
   Pitch,
-  createChord,
-  createScale,
   type ChordPattern,
   type ScalePattern,
 } from "@music-workspace/music-theory";
 
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
 
-const PLAYBACK_OCTAVE = 4;
+/** Oitavas possíveis de playback — sorteada por questão para o ouvido não ancorar em frequências absolutas. */
+const PLAYBACK_OCTAVES = [3, 4, 5];
 
-const INTERVAL_SEMITONE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+export type Difficulty = "easy" | "medium" | "hard";
 
-const CHORD_QUALITY_OPTIONS: ChordPattern[] = [
-  MAJOR_CHORD_PATTERN,
-  MINOR_CHORD_PATTERN,
-  DIMINISHED_CHORD_PATTERN,
-  AUGMENTED_CHORD_PATTERN,
-  MAJOR_7_CHORD_PATTERN,
-  MINOR_7_CHORD_PATTERN,
-  DOMINANT_7_CHORD_PATTERN,
-  HALF_DIMINISHED_CHORD_PATTERN,
+const DIFFICULTY_RANK: Record<Difficulty, number> = { easy: 1, medium: 2, hard: 3 };
+
+/** Filtra `entries` (item + rank de dificuldade) para tudo até o nível pedido, cumulativo. */
+function poolForDifficulty<T>(entries: [T, number][], difficulty: Difficulty): T[] {
+  const maxRank = DIFFICULTY_RANK[difficulty];
+
+  return entries.filter(([, rank]) => rank <= maxRank).map(([item]) => item);
+}
+
+// Cada pool cresce por nível (fácil ⊂ médio ⊂ difícil); todo nível tem >= 4 itens
+// para garantir 3 distratores distintos + a resposta certa.
+const INTERVAL_SEMITONE_ENTRIES: [number, number][] = [
+  [4, 1],
+  [5, 1],
+  [7, 1],
+  [12, 1],
+  [2, 2],
+  [3, 2],
+  [9, 2],
+  [10, 2],
+  [11, 2],
+  [1, 3],
+  [6, 3],
+  [8, 3],
 ];
 
-const SCALE_OPTIONS: ScalePattern[] = [
-  MAJOR_SCALE_PATTERN,
-  NATURAL_MINOR_SCALE_PATTERN,
-  HARMONIC_MINOR_SCALE_PATTERN,
-  MELODIC_MINOR_SCALE_PATTERN,
-  DORIAN_SCALE_PATTERN,
-  AEOLIAN_SCALE_PATTERN,
-  IONIAN_SCALE_PATTERN,
-  LOCRIAN_SCALE_PATTERN,
-  LYDIAN_SCALE_PATTERN,
-  MIXOLYDIAN_SCALE_PATTERN,
-  PHRYGIAN_SCALE_PATTERN,
+const CHORD_QUALITY_ENTRIES: [ChordPattern, number][] = [
+  [MAJOR_CHORD_PATTERN, 1],
+  [MINOR_CHORD_PATTERN, 1],
+  [DIMINISHED_CHORD_PATTERN, 1],
+  [AUGMENTED_CHORD_PATTERN, 1],
+  [MAJOR_7_CHORD_PATTERN, 2],
+  [MINOR_7_CHORD_PATTERN, 2],
+  [DOMINANT_7_CHORD_PATTERN, 3],
+  [HALF_DIMINISHED_CHORD_PATTERN, 3],
+];
+
+/**
+ * Um nome canônico por conjunto de intervalos: Ionian/Aeolian ficam fora do pool
+ * porque soam **identicos** a Major/Natural Minor — um distrator não pode ser
+ * aurally indistinguível da resposta certa (o usuário ouve certo e o quiz marca
+ * errado por ter sorteado o nome "gêmeo").
+ */
+const SCALE_ENTRIES: [ScalePattern, number][] = [
+  [MAJOR_SCALE_PATTERN, 1],
+  [NATURAL_MINOR_SCALE_PATTERN, 1],
+  [HARMONIC_MINOR_SCALE_PATTERN, 1],
+  [MELODIC_MINOR_SCALE_PATTERN, 1],
+  [DORIAN_SCALE_PATTERN, 2],
+  [MIXOLYDIAN_SCALE_PATTERN, 2],
+  [LYDIAN_SCALE_PATTERN, 2],
+  [LOCRIAN_SCALE_PATTERN, 3],
+  [PHRYGIAN_SCALE_PATTERN, 3],
 ];
 
 export type QuizKind = "interval" | "chordQuality" | "scale";
@@ -82,12 +109,24 @@ function intervalName(semitones: number): string {
   return semitones === 12 ? "octave" : new Interval(semitones).name();
 }
 
-function generateIntervalQuestion(): Question {
-  const root = randomRootNote();
-  const semitones = randomChoice(INTERVAL_SEMITONE_OPTIONS);
-  const target = root.transpose(semitones);
+/**
+ * Constrói pitches **estritamente ascendentes** a partir de uma fundamental,
+ * uma por semitom-offset, via `Pitch.transpose` (aritmética MIDI). Ao contrário
+ * de `Note.transpose` + oitava fixa, nunca "cai" de registro ao cruzar B->C —
+ * é o helper único que os três geradores usam para evitar o bug de wrap.
+ */
+function pitchesFor(root: Note, octave: number, semitoneOffsets: number[]): Pitch[] {
+  const rootPitch = Pitch.from(root.value, octave);
 
-  const distractors = sampleDistinct(INTERVAL_SEMITONE_OPTIONS, 3, (value) => value === semitones);
+  return semitoneOffsets.map((offset) => rootPitch.transpose(offset));
+}
+
+function generateIntervalQuestion(difficulty: Difficulty): Question {
+  const pool = poolForDifficulty(INTERVAL_SEMITONE_ENTRIES, difficulty);
+  const root = randomRootNote();
+  const semitones = randomChoice(pool);
+
+  const distractors = sampleDistinct(pool, 3, (value) => value === semitones);
 
   const options = shuffle(
     [semitones, ...distractors].map((value) => ({ id: value.toString(), label: intervalName(value) })),
@@ -97,17 +136,17 @@ function generateIntervalQuestion(): Question {
     kind: "interval",
     correctId: semitones.toString(),
     options,
-    pitches: [Pitch.from(root.value, PLAYBACK_OCTAVE), Pitch.from(target.value, PLAYBACK_OCTAVE)],
+    pitches: pitchesFor(root, randomChoice(PLAYBACK_OCTAVES), [0, semitones]),
     playback: "sequence",
   };
 }
 
-function generateChordQualityQuestion(): Question {
+function generateChordQualityQuestion(difficulty: Difficulty): Question {
+  const pool = poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty);
   const root = randomRootNote();
-  const pattern = randomChoice(CHORD_QUALITY_OPTIONS);
-  const chord = createChord(root, pattern);
+  const pattern = randomChoice(pool);
 
-  const distractors = sampleDistinct(CHORD_QUALITY_OPTIONS, 3, (item) => item.name === pattern.name);
+  const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
 
   const options = shuffle(
     [pattern, ...distractors].map((item) => ({ id: item.name, label: item.name })),
@@ -117,34 +156,42 @@ function generateChordQualityQuestion(): Question {
     kind: "chordQuality",
     correctId: pattern.name,
     options,
-    pitches: chord.notes.map((note) => Pitch.from(note.value, PLAYBACK_OCTAVE)),
+    pitches: pitchesFor(
+      root,
+      randomChoice(PLAYBACK_OCTAVES),
+      pattern.degrees.map((degree) => degree.semitones()),
+    ),
     playback: "chord",
   };
 }
 
-function generateScaleQuestion(): Question {
+function generateScaleQuestion(difficulty: Difficulty): Question {
+  const pool = poolForDifficulty(SCALE_ENTRIES, difficulty);
   const root = randomRootNote();
-  const pattern = randomChoice(SCALE_OPTIONS);
-  const scale = createScale(root, pattern);
+  const pattern = randomChoice(pool);
 
-  const distractors = sampleDistinct(SCALE_OPTIONS, 3, (item) => item.name === pattern.name);
+  const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
 
   const options = shuffle(
     [pattern, ...distractors].map((item) => ({ id: item.name, label: item.name })),
   );
 
+  // Fecha a sequência com a tônica uma oitava acima, para o contorno soar
+  // completo e sempre ascendente (nunca cai de registro ao cruzar B->C).
+  const semitoneOffsets = [...pattern.degrees.map((degree) => degree.semitones()), 12];
+
   return {
     kind: "scale",
     correctId: pattern.name,
     options,
-    pitches: scale.notes().map((note) => Pitch.from(note.value, PLAYBACK_OCTAVE)),
+    pitches: pitchesFor(root, randomChoice(PLAYBACK_OCTAVES), semitoneOffsets),
     playback: "sequence",
   };
 }
 
-export function generateQuestion(kind: QuizKind): Question {
-  if (kind === "chordQuality") return generateChordQualityQuestion();
-  if (kind === "scale") return generateScaleQuestion();
+export function generateQuestion(kind: QuizKind, difficulty: Difficulty = "medium"): Question {
+  if (kind === "chordQuality") return generateChordQualityQuestion(difficulty);
+  if (kind === "scale") return generateScaleQuestion(difficulty);
 
-  return generateIntervalQuestion();
+  return generateIntervalQuestion(difficulty);
 }

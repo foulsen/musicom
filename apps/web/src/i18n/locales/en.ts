@@ -86,10 +86,22 @@ export const en = {
     correct: "Correct!",
     incorrect: "Not quite — the highlighted answer was correct.",
     score: "Score: {correct}/{total}",
+    streak: "streak {streak}",
+    resetScore: "Reset score",
+    difficulty: "Difficulty",
+    intervalPlaybackMode: "Interval playback",
+    melodic: "Melodic",
+    harmonic: "Harmonic",
+    clickPlayHint: "Click Play to hear it (1-4 to answer, R to replay).",
     kinds: {
       interval: "Intervals",
       chordQuality: "Chord Quality",
       scale: "Scales",
+    },
+    difficulties: {
+      easy: "Easy",
+      medium: "Medium",
+      hard: "Hard",
     },
     prompts: {
       interval: "What interval do you hear?",
