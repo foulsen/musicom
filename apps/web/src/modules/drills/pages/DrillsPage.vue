@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-
-import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
+import { useRoute, useRouter } from "vue-router";
 
 import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
 import type { DeckId } from "../application/flashcard-decks";
 import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
+import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
-const section = ref<"fretboard" | "flashcards">("fretboard");
+type Section = "fretboard" | "flashcards";
+
+/** Aba ativa reflete `route.query.tab`: sobrevive à navegação e é linkável. */
+const section = computed<Section>(() => (route.query.tab === "flashcards" ? "flashcards" : "fretboard"));
+
+function setSection(value: unknown) {
+  const next = Array.isArray(value) ? value[0] : value;
+  if (typeof next !== "string" || !next) return;
+
+  router.replace({ query: { ...route.query, tab: next } });
+}
 
 const {
   positions,
@@ -31,6 +43,10 @@ const {
   guess,
 } = useFretboardDrill();
 
+const progressAnnounce = computed(() =>
+  isActive.value ? t("drills.fretboard.progressAnnounce", { found: foundKeys.value.size, total: totalTargets.value }) : "",
+);
+
 const {
   deckIds,
   activeDeckId,
@@ -39,9 +55,14 @@ const {
   dueCount,
   current,
   isSessionComplete,
+  isFreePractice,
   isRevealed,
   reveal,
   grade,
+  currentBox,
+  boxCount,
+  sessionPosition,
+  sessionSize,
 } = useFlashcardDrill();
 
 function formatMs(ms: number): string {
@@ -60,25 +81,20 @@ function formatMs(ms: number): string {
       </p>
     </header>
 
-    <toggle-group-root
-      v-model="section"
+    <chip-toggle-group
+      :model-value="section"
       type="single"
       :aria-label="t('drills.title')"
-      class="inline-flex w-fit gap-1 rounded-lg border border-border bg-card/40 p-1"
+      class="w-fit"
+      @update:model-value="setSection"
     >
-      <toggle-group-item
-        value="fretboard"
-        class="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-      >
+      <chip-toggle-item value="fretboard" class="px-3 py-1.5 text-sm">
         {{ t("drills.sections.fretboard") }}
-      </toggle-group-item>
-      <toggle-group-item
-        value="flashcards"
-        class="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-      >
+      </chip-toggle-item>
+      <chip-toggle-item value="flashcards" class="px-3 py-1.5 text-sm">
         {{ t("drills.sections.flashcards") }}
-      </toggle-group-item>
-    </toggle-group-root>
+      </chip-toggle-item>
+    </chip-toggle-group>
 
     <section v-if="section === 'fretboard'" class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-4">
@@ -117,41 +133,72 @@ function formatMs(ms: number): string {
             class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             @click="start"
           >
-            {{ isActive ? t("drills.fretboard.restart") : t("drills.fretboard.start") }}
+            {{ isActive ? t("drills.fretboard.restart") : (isComplete ? t("drills.fretboard.playAgain") : t("drills.fretboard.start")) }}
           </button>
         </div>
       </div>
 
-      <p v-if="isActive" class="text-sm font-mono text-muted-foreground">
+      <!-- Slot de largura reservada: o cronômetro não desloca o layout ao aparecer/sumir. -->
+      <p class="text-sm font-mono tabular-nums text-muted-foreground" :style="{ visibility: isActive ? 'visible' : 'hidden' }">
         {{ formatMs(elapsedMs) }}
       </p>
 
-      <drill-fretboard :positions="positions" :found-keys="foundKeys" :wrong-key="wrongKey" @guess="guess" />
+      <p aria-live="polite" class="sr-only">
+        {{ progressAnnounce }}
+      </p>
+
+      <drill-fretboard :positions="positions" :found-keys="foundKeys" :wrong-key="wrongKey" :active="isActive || isComplete" @guess="guess" />
+
+      <div
+        v-if="isComplete"
+        class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-brand-soft bg-brand-soft/30 p-4"
+      >
+        <div>
+          <p class="text-sm font-medium text-foreground">
+            {{ t("drills.fretboard.complete", { time: formatMs(elapsedMs) }) }}
+          </p>
+          <p v-if="bestMs > 0" class="text-xs text-muted-foreground">
+            {{ t("drills.fretboard.best", { time: formatMs(bestMs) }) }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          @click="start"
+        >
+          {{ t("drills.fretboard.playAgain") }}
+        </button>
+      </div>
     </section>
 
     <section v-else class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <toggle-group-root
+        <chip-toggle-group
           :model-value="activeDeckId"
           type="single"
+          wrap
           :aria-label="t('drills.flashcards.deck')"
-          class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-card/40 p-1"
           @update:model-value="(value) => value && selectDeck(value as DeckId)"
         >
-          <toggle-group-item
+          <chip-toggle-item
             v-for="id in deckIds"
             :key="id"
             :value="id"
-            class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+            class="px-3 py-1 text-xs"
           >
             {{ t(`drills.flashcards.decks.${id}`) }}
-          </toggle-group-item>
-        </toggle-group-root>
+          </chip-toggle-item>
+        </chip-toggle-group>
 
         <p class="text-sm text-muted-foreground">
           {{ t("drills.flashcards.due", { due: dueCount, total: deckSize }) }}
         </p>
       </div>
+
+      <p v-if="isFreePractice && current" class="w-fit rounded-md bg-brand-soft px-3 py-1 text-xs font-medium text-brand-soft-foreground">
+        {{ t("drills.flashcards.freePractice") }}
+      </p>
 
       <flashcard
         v-if="current"
@@ -159,6 +206,10 @@ function formatMs(ms: number): string {
         :prompt="current.prompt"
         :answer="current.answer"
         :revealed="isRevealed"
+        :box="currentBox"
+        :box-count="boxCount"
+        :position="sessionPosition"
+        :total="sessionSize"
         @reveal="reveal"
         @grade="grade"
       />
