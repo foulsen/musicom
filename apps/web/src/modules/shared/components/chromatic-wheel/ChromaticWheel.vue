@@ -13,8 +13,10 @@ const props = withDefaults(
     highlightedNotes: Note[];
     /** Grafia por classe de altura (ex.: da escala selecionada), para rotular fora do padrão sustenido. */
     labelByPitchClass?: Map<number, string>;
+    /** Oitava usada para tocar a nota clicada (ex.: registro do voicing selecionado no Chord Explorer). */
+    playbackOctave?: number;
   }>(),
-  { labelByPitchClass: undefined },
+  { labelByPitchClass: undefined, playbackOctave: 4 },
 );
 
 const emit = defineEmits<{
@@ -23,31 +25,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const PLAYBACK_OCTAVE = 4;
-
 const mode = ref<"chromatic" | "interval">("chromatic");
-
-const SHORT_INTERVAL_NAMES: Record<number, string> = {
-  0: "R",
-  1: "m2",
-  2: "M2",
-  3: "m3",
-  4: "M3",
-  5: "P4",
-  6: "TT",
-  7: "P5",
-  8: "m6",
-  9: "M6",
-  10: "m7",
-  11: "M7",
-};
 
 const SIZE = 300;
 const CENTER = SIZE / 2;
 const RING_RADIUS = 118;
 const NOTE_RADIUS = 20;
 
+/** Posição do rótulo de intervalo ao longo do raio tônica->nota (0 = na tônica, 1 = na nota). */
+const LABEL_ALONG_SPOKE = 0.62;
+const LABEL_PERPENDICULAR_OFFSET = 7;
+
 interface WheelNote {
+  index: number;
   note: Note;
   label: string;
   cx: number;
@@ -65,8 +55,10 @@ const nodes = computed<WheelNote[]>(() =>
     const angle = (index / 12) * 2 * Math.PI - Math.PI / 2;
 
     const semitonesFromRoot = props.root.distanceTo(note);
+    const interval = new Interval(semitonesFromRoot);
 
     return {
+      index,
       note,
       label: props.labelByPitchClass?.get(note.index()) ?? note.toString(),
       cx: CENTER + RING_RADIUS * Math.cos(angle),
@@ -74,8 +66,8 @@ const nodes = computed<WheelNote[]>(() =>
       isRoot: note.equals(props.root),
       isHighlighted: props.highlightedNotes.some((highlighted) => highlighted.equals(note)),
       semitonesFromRoot,
-      intervalName: new Interval(semitonesFromRoot).name(),
-      shortInterval: SHORT_INTERVAL_NAMES[semitonesFromRoot] ?? `${semitonesFromRoot}`,
+      intervalName: interval.name(),
+      shortInterval: interval.shortName(),
     };
   }),
 );
@@ -90,8 +82,61 @@ const shapePath = computed(() => {
   return `M ${highlighted.map((node) => `${node.cx} ${node.cy}`).join(" L ")} Z`;
 });
 
+interface Spoke {
+  key: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  labelX: number;
+  labelY: number;
+  shortInterval: string;
+}
+
+/**
+ * Desloca o rótulo ao longo do raio (não no meio exato) e alterna um offset
+ * perpendicular por nota — com escalas de 7 notas, spokes vizinhos (m2/M2,
+ * m7/M7) saem quase juntos da tônica e seus rótulos colidiam no meio do caminho.
+ */
+const spokes = computed<Spoke[]>(() => {
+  const root = rootNode.value;
+  if (!root) return [];
+
+  return nodes.value
+    .filter((node) => node.isHighlighted && !node.isRoot)
+    .map((node) => {
+      const dx = node.cx - root.cx;
+      const dy = node.cy - root.cy;
+      const length = Math.hypot(dx, dy) || 1;
+      const perpX = -dy / length;
+      const perpY = dx / length;
+      const offsetSign = node.index % 2 === 0 ? 1 : -1;
+
+      return {
+        key: `spoke-${node.note.toString()}`,
+        x1: root.cx,
+        y1: root.cy,
+        x2: node.cx,
+        y2: node.cy,
+        labelX: root.cx + dx * LABEL_ALONG_SPOKE + perpX * LABEL_PERPENDICULAR_OFFSET * offsetSign,
+        labelY: root.cy + dy * LABEL_ALONG_SPOKE + perpY * LABEL_PERPENDICULAR_OFFSET * offsetSign,
+        shortInterval: node.shortInterval,
+      };
+    });
+});
+
+/** Nota tocada por último: pulsa brevemente como confirmação visual do clique. */
+const playedNote = ref<string | null>(null);
+let playedTimeout: ReturnType<typeof setTimeout> | undefined;
+
 function play(note: Note) {
-  emit("notePlay", Pitch.from(note.value, PLAYBACK_OCTAVE));
+  emit("notePlay", Pitch.from(note.value, props.playbackOctave));
+
+  playedNote.value = note.value;
+  clearTimeout(playedTimeout);
+  playedTimeout = setTimeout(() => {
+    playedNote.value = null;
+  }, 300);
 }
 </script>
 
@@ -135,25 +180,18 @@ function play(note: Note) {
       <path v-if="shapePath" :d="shapePath" class="fill-brand/5 stroke-brand/40" stroke-width="1.5" />
 
       <!-- Raios de intervalo a partir da tônica -->
-      <template v-if="mode === 'interval' && rootNode">
-        <g v-for="node in nodes.filter((n) => n.isHighlighted && !n.isRoot)" :key="`spoke-${node.note.toString()}`">
-          <line
-            :x1="rootNode.cx"
-            :y1="rootNode.cy"
-            :x2="node.cx"
-            :y2="node.cy"
-            class="stroke-brand/50"
-            stroke-width="1.5"
-          />
+      <template v-if="mode === 'interval'">
+        <g v-for="spoke in spokes" :key="spoke.key">
+          <line :x1="spoke.x1" :y1="spoke.y1" :x2="spoke.x2" :y2="spoke.y2" class="stroke-brand/50" stroke-width="1.5" />
           <text
-            :x="(rootNode.cx + node.cx) / 2"
-            :y="(rootNode.cy + node.cy) / 2"
+            :x="spoke.labelX"
+            :y="spoke.labelY"
             text-anchor="middle"
             dominant-baseline="central"
             font-size="10"
             class="fill-brand-soft-foreground font-medium"
           >
-            {{ node.shortInterval }}
+            {{ spoke.shortInterval }}
           </text>
         </g>
       </template>
@@ -173,16 +211,29 @@ function play(note: Note) {
         <circle
           :cx="node.cx"
           :cy="node.cy"
-          :r="NOTE_RADIUS"
-          :class="
+          :r="playedNote === node.note.value ? NOTE_RADIUS + 3 : NOTE_RADIUS"
+          :class="[
             node.isRoot
               ? 'fill-brand stroke-brand'
               : node.isHighlighted
                 ? 'fill-brand-soft stroke-brand'
-                : 'fill-muted stroke-border'
-          "
+                : 'fill-muted stroke-border',
+            'transition-all duration-150',
+          ]"
           stroke-width="2"
         />
+        <circle
+          v-if="playedNote === node.note.value"
+          :cx="node.cx"
+          :cy="node.cy"
+          :r="NOTE_RADIUS + 3"
+          class="fill-none stroke-brand"
+          stroke-width="2"
+          opacity="0.6"
+        >
+          <animate attributeName="r" :from="NOTE_RADIUS + 3" :to="NOTE_RADIUS + 12" dur="0.3s" fill="freeze" />
+          <animate attributeName="opacity" from="0.6" to="0" dur="0.3s" fill="freeze" />
+        </circle>
         <text
           :x="node.cx"
           :y="node.cy"
