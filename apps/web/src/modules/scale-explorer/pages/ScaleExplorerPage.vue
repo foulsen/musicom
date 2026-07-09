@@ -12,11 +12,13 @@ import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram"
 import { ChordCard } from "@/modules/shared/components/chord-card";
 import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
 import { EmptyState } from "@/modules/shared/components/empty-state";
+import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 
 const {
   selectedRoot,
   selectedPattern,
   availablePatterns,
+  notes,
   degrees,
   triads,
   fretboardPositions,
@@ -57,6 +59,9 @@ const { t } = useI18n();
         <fretboard-diagram :positions="fretboardPositions" context="scale" class="max-w-3xl mx-auto"
           @note-play="play" />
       </div>
+
+      <chromatic-wheel :root="selectedRoot" :highlighted-notes="notes" class="lg:w-72 lg:shrink-0"
+        @note-play="play" />
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">

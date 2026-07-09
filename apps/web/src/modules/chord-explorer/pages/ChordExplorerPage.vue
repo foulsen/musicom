@@ -12,6 +12,7 @@ import { ChordCard } from "@/modules/shared/components/chord-card";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
 import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
 import { EmptyState } from "@/modules/shared/components/empty-state";
+import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 
 const {
   selectedRoot,
@@ -61,6 +62,9 @@ const { t } = useI18n();
         <empty-state v-else :title="t('chordExplorer.emptyShapes.title')"
           :description="t('chordExplorer.emptyShapes.description', { chord: chord.name })" class="lg:flex-1" />
       </section>
+
+      <chromatic-wheel :root="selectedRoot" :highlighted-notes="chord.notes" class="lg:w-72 lg:shrink-0"
+        @note-play="play" />
     </div>
     <section class="space-y-3">
       <header class="flex items-center justify-between gap-4">

@@ -13,6 +13,21 @@ const routes = [
     component: () => import("@/modules/chord-explorer/pages/ChordExplorerPage.vue"),
     meta: { titleKey: "chordExplorer.title" },
   },
+  {
+    path: "/modes",
+    component: () => import("@/modules/mode-explorer/pages/ModeExplorerPage.vue"),
+    meta: { titleKey: "modeExplorer.title" },
+  },
+  {
+    path: "/ear-training",
+    component: () => import("@/modules/ear-training/pages/EarTrainingPage.vue"),
+    meta: { titleKey: "earTraining.title" },
+  },
+  {
+    path: "/drills",
+    component: () => import("@/modules/drills/pages/DrillsPage.vue"),
+    meta: { titleKey: "drills.title" },
+  },
 ];
 
 export const router = createRouter({

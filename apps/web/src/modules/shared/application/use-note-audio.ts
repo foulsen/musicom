@@ -3,28 +3,53 @@ import type { Pitch } from "@music-workspace/music-theory";
 export function useNoteAudio() {
   let context: AudioContext | null = null;
 
-  function play(pitch: Pitch) {
+  function ensureContext(): AudioContext {
     context ??= new AudioContext();
 
     if (context.state === "suspended") {
       context.resume().catch(() => {});
     }
 
-    const now = context.currentTime;
+    return context;
+  }
 
-    const oscillator = context.createOscillator();
+  /** Agenda uma nota isolada em `startTime` (segundos do relógio do `AudioContext`). */
+  function scheduleNote(ctx: AudioContext, pitch: Pitch, startTime: number, duration = 0.5) {
+    const oscillator = ctx.createOscillator();
     oscillator.type = "triangle";
     oscillator.frequency.value = pitch.frequency();
 
-    const gain = context.createGain();
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start(now);
-    oscillator.stop(now + 0.5);
+    oscillator.connect(gain).connect(ctx.destination);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
   }
 
-  return { play };
+  function play(pitch: Pitch) {
+    const ctx = ensureContext();
+    scheduleNote(ctx, pitch, ctx.currentTime);
+  }
+
+  /** Toca várias alturas juntas; `strum` aplica um leve atraso entre elas (arpejo de violão). */
+  function playChord(pitches: Pitch[], options: { strum?: boolean } = {}) {
+    const ctx = ensureContext();
+    const stagger = options.strum ? 0.03 : 0;
+
+    pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * stagger));
+  }
+
+  /** Toca alturas em sequência (ex.: escala ascendente), uma após a outra. */
+  function playSequence(pitches: Pitch[], options: { gapSeconds?: number; duration?: number } = {}) {
+    const ctx = ensureContext();
+    const gap = options.gapSeconds ?? 0.45;
+    const duration = options.duration ?? gap * 0.9;
+
+    pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * gap, duration));
+  }
+
+  return { play, playChord, playSequence };
 }

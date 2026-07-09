@@ -4,6 +4,9 @@ export const pt: MessageSchema = {
   nav: {
     scaleExplorer: "Explorador de Escalas",
     chordExplorer: "Explorador de Acordes",
+    modeExplorer: "Explorador de Modos",
+    earTraining: "Treino de Ouvido",
+    drills: "Treinos",
     openSidebar: "Abrir navegação",
     closeSidebar: "Fechar navegação",
   },
@@ -48,5 +51,63 @@ export const pt: MessageSchema = {
     whole: "T",
     half: "ST",
     wholeHalf: "T½",
+  },
+  chromaticWheel: {
+    title: "Roda Cromática",
+    chromaticMode: "Cromática",
+    intervalMode: "Intervalos",
+  },
+  drills: {
+    title: "Treinos",
+    subtitle: "Pratique contra o relógio no braço, ou treine teoria com flashcards de repetição espaçada.",
+    sections: {
+      fretboard: "Braço",
+      flashcards: "Flashcards",
+    },
+    fretboard: {
+      intro: "Ache todas as ocorrências de uma nota no braço, o mais rápido que puder.",
+      findAll: "Ache todos os {note}",
+      complete: "Todas encontradas em {time}!",
+      best: "Melhor: {time}",
+      start: "Começar",
+      restart: "Recomeçar",
+    },
+    flashcards: {
+      due: "{due} de {total} cartões devidos",
+      reveal: "Revelar resposta",
+      again: "De novo",
+      gotIt: "Acertei",
+    },
+  },
+  earTraining: {
+    title: "Treino de Ouvido",
+    subtitle: "Ouça e escolha a resposta certa — intervalos, qualidades de acorde e escalas.",
+    quizType: "Tipo de quiz",
+    play: "Tocar",
+    next: "Próxima",
+    correct: "Certo!",
+    incorrect: "Quase — a resposta destacada era a correta.",
+    score: "Placar: {correct}/{total}",
+    kinds: {
+      interval: "Intervalos",
+      chordQuality: "Qualidade de Acorde",
+      scale: "Escalas",
+    },
+    prompts: {
+      interval: "Qual intervalo você ouviu?",
+      chordQuality: "Qual qualidade de acorde você ouviu?",
+      scale: "Qual escala você ouviu?",
+    },
+  },
+  modeExplorer: {
+    title: "Explorador de Modos",
+    subtitle: "Escolha um tom-pai e percorra seus 7 modos — mesmas notas, tônica diferente.",
+    mode: "Modo",
+    degree: "Grau {degree}",
+    brightness: "Brilho",
+    emptyShapes: {
+      title: "Ainda sem digitações salvas",
+      description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",
+    },
   },
 };

@@ -2,6 +2,9 @@ export const en = {
   nav: {
     scaleExplorer: "Scale Explorer",
     chordExplorer: "Chord Explorer",
+    modeExplorer: "Mode Explorer",
+    earTraining: "Ear Training",
+    drills: "Drills",
     openSidebar: "Open navigation",
     closeSidebar: "Close navigation",
   },
@@ -46,6 +49,64 @@ export const en = {
     whole: "W",
     half: "H",
     wholeHalf: "W½",
+  },
+  chromaticWheel: {
+    title: "Chromatic Wheel",
+    chromaticMode: "Chromatic",
+    intervalMode: "Intervals",
+  },
+  drills: {
+    title: "Drills",
+    subtitle: "Practice against the clock on the fretboard, or drill theory with spaced-repetition flashcards.",
+    sections: {
+      fretboard: "Fretboard",
+      flashcards: "Flashcards",
+    },
+    fretboard: {
+      intro: "Find every occurrence of a note on the fretboard, as fast as you can.",
+      findAll: "Find every {note}",
+      complete: "All found in {time}!",
+      best: "Best: {time}",
+      start: "Start",
+      restart: "Restart",
+    },
+    flashcards: {
+      due: "{due} of {total} cards due",
+      reveal: "Reveal answer",
+      again: "Again",
+      gotIt: "Got it",
+    },
+  },
+  earTraining: {
+    title: "Ear Training Studio",
+    subtitle: "Listen and pick the right answer — intervals, chord qualities and scales.",
+    quizType: "Quiz type",
+    play: "Play",
+    next: "Next",
+    correct: "Correct!",
+    incorrect: "Not quite — the highlighted answer was correct.",
+    score: "Score: {correct}/{total}",
+    kinds: {
+      interval: "Intervals",
+      chordQuality: "Chord Quality",
+      scale: "Scales",
+    },
+    prompts: {
+      interval: "What interval do you hear?",
+      chordQuality: "What chord quality do you hear?",
+      scale: "What scale do you hear?",
+    },
+  },
+  modeExplorer: {
+    title: "Mode Explorer",
+    subtitle: "Pick a parent key and spin through its 7 modes — same notes, different tonic.",
+    mode: "Mode",
+    degree: "Degree {degree}",
+    brightness: "Brightness",
+    emptyShapes: {
+      title: "No saved shapes yet",
+      description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",
+    },
   },
 };
 
