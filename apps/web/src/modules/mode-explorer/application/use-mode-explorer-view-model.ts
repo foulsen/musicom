@@ -8,6 +8,7 @@ import {
   Fretboard,
   Interval,
   Note,
+  Pitch,
   STANDARD_GUITAR_TUNING,
   relativeModesOf,
 } from "@music-workspace/music-theory";
@@ -55,6 +56,14 @@ export function useModeExplorerViewModel() {
   const triads = computed(() => scale.value.triads());
 
   const brightnessRank = computed(() => BRIGHTNESS_ORDER.indexOf(selectedMode.value.pattern.name));
+
+  /** Pitches ascendentes do modo (via Pitch.transpose, nunca Note+oitava fixa) para "ouvir o modo". */
+  const scalePitches = computed<Pitch[]>(() => {
+    const rootPitch = Pitch.from(scale.value.root.value, 4);
+    const offsets = [...degrees.value.map((item) => item.degree.semitones()), 12];
+
+    return offsets.map((offset) => rootPitch.transpose(offset));
+  });
 
   const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
 
@@ -119,6 +128,9 @@ export function useModeExplorerViewModel() {
     notes,
     degrees,
     triads,
+
+    scalePitches,
+    spelledByPitchClass,
 
     fretboardPositions,
     fretCount,

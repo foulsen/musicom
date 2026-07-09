@@ -21,6 +21,7 @@ const {
   notes,
   degrees,
   triads,
+  spelledByPitchClass,
   fretboardPositions,
   fretCount,
   selectedTriadIndex,
@@ -60,8 +61,8 @@ const { t } = useI18n();
           @note-play="play" />
       </div>
 
-      <chromatic-wheel :root="selectedRoot" :highlighted-notes="notes" class="lg:w-72 lg:shrink-0"
-        @note-play="play" />
+      <chromatic-wheel :root="selectedRoot" :highlighted-notes="notes" :label-by-pitch-class="spelledByPitchClass"
+        class="lg:w-72 lg:shrink-0" @note-play="play" />
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">

@@ -126,6 +126,7 @@ export const en = {
     mode: "Mode",
     degree: "Degree {degree}",
     brightness: "Brightness",
+    listenToMode: "Listen to {mode}",
     emptyShapes: {
       title: "No saved shapes yet",
       description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",

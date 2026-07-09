@@ -103,14 +103,21 @@ export function useChordExplorerViewModel() {
 
   const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
 
+  /** Grafia enarmônica por classe de altura, derivada do acorde selecionado. */
+  const spelledByPitchClass = computed(() => {
+    const current = chord.value;
+    const map = new Map<number, string>();
+
+    current.notes.forEach((note, index) => {
+      map.set(note.index(), current.spelledNotes[index].toString());
+    });
+
+    return map;
+  });
+
   /** Posições do braço categorizadas para o acorde (reusa o FretboardDiagram). */
   const fretboardPositions = computed<FretboardNote[][]>(() => {
     const current = chord.value;
-
-    const spelledByPitchClass = new Map<number, string>();
-    current.notes.forEach((note, index) => {
-      spelledByPitchClass.set(note.index(), current.spelledNotes[index].toString());
-    });
 
     return fretboard.value.positions().map((row) =>
       row.map((position) => {
@@ -118,7 +125,7 @@ export function useChordExplorerViewModel() {
 
         return {
           ...position,
-          label: spelledByPitchClass.get(note.index()) ?? note.toString(),
+          label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
           isTonic: note.equals(current.root),
           inScale: current.notes.some((chordNote) => chordNote.equals(note)),
           intervalName: new Interval(current.root.distanceTo(note)).name(),
@@ -140,6 +147,7 @@ export function useChordExplorerViewModel() {
     chordOptions,
     chordNotes,
     selectedChordCard,
+    spelledByPitchClass,
     fretboardPositions,
     fretCount,
     selectFretCount,

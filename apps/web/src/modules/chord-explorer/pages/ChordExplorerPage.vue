@@ -23,6 +23,7 @@ const {
   chordOptions,
   chordNotes,
   selectedChordCard,
+  spelledByPitchClass,
   fretboardPositions,
   fretCount,
 } = useChordExplorerViewModel();
@@ -63,8 +64,8 @@ const { t } = useI18n();
           :description="t('chordExplorer.emptyShapes.description', { chord: chord.name })" class="lg:flex-1" />
       </section>
 
-      <chromatic-wheel :root="selectedRoot" :highlighted-notes="chord.notes" class="lg:w-72 lg:shrink-0"
-        @note-play="play" />
+      <chromatic-wheel :root="selectedRoot" :highlighted-notes="chord.notes"
+        :label-by-pitch-class="spelledByPitchClass" class="lg:w-72 lg:shrink-0" @note-play="play" />
     </div>
     <section class="space-y-3">
       <header class="flex items-center justify-between gap-4">

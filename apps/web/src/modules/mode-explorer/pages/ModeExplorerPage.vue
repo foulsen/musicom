@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 
+import { Play as PlayIcon } from "@lucide/vue";
+
 import { useModeExplorerViewModel } from "../application/use-mode-explorer-view-model";
 import { ModeSelector } from "../components/mode-selector";
 
@@ -23,6 +25,8 @@ const {
   notes,
   degrees,
   triads,
+  scalePitches,
+  spelledByPitchClass,
   fretboardPositions,
   selectedTriadIndex,
   selectedChord,
@@ -30,8 +34,12 @@ const {
   selectChord,
 } = useModeExplorerViewModel();
 
-const { play } = useNoteAudio();
+const { play, playSequence } = useNoteAudio();
 const { t } = useI18n();
+
+function listenToMode() {
+  playSequence(scalePitches.value);
+}
 </script>
 
 <template>
@@ -48,6 +56,15 @@ const { t } = useI18n();
     <root-note-selector v-model="selectedParentRoot" />
 
     <mode-selector v-model="selectedModeIndex" :modes="modes" />
+
+    <button
+      type="button"
+      class="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card/40 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      @click="listenToMode"
+    >
+      <play-icon class="size-4" />
+      {{ t("modeExplorer.listenToMode", { mode: selectedMode.pattern.name }) }}
+    </button>
 
     <section class="space-y-3">
       <header>
@@ -78,8 +95,8 @@ const { t } = useI18n();
       <fretboard-diagram :positions="fretboardPositions" context="scale" class="min-w-0 max-w-3xl mx-auto lg:flex-1"
         @note-play="play" />
 
-      <chromatic-wheel :root="selectedMode.scale.root" :highlighted-notes="notes" class="lg:w-72 lg:shrink-0"
-        @note-play="play" />
+      <chromatic-wheel :root="selectedMode.scale.root" :highlighted-notes="notes"
+        :label-by-pitch-class="spelledByPitchClass" class="lg:w-72 lg:shrink-0" @note-play="play" />
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">

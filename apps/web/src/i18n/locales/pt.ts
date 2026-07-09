@@ -128,6 +128,7 @@ export const pt: MessageSchema = {
     mode: "Modo",
     degree: "Grau {degree}",
     brightness: "Brilho",
+    listenToMode: "Ouvir {mode}",
     emptyShapes: {
       title: "Ainda sem digitações salvas",
       description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",

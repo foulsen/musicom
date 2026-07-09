@@ -143,6 +143,8 @@ export function useScaleExplorerViewModel() {
     degrees,
     triads,
 
+    spelledByPitchClass,
+
     fretboardPositions,
     fretCount,
     selectFretCount,
