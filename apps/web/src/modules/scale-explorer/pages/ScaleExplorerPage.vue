@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
 import { useScaleExplorerViewModel } from "../application/use-scale-explorer-view-model";
 import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { HarmonicField } from "../components/harmonic-field";
-import { TuningSelector } from "../components/tuning-selector";
 
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
 import { ChordCard } from "@/modules/shared/components/chord-card";
+import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
+import { EmptyState } from "@/modules/shared/components/empty-state";
 
 const {
   selectedRoot,
@@ -17,8 +20,7 @@ const {
   degrees,
   triads,
   fretboardPositions,
-  availableTunings,
-  selectedTuning,
+  fretCount,
   selectedTriadIndex,
   selectedChord,
   selectedChordCard,
@@ -26,31 +28,34 @@ const {
 } = useScaleExplorerViewModel();
 
 const { play } = useNoteAudio();
+const { t } = useI18n();
 </script>
 
 <template>
-  <section class="flex flex-col gap-8 p-8">
-    <header>
-      <h1 class="text-2xl font-medium tracking-wide uppercase">
-        Scale Explorer
+  <section class="flex flex-col gap-8 p-4 sm:p-6 lg:p-8">
+    <header class="space-y-1">
+      <h1 class="text-2xl font-medium tracking-wide">
+        {{ t("scaleExplorer.title") }}
       </h1>
+      <p class="text-sm text-muted-foreground">
+        {{ t("scaleExplorer.subtitle") }}
+      </p>
     </header>
 
     <root-note-selector v-model="selectedRoot" />
 
     <scale-pattern-selector v-model="selectedPattern" :patterns="availablePatterns" />
 
-    <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-      <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" />
+    <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+      <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" @note-play="play" />
 
       <div class="min-w-0 space-y-4 lg:flex-1 flex-1">
-        <!-- <tuning-selector
-          v-model="selectedTuning"
-          :tunings="availableTunings"
-          class="max-w-xs"
-        /> -->
+        <div class="flex justify-end">
+          <fret-range-selector v-model="fretCount" />
+        </div>
 
-        <fretboard-diagram :positions="fretboardPositions" class="max-w-3xl mx-auto" @note-play="play" />
+        <fretboard-diagram :positions="fretboardPositions" context="scale" class="max-w-3xl mx-auto"
+          @note-play="play" />
       </div>
     </div>
 
@@ -62,9 +67,9 @@ const { play } = useNoteAudio();
         <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes"
           class="min-w-0 lg:flex-1" @note-play="play" />
 
-        <p v-else class="text-sm text-muted-foreground lg:flex-1">
-          Sem digitação predefinida para {{ selectedChord.name }}.
-        </p>
+        <empty-state v-else :title="t('scaleExplorer.emptyShapes.title')"
+          :description="t('scaleExplorer.emptyShapes.description', { chord: selectedChord.name })"
+          class="lg:flex-1" />
       </div>
     </div>
   </section>

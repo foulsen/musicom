@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
@@ -15,6 +16,8 @@ export interface ChordOption {
 const props = defineProps<{
   chords: ChordOption[];
 }>();
+
+const { t } = useI18n();
 
 const model = defineModel<ChordPattern>({ required: true });
 
@@ -33,8 +36,8 @@ const selectedName = computed<string>({
 <template>
   <section class="space-y-3">
     <header>
-      <h2 class="text-xl font-medium text-muted-foreground">
-        Chord
+      <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {{ t("chordExplorer.chordQuality") }}
       </h2>
     </header>
 
@@ -47,7 +50,7 @@ const selectedName = computed<string>({
         v-for="option in chords"
         :key="option.pattern.name"
         :value="option.pattern.name"
-        class="flex flex-col items-start gap-1 rounded-lg border border-border bg-card/40 px-4 py-3 text-left text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand data-[state=on]:bg-brand/10 data-[state=on]:text-foreground"
+        class="flex flex-col items-start gap-1 rounded-lg border border-border bg-card/40 px-4 py-3 text-left text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
         <span class="text-base font-medium">
           {{ option.name }}

@@ -4,14 +4,14 @@ export { default as NavigationItem } from "./NavigationItem.vue";
 
 export const navigationItemVariants = cva(
   [
-    "flex w-full items-center gap-3 rounded-md px-3 py-2",
+    "flex w-full items-center gap-3 rounded-md border-l-2 border-transparent px-3 py-2",
     "text-sm font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
   ],
   {
     variants: {
       active: {
-        true: "bg-secondary text-secondary-foreground",
+        true: "border-brand bg-brand/10 text-foreground",
         false:
           "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
       },

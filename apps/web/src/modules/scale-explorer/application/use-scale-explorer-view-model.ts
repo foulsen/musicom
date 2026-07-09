@@ -1,4 +1,5 @@
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { storeToRefs } from "pinia";
 
 import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
 import type { ChordCardData } from "@/modules/shared/types/chord-shape";
@@ -21,16 +22,16 @@ import {
   ScalePattern,
   Fretboard,
   Interval,
-  Tuning,
-  TUNINGS,
   STANDARD_GUITAR_TUNING,
-  detectTwoFiveOne,
 } from "@music-workspace/music-theory";
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 
+import { useScaleExplorerStore } from "./use-scale-explorer-store";
+
 export function useScaleExplorerViewModel() {
-  const selectedRoot = ref<Note>(Note.from("C"));
+  const store = useScaleExplorerStore();
+  const { rootValue, patternName, fretCount, selectedTriadIndex: storedTriadIndex } = storeToRefs(store);
 
   const availablePatterns: ScalePattern[] = [
     MAJOR_SCALE_PATTERN,
@@ -48,7 +49,19 @@ export function useScaleExplorerViewModel() {
     PHRYGIAN_SCALE_PATTERN,
   ];
 
-  const selectedPattern = ref<ScalePattern>(MAJOR_SCALE_PATTERN);
+  const selectedRoot = computed<Note>({
+    get: () => Note.from(rootValue.value),
+    set: (note) => {
+      rootValue.value = note.value;
+    },
+  });
+
+  const selectedPattern = computed<ScalePattern>({
+    get: () => availablePatterns.find((pattern) => pattern.name === patternName.value) ?? MAJOR_SCALE_PATTERN,
+    set: (pattern) => {
+      patternName.value = pattern.name;
+    },
+  });
 
   const scale = computed(() => createScale(selectedRoot.value, selectedPattern.value));
 
@@ -58,13 +71,7 @@ export function useScaleExplorerViewModel() {
 
   const triads = computed(() => scale.value.triads());
 
-  const progressions = computed(() => detectTwoFiveOne(scale.value.seventhChords()));
-
-  const availableTunings = TUNINGS;
-
-  const selectedTuning = ref<Tuning>(STANDARD_GUITAR_TUNING);
-
-  const fretboard = computed(() => new Fretboard(selectedTuning.value));
+  const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
 
   /** Grafia enarmônica por classe de altura, derivada da escala selecionada. */
   const spelledByPitchClass = computed(() => {
@@ -91,7 +98,12 @@ export function useScaleExplorerViewModel() {
     );
   });
 
-  const selectedTriadIndex = ref(0);
+  const selectedTriadIndex = computed({
+    get: () => Math.min(storedTriadIndex.value, triads.value.length - 1),
+    set: (index) => {
+      storedTriadIndex.value = index;
+    },
+  });
 
   const selectedChord = computed(
     () => triads.value[selectedTriadIndex.value] ?? triads.value[0],
@@ -110,12 +122,12 @@ export function useScaleExplorerViewModel() {
     selectedPattern.value = pattern;
   }
 
-  function selectTuning(tuning: Tuning) {
-    selectedTuning.value = tuning;
-  }
-
   function selectChord(index: number) {
     selectedTriadIndex.value = index;
+  }
+
+  function selectFretCount(count: number) {
+    fretCount.value = count;
   }
 
   return {
@@ -130,12 +142,10 @@ export function useScaleExplorerViewModel() {
     notes,
     degrees,
     triads,
-    progressions,
-
-    availableTunings,
-    selectedTuning,
 
     fretboardPositions,
+    fretCount,
+    selectFretCount,
 
     selectedTriadIndex,
     selectedChord,
@@ -143,7 +153,6 @@ export function useScaleExplorerViewModel() {
 
     selectRoot,
     selectPattern,
-    selectTuning,
     selectChord,
   };
 }

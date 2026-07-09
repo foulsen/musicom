@@ -1,4 +1,6 @@
-import { computed, ref, watch } from "vue";
+import { computed, onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 
 import {
   CHORD_FAMILIES,
@@ -6,32 +8,72 @@ import {
   Interval,
   Note,
   STANDARD_GUITAR_TUNING,
-  TRIADS_FAMILY,
   createChord,
-  type ChordFamily,
-  type ChordPattern,
+  type SingleNote,
 } from "@music-workspace/music-theory";
 
 import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
 import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 
-/** Braço em afinação padrão para o mapa de notas do acorde. */
-const standardFretboard = new Fretboard(STANDARD_GUITAR_TUNING);
+import { useChordExplorerStore } from "./use-chord-explorer-store";
 
 /** Estado local da página de estudo de acordes (independente do Scale Explorer). */
 export function useChordExplorerViewModel() {
-  const selectedRoot = ref<Note>(Note.from("C"));
+  const route = useRoute();
+  const router = useRouter();
 
-  const availableFamilies: ChordFamily[] = CHORD_FAMILIES;
+  const store = useChordExplorerStore();
+  const { rootValue, familyName, qualityName, fretCount } = storeToRefs(store);
 
-  const selectedFamily = ref<ChordFamily>(TRIADS_FAMILY);
+  const availableFamilies = CHORD_FAMILIES;
 
-  const selectedQuality = ref<ChordPattern>(TRIADS_FAMILY.patterns[0]);
+  const selectedRoot = computed<Note>({
+    get: () => Note.from(rootValue.value),
+    set: (note) => {
+      rootValue.value = note.value;
+    },
+  });
 
-  // Ao trocar de família, seleciona a primeira qualidade dela.
-  watch(selectedFamily, (family) => {
-    selectedQuality.value = family.patterns[0] ?? selectedQuality.value;
+  const selectedFamily = computed({
+    get: () => availableFamilies.find((family) => family.name === familyName.value) ?? availableFamilies[0],
+    set: (family) => {
+      familyName.value = family.name;
+      qualityName.value = family.patterns[0]?.name ?? qualityName.value;
+    },
+  });
+
+  const selectedQuality = computed({
+    get: () =>
+      selectedFamily.value.patterns.find((pattern) => pattern.name === qualityName.value) ??
+      selectedFamily.value.patterns[0],
+    set: (pattern) => {
+      qualityName.value = pattern.name;
+    },
+  });
+
+  // Ao entrar vindo do Harmonic Field (Scale Explorer), aplica a seleção da query string.
+  onMounted(() => {
+    const queryRoot = route.query.root;
+    const queryFamily = route.query.family;
+    const queryQuality = route.query.quality;
+
+    if (typeof queryRoot === "string") {
+      rootValue.value = queryRoot as SingleNote;
+    }
+
+    if (typeof queryFamily === "string") {
+      const family = availableFamilies.find((item) => item.name === queryFamily);
+      if (family) familyName.value = family.name;
+    }
+
+    if (typeof queryQuality === "string") {
+      qualityName.value = queryQuality;
+    }
+
+    if (queryRoot || queryFamily || queryQuality) {
+      router.replace({ query: {} });
+    }
   });
 
   const chord = computed(() => createChord(selectedRoot.value, selectedQuality.value));
@@ -59,6 +101,8 @@ export function useChordExplorerViewModel() {
     resolveChordCard(chord.value.name),
   );
 
+  const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
+
   /** Posições do braço categorizadas para o acorde (reusa o FretboardDiagram). */
   const fretboardPositions = computed<FretboardNote[][]>(() => {
     const current = chord.value;
@@ -68,7 +112,7 @@ export function useChordExplorerViewModel() {
       spelledByPitchClass.set(note.index(), current.spelledNotes[index].toString());
     });
 
-    return standardFretboard.positions().map((row) =>
+    return fretboard.value.positions().map((row) =>
       row.map((position) => {
         const note = position.pitch.note;
 
@@ -83,6 +127,10 @@ export function useChordExplorerViewModel() {
     );
   });
 
+  function selectFretCount(count: number) {
+    fretCount.value = count;
+  }
+
   return {
     selectedRoot,
     availableFamilies,
@@ -93,5 +141,7 @@ export function useChordExplorerViewModel() {
     chordNotes,
     selectedChordCard,
     fretboardPositions,
+    fretCount,
+    selectFretCount,
   };
 }

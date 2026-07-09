@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { t } = useI18n();
 
 const model = defineModel<ScalePattern>({ required: true });
 
@@ -31,11 +34,11 @@ function formatIntervals(pattern: ScalePattern): string {
 function intervalLabel(interval: Interval): string {
   switch (interval.semitones) {
     case 1:
-      return "ST";
+      return t("intervals.half");
     case 2:
-      return "T";
+      return t("intervals.whole");
     case 3:
-      return "T½";
+      return t("intervals.wholeHalf");
     default:
       return `${interval.semitones}st`;
   }
@@ -45,8 +48,8 @@ function intervalLabel(interval: Interval): string {
 <template>
   <section class="space-y-3">
     <header>
-      <h2 class="text-xl font-medium text-muted-foreground">
-        Scale Type
+      <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {{ t("scaleExplorer.scaleType") }}
       </h2>
     </header>
 
@@ -59,7 +62,7 @@ function intervalLabel(interval: Interval): string {
         v-for="pattern in patterns"
         :key="pattern.name"
         :value="pattern.name"
-        class="flex flex-col items-start gap-1 rounded-lg border border-border bg-card/40 px-4 py-3 text-left text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand data-[state=on]:bg-brand/10 data-[state=on]:text-foreground"
+        class="flex flex-col items-start gap-1 rounded-lg border border-border bg-card/40 px-4 py-3 text-left text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
         <span class="text-base font-medium">
           {{ pattern.name }}

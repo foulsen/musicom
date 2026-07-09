@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-
-import { cn } from "@/lib/utils";
+import { useI18n } from "vue-i18n";
 
 import type { NavigationItem as NavigationItemType } from "../../types/navigation-item";
 
@@ -13,6 +12,8 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -31,7 +32,7 @@ defineProps<Props>();
         class="size-4 shrink-0"
       />
 
-      {{ item.title }}
+      {{ t(item.titleKey) }}
     </a>
   </router-link>
 </template>

@@ -84,6 +84,20 @@ const cells = computed<Cell[]>(() =>
 );
 
 const hovered = ref<string | null>(null);
+
+/** Nota tocada por último: pulsa brevemente como confirmação visual do clique. */
+const playedKey = ref<string | null>(null);
+let playedTimeout: ReturnType<typeof setTimeout> | undefined;
+
+function playNote(cell: Cell) {
+  emit("notePlay", cell.pitch);
+
+  playedKey.value = cell.key;
+  clearTimeout(playedTimeout);
+  playedTimeout = setTimeout(() => {
+    playedKey.value = null;
+  }, 260);
+}
 </script>
 
 <template>
@@ -150,22 +164,34 @@ const hovered = ref<string | null>(null);
       class="cursor-pointer"
       @mouseenter="hovered = cell.key"
       @mouseleave="hovered = null"
-      @click="emit('notePlay', cell.pitch)"
+      @click="playNote(cell)"
     >
       <circle
         :cx="cell.cx"
         :cy="cell.cy"
-        :r="hovered === cell.key ? RADIUS + 1.5 : RADIUS"
-        class="fill-brand-soft stroke-brand"
+        :r="hovered === cell.key || playedKey === cell.key ? RADIUS + 1.5 : RADIUS"
+        class="fill-brand-soft stroke-brand transition-all duration-150"
         stroke-width="1.5"
       />
+      <circle
+        v-if="playedKey === cell.key"
+        :cx="cell.cx"
+        :cy="cell.cy"
+        :r="RADIUS + 1.5"
+        class="fill-none stroke-brand"
+        stroke-width="1.5"
+        opacity="0.6"
+      >
+        <animate attributeName="r" :from="RADIUS + 1.5" :to="RADIUS + 7" dur="0.3s" fill="freeze" />
+        <animate attributeName="opacity" from="0.6" to="0" dur="0.3s" fill="freeze" />
+      </circle>
       <text
         :x="cell.cx"
         :y="cell.cy"
         text-anchor="middle"
         dominant-baseline="central"
         font-size="8"
-        class="fill-brand-foreground"
+        class="fill-brand-soft-foreground"
       >
         {{ cell.label }}
       </text>

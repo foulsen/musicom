@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import { CHROMATIC_SCALE, Note } from "@music-workspace/music-theory";
 import type { SingleNote } from "@music-workspace/music-theory";
+
+const { t } = useI18n();
 
 const model = defineModel<Note>({ required: true });
 
@@ -22,21 +25,21 @@ const selectedNote = computed<string>({
 <template>
   <section class="space-y-3">
     <header>
-      <h2 class="text-xl font-medium text-muted-foreground">
-        Root note
+      <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {{ t("common.rootNote") }}
       </h2>
     </header>
 
     <toggle-group-root
       v-model="selectedNote"
       type="single"
-      class="flex w-full gap-1 rounded-xl border border-border bg-card/40 p-2"
+      class="grid w-full max-w-xl grid-cols-6 gap-1 rounded-xl border border-border bg-card/40 p-2 sm:grid-cols-12"
     >
       <toggle-group-item
         v-for="note in CHROMATIC_SCALE"
         :key="note"
         :value="note"
-        class="h-10 flex-1 rounded-lg border border-transparent text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand data-[state=on]:bg-brand/10 data-[state=on]:text-foreground"
+        class="h-10 rounded-lg border border-transparent text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
         {{ note }}
       </toggle-group-item>

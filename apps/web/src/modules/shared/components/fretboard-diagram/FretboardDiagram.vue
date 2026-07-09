@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { useMediaQuery } from "@vueuse/core";
 
 import type { Pitch } from "@music-workspace/music-theory";
 
@@ -11,13 +13,26 @@ import {
 
 import { Check, X } from "@lucide/vue";
 
-const props = defineProps<{
-  positions: FretboardNote[][];
-}>();
+const props = withDefaults(
+  defineProps<{
+    positions: FretboardNote[][];
+    /** Contexto de exibição: define o rótulo do toggle ("fora da escala" vs "fora do acorde"). */
+    context?: "scale" | "chord";
+  }>(),
+  { context: "scale" },
+);
 
 const emit = defineEmits<{
   notePlay: [pitch: Pitch];
 }>();
+
+const { t } = useI18n();
+
+const showOutOfScaleLabel = computed(() =>
+  props.context === "chord" ? t("fretboard.showOutOfChord") : t("fretboard.showOutOfScale"),
+);
+
+const reducedView = ref(false)
 
 /**
  * Configurável por ref (sem UI por ora): quando true, também desenha as notas
@@ -25,31 +40,58 @@ const emit = defineEmits<{
  */
 const showOutOfScale = ref(false);
 
-// Geometria em unidades do viewBox.
+/** Abaixo de `md`, o braço vira vertical (pestana no topo) para caber sem scroll lateral. */
+const isVertical = useMediaQuery("(max-width: 767px)");
+
+// Geometria em unidades do viewBox, descrita em eixos abstratos do braço:
+// "along" = ao longo do braço (pestana → última casa), "across" = através das cordas.
+// `toScreen` decide, por orientação, qual eixo vira X e qual vira Y na tela.
 const STRING_GAP = 36;
-const FRET_WIDTH = 54;
 const OPEN_COL = 44;
-const RADIUS = 14;
-const PAD = { top: 24, bottom: 50, left: 0, right: 0 };
+const ACROSS_START = 24;
+const ACROSS_END = 50;
 
 const stringCount = computed(() => props.positions.length);
 const fretCount = computed(() => (props.positions[0]?.length ?? 1) - 1);
+const fretWidth = computed(() => (reducedView.value ? 34 : 54));
+const noteRadius = computed(() => (reducedView.value ? 10 : 14));
 
-const nutX = PAD.left + OPEN_COL;
-const topY = PAD.top;
-const bottomY = computed(() => PAD.top + (stringCount.value - 1) * STRING_GAP);
-const rightX = computed(() => nutX + fretCount.value * FRET_WIDTH);
-const width = computed(() => rightX.value + PAD.right);
-const height = computed(() => bottomY.value + PAD.bottom);
+const alongExtent = computed(() => OPEN_COL + fretCount.value * fretWidth.value);
+const acrossLastString = computed(() => ACROSS_START + (stringCount.value - 1) * STRING_GAP);
+const acrossExtent = computed(() => acrossLastString.value + ACROSS_END);
 
-const stringYs = computed(() =>
-  Array.from({ length: stringCount.value }, (_, row) => PAD.top + row * STRING_GAP),
+function toScreen(along: number, across: number) {
+  return isVertical.value ? { x: across, y: along } : { x: along, y: across };
+}
+
+const width = computed(() => (isVertical.value ? acrossExtent.value : alongExtent.value));
+const height = computed(() => (isVertical.value ? alongExtent.value : acrossExtent.value));
+
+const nut = computed(() => {
+  const start = toScreen(OPEN_COL, ACROSS_START);
+  const end = toScreen(OPEN_COL, acrossLastString.value);
+  return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+});
+
+const strings = computed(() =>
+  Array.from({ length: stringCount.value }, (_, row) => {
+    const across = ACROSS_START + row * STRING_GAP;
+    const start = toScreen(OPEN_COL, across);
+    const end = toScreen(alongExtent.value, across);
+    return { key: row, x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+  }),
 );
 
 const frets = computed(() =>
   Array.from({ length: fretCount.value }, (_, i) => {
     const fret = i + 1;
-    return { fret, x: nutX + fret * FRET_WIDTH, labelX: nutX + (fret - 0.5) * FRET_WIDTH };
+    const along = OPEN_COL + fret * fretWidth.value;
+    const start = toScreen(along, ACROSS_START);
+    const end = toScreen(along, acrossLastString.value);
+    // const labelAlong = OPEN_COL + (fret - 0.5) * FRET_WIDTH;
+    const labelAlong = OPEN_COL + fretWidth.value * (fret - 0.5) + (isVertical.value ? 4 : 0);
+    const label = toScreen(labelAlong, acrossLastString.value + 36);
+    return { fret, x1: start.x, y1: start.y, x2: end.x, y2: end.y, labelX: label.x, labelY: label.y };
   }),
 );
 
@@ -67,13 +109,13 @@ interface Cell {
 const CIRCLE_CLASS = {
   tonic: "fill-brand-soft stroke-brand",
   in: "fill-muted stroke-brand",
-  out: "fill-muted stroke-transparent",
+  out: "fill-muted stroke-transparent opacity-50",
 } as const;
 
 const TEXT_CLASS = {
-  tonic: "fill-brand-foreground",
+  tonic: "fill-brand-soft-foreground",
   in: "fill-foreground",
-  out: "fill-muted-foreground",
+  out: "fill-muted-foreground opacity-50",
 } as const;
 
 const cells = computed<Cell[]>(() => {
@@ -82,19 +124,23 @@ const cells = computed<Cell[]>(() => {
   const result: Cell[] = [];
 
   rows.forEach((row, stringIndex) => {
-    // Corda mais aguda no topo: inverte a ordem física (grave→aguda) do domínio.
-    const displayRow = count - 1 - stringIndex;
-    const cy = PAD.top + displayRow * STRING_GAP;
+    // Corda mais aguda no topo (horizontal) / à esquerda (vertical): inverte a ordem física do domínio.
+    let displayRow = count - 1 - stringIndex;
+
+    if (isVertical.value) {
+      // Braço vertical: corda mais grave no topo, corda mais aguda embaixo.
+      displayRow = stringIndex;
+    }
+
+    const across = ACROSS_START + displayRow * STRING_GAP;
 
     row.forEach((position) => {
       if (!position.isTonic && !position.inScale && !showOutOfScale.value) {
         return;
       }
 
-      const cx =
-        position.fret === 0
-          ? PAD.left + OPEN_COL / 2
-          : nutX + (position.fret - 0.5) * FRET_WIDTH;
+      const along = position.fret === 0 ? OPEN_COL / 2 : OPEN_COL + (position.fret - 0.5) * fretWidth.value;
+      const { x: cx, y: cy } = toScreen(along, across);
 
       const category = position.isTonic ? "tonic" : position.inScale ? "in" : "out";
 
@@ -116,6 +162,20 @@ const cells = computed<Cell[]>(() => {
 
 const hovered = ref<Cell | null>(null);
 
+/** Nota tocada por último: pulsa brevemente como confirmação visual do clique. */
+const playedKey = ref<string | null>(null);
+let playedTimeout: ReturnType<typeof setTimeout> | undefined;
+
+function playNote(cell: Cell) {
+  emit("notePlay", cell.pitch);
+
+  playedKey.value = cell.key;
+  clearTimeout(playedTimeout);
+  playedTimeout = setTimeout(() => {
+    playedKey.value = null;
+  }, 260);
+}
+
 const tooltip = computed(() => {
   const cell = hovered.value;
   if (!cell) return null;
@@ -126,8 +186,8 @@ const tooltip = computed(() => {
 
   const x = Math.max(4, Math.min(cell.cx - boxWidth / 2, width.value - boxWidth - 4));
   // Acima da nota; se não couber, mostra abaixo.
-  const above = cell.cy - RADIUS - 8 - boxHeight;
-  const y = above < 2 ? cell.cy + RADIUS + 8 : above;
+  const above = cell.cy - noteRadius.value - 8 - boxHeight;
+  const y = above < 2 ? cell.cy + noteRadius.value + 8 : above;
 
   return { x, y, width: boxWidth, height: boxHeight, text, cx: x + boxWidth / 2, cy: y + boxHeight / 2 };
 });
@@ -135,55 +195,77 @@ const tooltip = computed(() => {
 
 <template>
   <div class="flex flex-col items-end gap-4">
-    <toggle 
-      v-model="showOutOfScale" 
-      class="w-fit px-4" 
-      variant="outline" 
-      aria-label="Toggle small" 
+    <toggle
+      v-model="showOutOfScale"
+      class="w-fit px-4"
+      variant="outline"
+      aria-label="Toggle small"
       size="sm"
     >
     <check v-if="showOutOfScale" />
     <x v-else />
-      Show notes out of scale
+      {{ showOutOfScaleLabel }}
     </toggle>
-    <svg :viewBox="`0 0 ${width} ${height}`" class="w-full" role="img" aria-label="Fretboard">
-      <!-- Cordas -->
-      <line v-for="(y, row) in stringYs" :key="`string-${row}`" :x1="nutX" :y1="y" :x2="rightX" :y2="y"
-        class="stroke-border" stroke-width="1" />
+    <toggle
+      v-model="reducedView"
+      class="w-fit px-4"
+      variant="outline"
+      aria-label="Toggle small"
+      size="sm"
+      v-if="isVertical"
+    >
+    <check v-if="reducedView" />
+    <x v-else />
+      {{ t('show-reduced-view') }}
+    </toggle>
+    <div :class="isVertical ? 'w-full' : 'w-full overflow-x-auto'">
+      <svg :viewBox="`0 0 ${width} ${height}`" :style="isVertical ? {} : { width: `${width}px` }"
+        :class="isVertical ? 'h-auto w-full' : 'max-w-none min-w-full'" role="img" aria-label="Fretboard">
+        <!-- Cordas -->
+        <line v-for="string in strings" :key="`string-${string.key}`" :x1="string.x1" :y1="string.y1" :x2="string.x2"
+          :y2="string.y2" class="stroke-border" stroke-width="1" />
 
-      <!-- Trastes -->
-      <line v-for="fret in frets" :key="`fret-${fret.fret}`" :x1="fret.x" :y1="topY" :x2="fret.x" :y2="bottomY"
-        class="stroke-border" stroke-width="1" />
+        <!-- Trastes -->
+        <line v-for="fret in frets" :key="`fret-${fret.fret}`" :x1="fret.x1" :y1="fret.y1" :x2="fret.x2"
+          :y2="fret.y2" class="stroke-border" stroke-width="1" />
 
-      <!-- Pestana (nut) -->
-      <line :x1="nutX" :y1="topY" :x2="nutX" :y2="bottomY" class="stroke-muted-foreground" stroke-width="3" />
+        <!-- Pestana (nut) -->
+        <line :x1="nut.x1" :y1="nut.y1" :x2="nut.x2" :y2="nut.y2" class="stroke-muted-foreground" stroke-width="3" />
 
-      <!-- Números das casas -->
-      <text v-for="fret in frets" :key="`label-${fret.fret}`" :x="fret.labelX" :y="bottomY + 36" text-anchor="middle"
-        font-size="13" class="fill-muted-foreground">
-        {{ fret.fret }}
-      </text>
-
-      <!-- Notas -->
-      <g v-for="cell in cells" :key="cell.key" class="cursor-pointer" @mouseenter="hovered = cell"
-        @mouseleave="hovered = null" @click="emit('notePlay', cell.pitch)">
-        <circle :cx="cell.cx" :cy="cell.cy" :r="hovered?.key === cell.key ? RADIUS + 3 : RADIUS"
-          :class="cell.circleClass" stroke-width="2" />
-        <text :x="cell.cx" :y="cell.cy" text-anchor="middle" dominant-baseline="central" font-size="13"
-          :class="cell.textClass">
-          {{ cell.label }}
+        <!-- Números das casas -->
+        <text v-for="fret in frets" :key="`label-${fret.fret}`" :x="fret.labelX" :y="fret.labelY" text-anchor="middle"
+          font-size="13" class="fill-muted-foreground">
+          {{ fret.fret }}
         </text>
-      </g>
 
-      <!-- Tooltip (hover) -->
-      <g v-if="tooltip" style="pointer-events: none">
-        <rect :x="tooltip.x" :y="tooltip.y" :width="tooltip.width" :height="tooltip.height" rx="6"
-          class="fill-popover stroke-border" stroke-width="1" />
-        <text :x="tooltip.cx" :y="tooltip.cy" text-anchor="middle" dominant-baseline="central" font-size="12"
-          class="fill-popover-foreground">
-          {{ tooltip.text }}
-        </text>
-      </g>
-    </svg>
+        <!-- Notas -->
+        <g v-for="cell in cells" :key="cell.key" class="cursor-pointer" @mouseenter="hovered = cell"
+          @mouseleave="hovered = null" @click="playNote(cell)">
+          <circle :cx="cell.cx" :cy="cell.cy"
+            :r="hovered?.key === cell.key || playedKey === cell.key ? noteRadius + 3 : noteRadius"
+            :class="[cell.circleClass, playedKey === cell.key ? 'transition-all duration-150' : 'transition-all duration-300']"
+            stroke-width="2" />
+          <circle v-if="playedKey === cell.key" :cx="cell.cx" :cy="cell.cy" :r="noteRadius + 3" class="fill-none stroke-brand"
+            stroke-width="2" opacity="0.6">
+            <animate attributeName="r" :from="noteRadius + 3" :to="noteRadius + 12" dur="0.35s" fill="freeze" />
+            <animate attributeName="opacity" from="0.6" to="0" dur="0.35s" fill="freeze" />
+          </circle>
+          <text :x="cell.cx" :y="cell.cy" text-anchor="middle" dominant-baseline="central" font-size="13"
+            :class="cell.textClass">
+            {{ cell.label }}
+          </text>
+        </g>
+
+        <!-- Tooltip (hover) -->
+        <g v-if="tooltip" style="pointer-events: none">
+          <rect :x="tooltip.x" :y="tooltip.y" :width="tooltip.width" :height="tooltip.height" rx="6"
+            class="fill-popover stroke-border" stroke-width="1" />
+          <text :x="tooltip.cx" :y="tooltip.cy" text-anchor="middle" dominant-baseline="central" font-size="12"
+            class="fill-popover-foreground">
+            {{ tooltip.text }}
+          </text>
+        </g>
+      </svg>
+    </div>
   </div>
 </template>

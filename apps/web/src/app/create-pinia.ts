@@ -1,5 +1,10 @@
 import { createPinia } from "pinia";
+import { createPersistedState } from "pinia-plugin-persistedstate";
 
 export function setupPinia() {
-  return createPinia();
+  const pinia = createPinia();
+
+  pinia.use(createPersistedState({ storage: localStorage }));
+
+  return pinia;
 }

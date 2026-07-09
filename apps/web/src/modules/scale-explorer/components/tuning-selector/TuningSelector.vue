@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import type { Tuning } from "@music-workspace/music-theory";
+
+const { t } = useI18n();
 
 // `Select` vira `<select>` em kebab-case e colidiria com o elemento nativo;
 // por isso o root é importado com alias.
@@ -34,14 +37,14 @@ const selectedName = computed<string>({
 <template>
   <section class="space-y-3">
     <header>
-      <h2 class="text-md font-medium text-muted-foreground">
-        Tuning
+      <h2 class="text-xl font-medium text-muted-foreground">
+        {{ t("tuning.label") }}
       </h2>
     </header>
 
     <select-root v-model="selectedName">
       <select-trigger class="w-full">
-        <select-value placeholder="Escolha a afinação" />
+        <select-value :placeholder="t('tuning.placeholder')" />
       </select-trigger>
 
       <select-content>

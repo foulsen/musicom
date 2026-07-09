@@ -3,12 +3,12 @@ import type { NavigationItem } from "./types/navigation-item";
 
 export const navigation: NavigationItem[] = [
   {
-    title: "scale explorer",
+    titleKey: "nav.scaleExplorer",
     to: "/",
     icon: Music,
   },
   {
-    title: "chord explorer",
+    titleKey: "nav.chordExplorer",
     to: "/chords",
     icon: Guitar,
   },
