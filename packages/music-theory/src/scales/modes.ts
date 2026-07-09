@@ -24,6 +24,21 @@ export const MAJOR_SCALE_MODE_PATTERNS: ScalePattern[] = [
   LOCRIAN_SCALE_PATTERN,
 ];
 
+/**
+ * Os mesmos 7 padrões, do mais brilhante (Lydian) ao mais escuro (Locrian).
+ * Referências de objeto (não nomes em string), para não quebrar silenciosamente
+ * se um padrão for renomeado — quem consome compara por igualdade de referência.
+ */
+export const MODE_BRIGHTNESS_ORDER: ScalePattern[] = [
+  LYDIAN_SCALE_PATTERN,
+  IONIAN_SCALE_PATTERN,
+  MIXOLYDIAN_SCALE_PATTERN,
+  DORIAN_SCALE_PATTERN,
+  AEOLIAN_SCALE_PATTERN,
+  PHRYGIAN_SCALE_PATTERN,
+  LOCRIAN_SCALE_PATTERN,
+];
+
 export interface Mode {
   /** Grau do tom-pai em que o modo começa (1..7). */
   degree: number;

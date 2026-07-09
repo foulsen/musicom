@@ -8,6 +8,7 @@ import {
   Fretboard,
   Interval,
   MAJOR_SCALE_MODE_PATTERNS,
+  MODE_BRIGHTNESS_ORDER,
   Note,
   Pitch,
   STANDARD_GUITAR_TUNING,
@@ -19,9 +20,6 @@ import {
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 
 import { useModeExplorerStore } from "./use-mode-explorer-store";
-
-/** Ordem de "brilho" dos 7 modos do sistema maior, do mais brilhante ao mais escuro. */
-const BRIGHTNESS_ORDER = ["Lydian", "Ionian", "Mixolydian", "Dorian", "Aeolian", "Phrygian", "Locrian"];
 
 function ascendingPitches(root: Note, degreeSemitones: number[]): Pitch[] {
   const rootPitch = Pitch.from(root.value, 4);
@@ -69,7 +67,7 @@ export function useModeExplorerViewModel() {
   /** Tríades ou sétimas no Harmonic Field (índice de grau preservado entre as duas). */
   const harmonicFieldMode = ref<"triads" | "sevenths">("triads");
 
-  const brightnessRank = computed(() => BRIGHTNESS_ORDER.indexOf(selectedMode.value.pattern.name));
+  const brightnessRank = computed(() => MODE_BRIGHTNESS_ORDER.indexOf(selectedMode.value.pattern));
 
   function selectModeByPatternName(name: string) {
     const index = modes.value.findIndex((mode) => mode.pattern.name === name);
@@ -176,14 +174,6 @@ export function useModeExplorerViewModel() {
 
   const selectedChordCard = computed<ChordCardData | null>(() => resolveChordCard(selectedChord.value.name));
 
-  function selectParentRoot(note: Note) {
-    selectedParentRoot.value = note;
-  }
-
-  function selectMode(index: number) {
-    selectedModeIndex.value = index;
-  }
-
   function selectChord(index: number) {
     selectedTriadIndex.value = index;
   }
@@ -195,7 +185,7 @@ export function useModeExplorerViewModel() {
     selectedMode,
 
     brightnessRank,
-    brightnessOrder: BRIGHTNESS_ORDER,
+    brightnessOrder: MODE_BRIGHTNESS_ORDER.map((pattern) => pattern.name),
     selectModeByPatternName,
 
     scale,
@@ -223,8 +213,6 @@ export function useModeExplorerViewModel() {
     selectedChord,
     selectedChordCard,
 
-    selectParentRoot,
-    selectMode,
     selectChord,
   };
 }
