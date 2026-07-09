@@ -69,12 +69,15 @@ export const en = {
       best: "Best: {time}",
       start: "Start",
       restart: "Restart",
+      naturalsOnly: "Naturals only",
     },
     flashcards: {
       due: "{due} of {total} cards due",
       reveal: "Reveal answer",
       again: "Again",
       gotIt: "Got it",
+      done: "All done for now",
+      doneDescription: "No cards left in this session — come back later or switch decks.",
     },
   },
   earTraining: {

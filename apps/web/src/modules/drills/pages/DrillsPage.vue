@@ -8,6 +8,7 @@ import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
 import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
+import { EmptyState } from "@/modules/shared/components/empty-state";
 
 const { t } = useI18n();
 
@@ -23,11 +24,13 @@ const {
   elapsedMs,
   totalTargets,
   bestMs,
+  naturalsOnly,
+  setNaturalsOnly,
   start,
   guess,
 } = useFretboardDrill();
 
-const { deckSize, dueCount, current, isRevealed, reveal, grade } = useFlashcardDrill();
+const { deckSize, dueCount, current, isSessionComplete, isRevealed, reveal, grade } = useFlashcardDrill();
 
 function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
@@ -81,6 +84,18 @@ function formatMs(ms: number): string {
         </p>
 
         <div class="flex items-center gap-4">
+          <button
+            type="button"
+            class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :class="naturalsOnly
+              ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
+              : 'border-border bg-card/40 text-muted-foreground hover:text-foreground'"
+            :aria-pressed="naturalsOnly"
+            @click="setNaturalsOnly(!naturalsOnly)"
+          >
+            {{ t("drills.fretboard.naturalsOnly") }}
+          </button>
+
           <p v-if="bestMs > 0" class="text-xs text-muted-foreground">
             {{ t("drills.fretboard.best", { time: formatMs(bestMs) }) }}
           </p>
@@ -109,12 +124,18 @@ function formatMs(ms: number): string {
 
       <flashcard
         v-if="current"
-        :key="current.card.id"
-        :prompt="current.card.prompt"
-        :answer="current.card.answer"
+        :key="current.id"
+        :prompt="current.prompt"
+        :answer="current.answer"
         :revealed="isRevealed"
         @reveal="reveal"
         @grade="grade"
+      />
+
+      <empty-state
+        v-else-if="isSessionComplete"
+        :title="t('drills.flashcards.done')"
+        :description="t('drills.flashcards.doneDescription')"
       />
     </section>
   </section>

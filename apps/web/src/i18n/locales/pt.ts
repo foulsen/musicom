@@ -71,12 +71,15 @@ export const pt: MessageSchema = {
       best: "Melhor: {time}",
       start: "Começar",
       restart: "Recomeçar",
+      naturalsOnly: "Só naturais",
     },
     flashcards: {
       due: "{due} de {total} cartões devidos",
       reveal: "Revelar resposta",
       again: "De novo",
       gotIt: "Acertei",
+      done: "Tudo em dia por aqui",
+      doneDescription: "Nenhum cartão restante nesta sessão — volte mais tarde ou troque de baralho.",
     },
   },
   earTraining: {
