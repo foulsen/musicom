@@ -195,3 +195,28 @@ export function generateQuestion(kind: QuizKind, difficulty: Difficulty = "mediu
 
   return generateIntervalQuestion(difficulty);
 }
+
+/**
+ * Reconstrói as pitches de uma opção específica (não necessariamente a tocada
+ * originalmente) para permitir "ouvir sua resposta" vs "ouvir a correta" no
+ * feedback de erro. Reusa a mesma fundamental (`question.pitches[0]`) da questão.
+ */
+export function pitchesForOption(question: Question, optionId: string): Pitch[] {
+  const root = question.pitches[0];
+
+  if (question.kind === "interval") {
+    return [root, root.transpose(Number(optionId))];
+  }
+
+  if (question.kind === "chordQuality") {
+    const pattern = CHORD_QUALITY_ENTRIES.map(([item]) => item).find((item) => item.name === optionId);
+    if (!pattern) return question.pitches;
+
+    return pattern.degrees.map((degree) => root.transpose(degree.semitones()));
+  }
+
+  const pattern = SCALE_ENTRIES.map(([item]) => item).find((item) => item.name === optionId);
+  if (!pattern) return question.pitches;
+
+  return [...pattern.degrees.map((degree) => root.transpose(degree.semitones())), root.transpose(12)];
+}

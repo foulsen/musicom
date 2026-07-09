@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 import { Play, RotateCcw } from "@lucide/vue";
 
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import type { Difficulty, QuizKind } from "../application/question-generators";
 import { AnswerOptions } from "../components/answer-options";
+import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 const {
   kind,
@@ -19,6 +19,8 @@ const {
   streak,
   difficulty,
   intervalPlaybackMode,
+  isPlaying,
+  hasPlayedFirst,
   replay,
   newQuestion,
   selectKind,
@@ -26,6 +28,8 @@ const {
   selectIntervalPlaybackMode,
   answer,
   resetScore,
+  playYourAnswer,
+  playCorrectAnswer,
 } = useEarTrainingViewModel();
 
 const { t } = useI18n();
@@ -33,7 +37,21 @@ const { t } = useI18n();
 const KINDS: QuizKind[] = ["interval", "chordQuality", "scale"];
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
-/** Atalhos de teclado: 1-4 escolhem a opção, R repete o áudio, Enter avança. */
+const scorePercent = computed(() =>
+  score.value.total === 0 ? null : Math.round((score.value.correct / score.value.total) * 100),
+);
+
+const nextButton = useTemplateRef<HTMLButtonElement>("nextButton");
+
+// Move o foco para o botão "Next" assim que a resposta é revelada, já que os
+// botões de opção deixam de ser o alvo natural (WCAG 4.1.3 — foco não pode evaporar).
+watch(isAnswered, (answered) => {
+  if (!answered) return;
+
+  nextTick(() => nextButton.value?.focus());
+});
+
+/** Atalhos de teclado: 1-4 escolhem a opção, R repete o áudio, Enter/Espaço avança. */
 function handleKeydown(event: KeyboardEvent) {
   if (event.key >= "1" && event.key <= "4") {
     const option = question.value.options[Number(event.key) - 1];
@@ -46,7 +64,12 @@ function handleKeydown(event: KeyboardEvent) {
     return;
   }
 
-  if (event.key === "Enter" && isAnswered.value) {
+  if ((event.key === "Enter" || event.key === " ") && isAnswered.value) {
+    // Se o foco já está no botão Next, deixa a ativação nativa cuidar disso
+    // (senão a questão avançaria duas vezes: uma pelo handler, outra pelo clique nativo).
+    if (event.target === nextButton.value) return;
+
+    event.preventDefault();
     newQuestion();
   }
 }
@@ -67,27 +90,27 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
     </header>
 
     <div class="flex flex-wrap items-center justify-between gap-4">
-      <toggle-group-root
+      <chip-toggle-group
         :model-value="kind"
         type="single"
         :aria-label="t('earTraining.quizType')"
-        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
         @update:model-value="(value) => value && selectKind(value as QuizKind)"
       >
-        <toggle-group-item
+        <chip-toggle-item
           v-for="option in KINDS"
           :key="option"
           :value="option"
-          class="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+          class="px-3 py-1.5 text-sm"
         >
           {{ t(`earTraining.kinds.${option}`) }}
-        </toggle-group-item>
-      </toggle-group-root>
+        </chip-toggle-item>
+      </chip-toggle-group>
 
       <div class="flex items-center gap-3">
         <p class="text-sm text-muted-foreground">
           {{ t("earTraining.score", { correct: score.correct, total: score.total }) }}
-          <span v-if="streak > 1">· {{ t("earTraining.streak", { streak }) }}</span>
+          <span v-if="scorePercent !== null">· {{ scorePercent }}%</span>
+          <span v-if="streak > 1">· 🔥{{ streak }}</span>
         </p>
 
         <button
@@ -102,65 +125,59 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4">
-      <toggle-group-root
+      <chip-toggle-group
         :model-value="difficulty"
         type="single"
         :aria-label="t('earTraining.difficulty')"
-        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
         @update:model-value="(value) => value && selectDifficulty(value as Difficulty)"
       >
-        <toggle-group-item
+        <chip-toggle-item
           v-for="option in DIFFICULTIES"
           :key="option"
           :value="option"
-          class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+          class="px-3 py-1 text-xs"
         >
           {{ t(`earTraining.difficulties.${option}`) }}
-        </toggle-group-item>
-      </toggle-group-root>
+        </chip-toggle-item>
+      </chip-toggle-group>
 
-      <toggle-group-root
+      <chip-toggle-group
         v-if="kind === 'interval'"
         :model-value="intervalPlaybackMode"
         type="single"
         :aria-label="t('earTraining.intervalPlaybackMode')"
-        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
         @update:model-value="(value) => value && selectIntervalPlaybackMode(value as 'harmonic' | 'melodic')"
       >
-        <toggle-group-item
-          value="melodic"
-          class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        <chip-toggle-item value="melodic" class="px-3 py-1 text-xs">
           {{ t("earTraining.melodic") }}
-        </toggle-group-item>
-        <toggle-group-item
-          value="harmonic"
-          class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        </chip-toggle-item>
+        <chip-toggle-item value="harmonic" class="px-3 py-1 text-xs">
           {{ t("earTraining.harmonic") }}
-        </toggle-group-item>
-      </toggle-group-root>
+        </chip-toggle-item>
+      </chip-toggle-group>
     </div>
 
-    <section class="space-y-4 rounded-xl border border-border bg-card/40 p-6">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="space-y-0.5">
-          <h2 class="text-sm font-medium text-foreground">
-            {{ t(`earTraining.prompts.${question.kind}`) }}
-          </h2>
-          <p v-if="!isAnswered" class="text-xs text-muted-foreground">
-            {{ t("earTraining.clickPlayHint") }}
-          </p>
-        </div>
+    <section class="space-y-5 rounded-xl border border-border bg-card/40 p-6">
+      <div class="flex flex-col items-center gap-3 text-center">
+        <h2 v-if="hasPlayedFirst" class="text-sm font-medium text-foreground">
+          {{ t(`earTraining.prompts.${question.kind}`) }}
+        </h2>
+        <p v-else class="text-sm font-medium text-foreground">
+          {{ t("earTraining.firstPlayHint") }}
+        </p>
 
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-md border border-border bg-card/40 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-base font-semibold text-brand-foreground shadow-sm transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="replay"
         >
-          <play class="size-4" />
-          {{ t("earTraining.play") }}
+          <play class="size-5" :class="{ 'animate-pulse': isPlaying }" />
+          {{ hasPlayedFirst ? t("earTraining.playAgain") : t("earTraining.play") }}
         </button>
+
+        <p v-if="hasPlayedFirst && !isAnswered" class="text-xs text-muted-foreground">
+          {{ t("earTraining.clickPlayHint") }}
+        </p>
       </div>
 
       <answer-options
@@ -170,12 +187,33 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
         @select="answer"
       />
 
-      <div v-if="isAnswered" class="flex flex-wrap items-center justify-between gap-4">
-        <p class="text-sm font-medium" :class="isCorrect ? 'text-brand' : 'text-destructive'">
-          {{ isCorrect ? t("earTraining.correct") : t("earTraining.incorrect") }}
-        </p>
+      <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-4">
+        <div v-if="isAnswered" role="status" aria-live="polite" aria-atomic="true" class="flex flex-wrap items-center gap-3">
+          <p class="text-sm font-medium" :class="isCorrect ? 'text-brand' : 'text-destructive'">
+            {{ isCorrect ? t("earTraining.correct") : t("earTraining.incorrect") }}
+          </p>
+
+          <template v-if="!isCorrect">
+            <button
+              type="button"
+              class="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              @click="playYourAnswer"
+            >
+              {{ t("earTraining.listenYourAnswer") }}
+            </button>
+            <button
+              type="button"
+              class="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              @click="playCorrectAnswer"
+            >
+              {{ t("earTraining.listenCorrectAnswer") }}
+            </button>
+          </template>
+        </div>
 
         <button
+          v-if="isAnswered"
+          ref="nextButton"
           type="button"
           class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="newQuestion"
