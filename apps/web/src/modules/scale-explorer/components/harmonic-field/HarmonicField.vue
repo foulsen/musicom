@@ -3,10 +3,10 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { RouterLink } from "vue-router";
 
-import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 import { ArrowUpRight } from "@lucide/vue";
 
 import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord } from "@music-workspace/music-theory";
+import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 const props = defineProps<{
   triads: Chord[];
@@ -51,25 +51,18 @@ const selectedChordExplorerQuery = computed(() => {
         {{ t("scaleExplorer.harmonicField") }}
       </h2>
 
-      <toggle-group-root
+      <chip-toggle-group
         v-model="mode"
         type="single"
         :aria-label="t('scaleExplorer.chordSet')"
-        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
       >
-        <toggle-group-item
-          value="triads"
-          class="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        <chip-toggle-item value="triads" class="px-2.5 py-1 text-xs">
           {{ t("scaleExplorer.triads") }}
-        </toggle-group-item>
-        <toggle-group-item
-          value="sevenths"
-          class="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
-        >
+        </chip-toggle-item>
+        <chip-toggle-item value="sevenths" class="px-2.5 py-1 text-xs">
           {{ t("scaleExplorer.sevenths") }}
-        </toggle-group-item>
-      </toggle-group-root>
+        </chip-toggle-item>
+      </chip-toggle-group>
     </header>
 
     <ul class="space-y-1">
