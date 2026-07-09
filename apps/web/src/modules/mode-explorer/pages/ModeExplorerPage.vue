@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 import { Play as PlayIcon } from "@lucide/vue";
 
 import { useModeExplorerViewModel } from "../application/use-mode-explorer-view-model";
 import { ModeSelector } from "../components/mode-selector";
 
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
+import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
@@ -45,7 +46,7 @@ const {
 } = useModeExplorerViewModel();
 
 const { play, playSequence } = useNoteAudio();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 function listenToMode() {
   playSequence(scalePitches.value);
@@ -53,6 +54,24 @@ function listenToMode() {
 
 function listenToComparison() {
   playSequence(comparisonPitches.value);
+}
+
+/** Grau do modo, formatado por ordinal ("2nd" / "2º") para a frase-resumo do tom-pai. */
+const degreeOrdinal = computed(() => {
+  const degree = selectedMode.value.degree;
+
+  if (locale.value.startsWith("pt")) return `${degree}º`;
+
+  const suffixes = ["th", "st", "nd", "rd"];
+  const remainder = degree % 100;
+  return `${degree}${suffixes[(remainder - 20) % 10] ?? suffixes[remainder] ?? suffixes[0]}`;
+});
+
+/** Matiz de fundo sutil para cada pílula do eixo de brilho: quente (brilhante) -> frio (escuro). */
+function brightnessTint(index: number): string {
+  const ratio = index / Math.max(brightnessOrder.length - 1, 1);
+  const hue = 45 + (230 - 45) * ratio;
+  return `hsl(${hue} 70% 55% / 0.16)`;
 }
 </script>
 
@@ -67,9 +86,19 @@ function listenToComparison() {
       </p>
     </header>
 
-    <root-note-selector v-model="selectedParentRoot" />
+    <root-note-selector v-model="selectedParentRoot" :title="t('modeExplorer.parentKeyTitle')" />
 
     <mode-selector v-model="selectedModeIndex" :modes="modes" />
+
+    <p class="text-sm text-muted-foreground">
+      {{
+        t("modeExplorer.relationSummary", {
+          mode: `${selectedMode.scale.root.toString()} ${selectedMode.pattern.name}`,
+          parentRoot: selectedParentRoot.toString(),
+          degreeOrdinal,
+        })
+      }}
+    </p>
 
     <button
       type="button"
@@ -87,22 +116,36 @@ function listenToComparison() {
         </h2>
       </header>
 
-      <ol class="flex flex-wrap items-center gap-2">
-        <li v-for="(name, index) in brightnessOrder" :key="name">
+      <ol class="flex flex-wrap items-center gap-x-2 gap-y-3">
+        <li v-for="(name, index) in brightnessOrder" :key="name" class="relative">
           <button
             type="button"
             class="rounded-md border px-3 py-1.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
             :class="
               index === brightnessRank
-                ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground font-medium'
-                : 'border-border bg-card/40 text-muted-foreground hover:text-foreground'
+                ? 'border-brand bg-brand-soft text-brand-soft-foreground font-semibold shadow-sm'
+                : 'border-border text-muted-foreground hover:text-foreground'
             "
+            :style="index === brightnessRank ? undefined : { backgroundColor: brightnessTint(index) }"
             @click="selectModeByPatternName(name)"
           >
             {{ name }}
           </button>
+
+          <span
+            v-if="index === brightnessRank"
+            class="absolute top-full left-1/2 mt-0.5 -translate-x-1/2 text-xs leading-none text-brand"
+            aria-hidden="true"
+          >
+            ▲
+          </span>
         </li>
       </ol>
+
+      <div class="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{{ t("modeExplorer.brightnessBrightest") }}</span>
+        <span>{{ t("modeExplorer.brightnessDarkest") }}</span>
+      </div>
     </section>
 
     <section class="space-y-4 rounded-xl border border-border bg-card/40 p-6">
@@ -111,22 +154,22 @@ function listenToComparison() {
           {{ t("modeExplorer.compare.title", { root: selectedMode.scale.root.toString() }) }}
         </h2>
 
-        <toggle-group-root
+        <chip-toggle-group
           :model-value="comparisonPattern.name"
           type="single"
+          wrap
           :aria-label="t('modeExplorer.compare.title', { root: selectedMode.scale.root.toString() })"
-          class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-card/40 p-1"
           @update:model-value="(value) => value && selectComparisonPattern(value as string)"
         >
-          <toggle-group-item
+          <chip-toggle-item
             v-for="pattern in comparisonOptions"
             :key="pattern.name"
             :value="pattern.name"
-            class="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+            class="px-2.5 py-1 text-xs"
           >
             {{ pattern.name }}
-          </toggle-group-item>
-        </toggle-group-root>
+          </chip-toggle-item>
+        </chip-toggle-group>
       </header>
 
       <div class="grid grid-cols-2 gap-6">
@@ -184,11 +227,15 @@ function listenToComparison() {
       </div>
     </section>
 
+    <p class="text-xs text-muted-foreground italic">
+      {{ t("modeExplorer.notesUnchangedCaption") }}
+    </p>
+
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" @note-play="play" />
 
-      <fretboard-diagram :positions="fretboardPositions" context="scale" class="min-w-0 max-w-3xl mx-auto lg:flex-1"
-        @note-play="play" />
+      <fretboard-diagram :positions="fretboardPositions" context="scale" :pulse-trigger="selectedModeIndex"
+        class="min-w-0 max-w-3xl mx-auto lg:flex-1" @note-play="play" />
 
       <chromatic-wheel :root="selectedMode.scale.root" :highlighted-notes="notes"
         :label-by-pitch-class="spelledByPitchClass" class="lg:w-72 lg:shrink-0" @note-play="play" />

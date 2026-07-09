@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useMediaQuery } from "@vueuse/core";
 
@@ -18,8 +18,13 @@ const props = withDefaults(
     positions: FretboardNote[][];
     /** Contexto de exibição: define o rótulo do toggle ("fora da escala" vs "fora do acorde"). */
     context?: "scale" | "chord";
+    /**
+     * Valor incremental (ex.: índice do modo selecionado). Ao mudar, dispara um pulso breve
+     * em todas as tônicas do braço — sinaliza "a tônica mudou" mesmo sem clique do usuário.
+     */
+    pulseTrigger?: number | string;
   }>(),
-  { context: "scale" },
+  { context: "scale", pulseTrigger: undefined },
 );
 
 const emit = defineEmits<{
@@ -104,6 +109,7 @@ interface Cell {
   pitch: Pitch;
   circleClass: string;
   textClass: string;
+  isTonic: boolean;
 }
 
 const CIRCLE_CLASS = {
@@ -153,6 +159,7 @@ const cells = computed<Cell[]>(() => {
         pitch: position.pitch,
         circleClass: CIRCLE_CLASS[category],
         textClass: TEXT_CLASS[category],
+        isTonic: position.isTonic,
       });
     });
   });
@@ -175,6 +182,23 @@ function playNote(cell: Cell) {
     playedKey.value = null;
   }, 260);
 }
+
+/** Pulso breve em todas as tônicas quando `pulseTrigger` muda (ex.: troca de modo). */
+const pulsingTonic = ref(false);
+let pulseTimeout: ReturnType<typeof setTimeout> | undefined;
+
+watch(
+  () => props.pulseTrigger,
+  (value, oldValue) => {
+    if (value === undefined || oldValue === undefined || value === oldValue) return;
+
+    pulsingTonic.value = true;
+    clearTimeout(pulseTimeout);
+    pulseTimeout = setTimeout(() => {
+      pulsingTonic.value = false;
+    }, 400);
+  },
+);
 
 const tooltip = computed(() => {
   const cell = hovered.value;
@@ -249,6 +273,11 @@ const tooltip = computed(() => {
             stroke-width="2" opacity="0.6">
             <animate attributeName="r" :from="noteRadius + 3" :to="noteRadius + 12" dur="0.35s" fill="freeze" />
             <animate attributeName="opacity" from="0.6" to="0" dur="0.35s" fill="freeze" />
+          </circle>
+          <circle v-if="cell.isTonic && pulsingTonic" :cx="cell.cx" :cy="cell.cy" :r="noteRadius + 3"
+            class="fill-none stroke-brand" stroke-width="2" opacity="0.7">
+            <animate attributeName="r" :from="noteRadius + 3" :to="noteRadius + 14" dur="0.4s" fill="freeze" />
+            <animate attributeName="opacity" from="0.7" to="0" dur="0.4s" fill="freeze" />
           </circle>
           <text :x="cell.cx" :y="cell.cy" text-anchor="middle" dominant-baseline="central" font-size="13"
             :class="cell.textClass">

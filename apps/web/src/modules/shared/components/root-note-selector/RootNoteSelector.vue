@@ -7,7 +7,17 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 import { CHROMATIC_SCALE, Note } from "@music-workspace/music-theory";
 import type { SingleNote } from "@music-workspace/music-theory";
 
+const props = withDefaults(
+  defineProps<{
+    /** Rótulo do cabeçalho. Default preserva o rótulo genérico ("Root note") usado nas outras páginas. */
+    title?: string;
+  }>(),
+  { title: undefined },
+);
+
 const { t } = useI18n();
+
+const heading = computed(() => props.title ?? t("common.rootNote"));
 
 const model = defineModel<Note>({ required: true });
 
@@ -26,7 +36,7 @@ const selectedNote = computed<string>({
   <section class="space-y-3">
     <header>
       <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {{ t("common.rootNote") }}
+        {{ heading }}
       </h2>
     </header>
 
