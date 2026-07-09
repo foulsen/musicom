@@ -6,6 +6,7 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
+import type { DeckId } from "../application/flashcard-decks";
 import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
 import { EmptyState } from "@/modules/shared/components/empty-state";
@@ -30,7 +31,18 @@ const {
   guess,
 } = useFretboardDrill();
 
-const { deckSize, dueCount, current, isSessionComplete, isRevealed, reveal, grade } = useFlashcardDrill();
+const {
+  deckIds,
+  activeDeckId,
+  selectDeck,
+  deckSize,
+  dueCount,
+  current,
+  isSessionComplete,
+  isRevealed,
+  reveal,
+  grade,
+} = useFlashcardDrill();
 
 function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
@@ -118,9 +130,28 @@ function formatMs(ms: number): string {
     </section>
 
     <section v-else class="space-y-4">
-      <p class="text-sm text-muted-foreground">
-        {{ t("drills.flashcards.due", { due: dueCount, total: deckSize }) }}
-      </p>
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <toggle-group-root
+          :model-value="activeDeckId"
+          type="single"
+          :aria-label="t('drills.flashcards.deck')"
+          class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-card/40 p-1"
+          @update:model-value="(value) => value && selectDeck(value as DeckId)"
+        >
+          <toggle-group-item
+            v-for="id in deckIds"
+            :key="id"
+            :value="id"
+            class="rounded-md px-3 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+          >
+            {{ t(`drills.flashcards.decks.${id}`) }}
+          </toggle-group-item>
+        </toggle-group-root>
+
+        <p class="text-sm text-muted-foreground">
+          {{ t("drills.flashcards.due", { due: dueCount, total: deckSize }) }}
+        </p>
+      </div>
 
       <flashcard
         v-if="current"

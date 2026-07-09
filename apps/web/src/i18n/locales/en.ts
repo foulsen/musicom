@@ -70,14 +70,22 @@ export const en = {
       start: "Start",
       restart: "Restart",
       naturalsOnly: "Naturals only",
+      ariaLabel: "Fretboard drill",
     },
     flashcards: {
+      deck: "Deck",
       due: "{due} of {total} cards due",
       reveal: "Reveal answer",
       again: "Again",
       gotIt: "Got it",
       done: "All done for now",
       doneDescription: "No cards left in this session — come back later or switch decks.",
+      decks: {
+        intervals: "Intervals",
+        intervalNames: "Interval names",
+        chordFormulas: "Chord formulas",
+        chordSpelling: "Chord spelling",
+      },
     },
   },
   earTraining: {

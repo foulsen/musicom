@@ -72,14 +72,22 @@ export const pt: MessageSchema = {
       start: "Começar",
       restart: "Recomeçar",
       naturalsOnly: "Só naturais",
+      ariaLabel: "Treino de braço",
     },
     flashcards: {
+      deck: "Baralho",
       due: "{due} de {total} cartões devidos",
       reveal: "Revelar resposta",
       again: "De novo",
       gotIt: "Acertei",
       done: "Tudo em dia por aqui",
       doneDescription: "Nenhum cartão restante nesta sessão — volte mais tarde ou troque de baralho.",
+      decks: {
+        intervals: "Intervalos",
+        intervalNames: "Nomes de intervalo",
+        chordFormulas: "Fórmulas de acorde",
+        chordSpelling: "Grafia de acordes",
+      },
     },
   },
   earTraining: {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 import type { FretPosition } from "@music-workspace/music-theory";
 
@@ -13,11 +14,18 @@ const emit = defineEmits<{
   guess: [position: FretPosition];
 }>();
 
+const { t } = useI18n();
+
 const STRING_GAP = 32;
 const FRET_WIDTH = 48;
-const OPEN_COL = 40;
+const LABEL_COL = 20;
+const OPEN_COL = LABEL_COL + 40;
 const MARGIN = 20;
 const NOTE_RADIUS = 12;
+
+/** Casas com inlay tradicional: um ponto (única) ou dois (dupla, na oitava). */
+const SINGLE_INLAY_FRETS = new Set([3, 5, 7, 9]);
+const DOUBLE_INLAY_FRETS = new Set([12]);
 
 const stringCount = computed(() => props.positions.length);
 const fretCount = computed(() => (props.positions[0]?.length ?? 1) - 1);
@@ -54,10 +62,31 @@ const cells = computed<Cell[]>(() => {
   return result;
 });
 
+/** Cordas graves são visualmente mais grossas que as agudas, como no violão real. */
+function strokeWidthFor(stringIndex: number): number {
+  const count = stringCount.value;
+  if (count <= 1) return 1.5;
+
+  return 1 + ((count - 1 - stringIndex) / (count - 1)) * 1.5;
+}
+
 const strings = computed(() =>
   Array.from({ length: stringCount.value }, (_, row) => {
-    const y = MARGIN + row * STRING_GAP;
-    return { key: row, x1: OPEN_COL, y1: y, x2: width.value - MARGIN, y2: y };
+    const displayRow = stringCount.value - 1 - row;
+    const y = MARGIN + displayRow * STRING_GAP;
+    const label = props.positions[row]?.[0]?.pitch.note.toString() ?? "";
+
+    return {
+      key: row,
+      x1: OPEN_COL,
+      y1: y,
+      x2: width.value - MARGIN,
+      y2: y,
+      strokeWidth: strokeWidthFor(row),
+      labelX: LABEL_COL,
+      labelY: y,
+      label,
+    };
   }),
 );
 
@@ -77,6 +106,29 @@ const frets = computed(() =>
   }),
 );
 
+const middleY = computed(() => MARGIN + ((stringCount.value - 1) * STRING_GAP) / 2);
+
+interface Inlay {
+  key: string;
+  cx: number;
+  cy: number[];
+}
+
+/** Marcadores de casa (3/5/7/9 = um ponto; 12 = dois), centralizados no braço. */
+const inlays = computed<Inlay[]>(() =>
+  Array.from({ length: fretCount.value }, (_, i) => i + 1)
+    .filter((fret) => SINGLE_INLAY_FRETS.has(fret) || DOUBLE_INLAY_FRETS.has(fret))
+    .map((fret) => {
+      const cx = OPEN_COL + FRET_WIDTH * (fret - 0.5);
+
+      if (DOUBLE_INLAY_FRETS.has(fret)) {
+        return { key: `inlay-${fret}`, cx, cy: [middleY.value - STRING_GAP / 2, middleY.value + STRING_GAP / 2] };
+      }
+
+      return { key: `inlay-${fret}`, cx, cy: [middleY.value] };
+    }),
+);
+
 function cellClass(cell: Cell): string {
   if (props.foundKeys.has(cell.key)) return "fill-brand stroke-brand";
   if (props.wrongKey === cell.key) return "fill-destructive/20 stroke-destructive";
@@ -91,8 +143,13 @@ function cellClass(cell: Cell): string {
       :style="{ width: `${width}px` }"
       class="min-w-full"
       role="img"
-      aria-label="Fretboard drill"
+      :aria-label="t('drills.fretboard.ariaLabel')"
     >
+      <template v-for="inlay in inlays" :key="inlay.key">
+        <circle v-for="(cy, index) in inlay.cy" :key="`${inlay.key}-${index}`" :cx="inlay.cx" :cy="cy" r="3"
+          class="fill-muted" />
+      </template>
+
       <line
         v-for="s in strings"
         :key="`str-${s.key}`"
@@ -101,8 +158,21 @@ function cellClass(cell: Cell): string {
         :x2="s.x2"
         :y2="s.y2"
         class="stroke-border"
-        stroke-width="1"
+        :stroke-width="s.strokeWidth"
       />
+
+      <text
+        v-for="s in strings"
+        :key="`str-label-${s.key}`"
+        :x="s.labelX"
+        :y="s.labelY"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-size="11"
+        class="fill-muted-foreground"
+      >
+        {{ s.label }}
+      </text>
 
       <line
         v-for="f in frets"

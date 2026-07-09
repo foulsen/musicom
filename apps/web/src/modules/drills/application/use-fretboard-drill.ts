@@ -41,6 +41,7 @@ export function useFretboardDrill() {
 
   let startedAt = 0;
   let timer: ReturnType<typeof setInterval> | undefined;
+  let wrongKeyTimer: ReturnType<typeof setTimeout> | undefined;
 
   const totalTargets = computed(
     () => positions.flat().filter((position) => position.pitch.note.equals(targetNote.value)).length,
@@ -101,10 +102,19 @@ export function useFretboardDrill() {
       }
     } else {
       wrongKey.value = key;
+
+      // Some sozinho depois de um instante, em vez de ficar vermelho até o próximo clique.
+      clearTimeout(wrongKeyTimer);
+      wrongKeyTimer = setTimeout(() => {
+        if (wrongKey.value === key) wrongKey.value = null;
+      }, 600);
     }
   }
 
-  onUnmounted(stopTimer);
+  onUnmounted(() => {
+    stopTimer();
+    clearTimeout(wrongKeyTimer);
+  });
 
   return {
     positions,
