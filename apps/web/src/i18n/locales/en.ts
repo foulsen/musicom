@@ -20,6 +20,9 @@ export const en = {
     subtitle: "Pick a root and a scale to see its notes, harmonic field and fretboard.",
     scaleType: "Scale Type",
     harmonicField: "Harmonic Field",
+    chordSet: "Chord set",
+    triads: "Triads",
+    sevenths: "Sevenths",
     openInChordExplorer: "Open in Chord Explorer",
     emptyShapes: {
       title: "No saved shapes yet",
@@ -127,6 +130,9 @@ export const en = {
     degree: "Degree {degree}",
     brightness: "Brightness",
     listenToMode: "Listen to {mode}",
+    compare: {
+      title: "Compare with another {root} mode",
+    },
     emptyShapes: {
       title: "No saved shapes yet",
       description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",

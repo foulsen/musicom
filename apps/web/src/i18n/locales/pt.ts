@@ -22,6 +22,9 @@ export const pt: MessageSchema = {
     subtitle: "Escolha uma fundamental e uma escala para ver suas notas, campo harmônico e braço.",
     scaleType: "Tipo de Escala",
     harmonicField: "Campo Harmônico",
+    chordSet: "Conjunto de acordes",
+    triads: "Tríades",
+    sevenths: "Sétimas",
     openInChordExplorer: "Abrir no Explorador de Acordes",
     emptyShapes: {
       title: "Ainda sem digitações salvas",
@@ -129,6 +132,9 @@ export const pt: MessageSchema = {
     degree: "Grau {degree}",
     brightness: "Brilho",
     listenToMode: "Ouvir {mode}",
+    compare: {
+      title: "Comparar com outro modo em {root}",
+    },
     emptyShapes: {
       title: "Ainda sem digitações salvas",
       description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",

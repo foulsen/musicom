@@ -3,12 +3,14 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { RouterLink } from "vue-router";
 
+import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 import { ArrowUpRight } from "@lucide/vue";
 
-import { TRIADS_FAMILY, type Chord } from "@music-workspace/music-theory";
+import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord } from "@music-workspace/music-theory";
 
 const props = defineProps<{
-  chords: Chord[];
+  triads: Chord[];
+  sevenths: Chord[];
   selectedIndex?: number;
 }>();
 
@@ -18,19 +20,25 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-/** Encontra a qualidade da tríade selecionada entre os padrões de "Triads" para linkar ao Chord Explorer. */
+/** Tríades ou sétimas do mesmo grau (índice preservado — ambas derivam de `scale.degrees()`). */
+const mode = defineModel<"triads" | "sevenths">("mode", { default: "triads" });
+
+const chords = computed(() => (mode.value === "triads" ? props.triads : props.sevenths));
+
+/** Encontra a qualidade do acorde selecionado na família ativa, para linkar ao Chord Explorer. */
 const selectedChordExplorerQuery = computed(() => {
-  const chord = props.chords[props.selectedIndex ?? -1];
+  const chord = chords.value[props.selectedIndex ?? -1];
   if (!chord) return null;
 
-  const pattern = TRIADS_FAMILY.patterns.find(
+  const family = mode.value === "triads" ? TRIADS_FAMILY : SEVENTH_FAMILY;
+  const pattern = family.patterns.find(
     (pattern) => pattern.quality.toString() === chord.quality.toString(),
   );
   if (!pattern) return null;
 
   return {
     root: chord.root.value,
-    family: TRIADS_FAMILY.name,
+    family: family.name,
     quality: pattern.name,
   };
 });
@@ -38,10 +46,30 @@ const selectedChordExplorerQuery = computed(() => {
 
 <template>
   <section class="space-y-3">
-    <header>
+    <header class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {{ t("scaleExplorer.harmonicField") }}
       </h2>
+
+      <toggle-group-root
+        v-model="mode"
+        type="single"
+        :aria-label="t('scaleExplorer.chordSet')"
+        class="inline-flex gap-1 rounded-lg border border-border bg-card/40 p-1"
+      >
+        <toggle-group-item
+          value="triads"
+          class="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+        >
+          {{ t("scaleExplorer.triads") }}
+        </toggle-group-item>
+        <toggle-group-item
+          value="sevenths"
+          class="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
+        >
+          {{ t("scaleExplorer.sevenths") }}
+        </toggle-group-item>
+      </toggle-group-root>
     </header>
 
     <ul class="space-y-1">

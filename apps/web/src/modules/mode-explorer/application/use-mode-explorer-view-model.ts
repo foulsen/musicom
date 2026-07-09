@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 
 import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
@@ -7,10 +7,13 @@ import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 import {
   Fretboard,
   Interval,
+  MAJOR_SCALE_MODE_PATTERNS,
   Note,
   Pitch,
   STANDARD_GUITAR_TUNING,
+  createScale,
   relativeModesOf,
+  type ScalePattern,
 } from "@music-workspace/music-theory";
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
@@ -19,6 +22,12 @@ import { useModeExplorerStore } from "./use-mode-explorer-store";
 
 /** Ordem de "brilho" dos 7 modos do sistema maior, do mais brilhante ao mais escuro. */
 const BRIGHTNESS_ORDER = ["Lydian", "Ionian", "Mixolydian", "Dorian", "Aeolian", "Phrygian", "Locrian"];
+
+function ascendingPitches(root: Note, degreeSemitones: number[]): Pitch[] {
+  const rootPitch = Pitch.from(root.value, 4);
+
+  return [...degreeSemitones, 12].map((offset) => rootPitch.transpose(offset));
+}
 
 export function useModeExplorerViewModel() {
   const store = useModeExplorerStore();
@@ -55,15 +64,73 @@ export function useModeExplorerViewModel() {
 
   const triads = computed(() => scale.value.triads());
 
+  const sevenths = computed(() => scale.value.seventhChords());
+
+  /** Tríades ou sétimas no Harmonic Field (índice de grau preservado entre as duas). */
+  const harmonicFieldMode = ref<"triads" | "sevenths">("triads");
+
   const brightnessRank = computed(() => BRIGHTNESS_ORDER.indexOf(selectedMode.value.pattern.name));
 
-  /** Pitches ascendentes do modo (via Pitch.transpose, nunca Note+oitava fixa) para "ouvir o modo". */
-  const scalePitches = computed<Pitch[]>(() => {
-    const rootPitch = Pitch.from(scale.value.root.value, 4);
-    const offsets = [...degrees.value.map((item) => item.degree.semitones()), 12];
+  function selectModeByPatternName(name: string) {
+    const index = modes.value.findIndex((mode) => mode.pattern.name === name);
+    if (index >= 0) selectedModeIndex.value = index;
+  }
 
-    return offsets.map((offset) => rootPitch.transpose(offset));
+  /** Pitches ascendentes do modo (via Pitch.transpose, nunca Note+oitava fixa) para "ouvir o modo". */
+  const scalePitches = computed<Pitch[]>(() =>
+    ascendingPitches(scale.value.root, degrees.value.map((item) => item.degree.semitones())),
+  );
+
+  // ── Comparação A/B: mesmo tom-pai e mesma raiz, outro padrão modal ──────────
+
+  const comparisonPatternName = ref<string>(
+    MAJOR_SCALE_MODE_PATTERNS.find((pattern) => pattern.name !== selectedMode.value.pattern.name)?.name ??
+      MAJOR_SCALE_MODE_PATTERNS[0].name,
+  );
+
+  /** Opções de comparação: os 7 modos, exceto o que já está selecionado acima. */
+  const comparisonOptions = computed(() =>
+    MAJOR_SCALE_MODE_PATTERNS.filter((pattern) => pattern.name !== selectedMode.value.pattern.name),
+  );
+
+  const comparisonPattern = computed<ScalePattern>(() => {
+    const chosen = comparisonOptions.value.find((pattern) => pattern.name === comparisonPatternName.value);
+
+    return chosen ?? comparisonOptions.value[0];
   });
+
+  function selectComparisonPattern(name: string) {
+    comparisonPatternName.value = name;
+  }
+
+  /** Mesma raiz do modo selecionado, outro padrão modal — para ouvir/ver a diferença lado a lado. */
+  const comparisonScale = computed(() => createScale(scale.value.root, comparisonPattern.value));
+
+  const comparisonDegrees = computed(() => comparisonScale.value.degrees());
+
+  /** Índices de grau (0-based) cuja nota difere entre o modo atual e o de comparação. */
+  const differingDegreeIndexes = computed(() => {
+    const current = degrees.value;
+    const other = comparisonDegrees.value;
+    const result = new Set<number>();
+
+    current.forEach((item, index) => {
+      if (!other[index] || !item.note.equals(other[index].note)) {
+        result.add(index);
+      }
+    });
+
+    return result;
+  });
+
+  const comparisonPitches = computed<Pitch[]>(() =>
+    ascendingPitches(
+      comparisonScale.value.root,
+      comparisonDegrees.value.map((item) => item.degree.semitones()),
+    ),
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
 
@@ -99,7 +166,13 @@ export function useModeExplorerViewModel() {
     },
   });
 
-  const selectedChord = computed(() => triads.value[selectedTriadIndex.value] ?? triads.value[0]);
+  const activeHarmonicFieldChords = computed(() =>
+    harmonicFieldMode.value === "triads" ? triads.value : sevenths.value,
+  );
+
+  const selectedChord = computed(
+    () => activeHarmonicFieldChords.value[selectedTriadIndex.value] ?? triads.value[0],
+  );
 
   const selectedChordCard = computed<ChordCardData | null>(() => resolveChordCard(selectedChord.value.name));
 
@@ -123,14 +196,25 @@ export function useModeExplorerViewModel() {
 
     brightnessRank,
     brightnessOrder: BRIGHTNESS_ORDER,
+    selectModeByPatternName,
 
     scale,
     notes,
     degrees,
     triads,
+    sevenths,
+    harmonicFieldMode,
 
     scalePitches,
     spelledByPitchClass,
+
+    comparisonOptions,
+    comparisonPattern,
+    selectComparisonPattern,
+    comparisonScale,
+    comparisonDegrees,
+    differingDegreeIndexes,
+    comparisonPitches,
 
     fretboardPositions,
     fretCount,

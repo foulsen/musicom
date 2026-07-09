@@ -21,6 +21,8 @@ const {
   notes,
   degrees,
   triads,
+  sevenths,
+  harmonicFieldMode,
   spelledByPitchClass,
   fretboardPositions,
   fretCount,
@@ -66,8 +68,8 @@ const { t } = useI18n();
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-      <harmonic-field :chords="triads" :selected-index="selectedTriadIndex" class="lg:w-56 lg:shrink-0"
-        @select="selectChord" />
+      <harmonic-field v-model:mode="harmonicFieldMode" :triads="triads" :sevenths="sevenths"
+        :selected-index="selectedTriadIndex" class="lg:w-56 lg:shrink-0" @select="selectChord" />
 
       <div class="flex-1">
         <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes"

@@ -1,4 +1,4 @@
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 
 import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
@@ -71,6 +71,11 @@ export function useScaleExplorerViewModel() {
 
   const triads = computed(() => scale.value.triads());
 
+  const sevenths = computed(() => scale.value.seventhChords());
+
+  /** Tríades ou sétimas no Harmonic Field (índice de grau preservado entre as duas). */
+  const harmonicFieldMode = ref<"triads" | "sevenths">("triads");
+
   const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
 
   /** Grafia enarmônica por classe de altura, derivada da escala selecionada. */
@@ -105,8 +110,12 @@ export function useScaleExplorerViewModel() {
     },
   });
 
+  const activeHarmonicFieldChords = computed(() =>
+    harmonicFieldMode.value === "triads" ? triads.value : sevenths.value,
+  );
+
   const selectedChord = computed(
-    () => triads.value[selectedTriadIndex.value] ?? triads.value[0],
+    () => activeHarmonicFieldChords.value[selectedTriadIndex.value] ?? triads.value[0],
   );
 
   /** Cartão de digitações do acorde selecionado, se houver um no banco. */
@@ -142,6 +151,8 @@ export function useScaleExplorerViewModel() {
     notes,
     degrees,
     triads,
+    sevenths,
+    harmonicFieldMode,
 
     spelledByPitchClass,
 
