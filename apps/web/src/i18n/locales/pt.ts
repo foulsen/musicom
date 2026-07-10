@@ -7,6 +7,7 @@ export const pt: MessageSchema = {
     modeExplorer: "Explorador de Modos",
     earTraining: "Treino de Ouvido",
     drills: "Treinos",
+    learn: "Trilhas",
     openSidebar: "Abrir navegação",
     closeSidebar: "Fechar navegação",
   },
@@ -179,6 +180,17 @@ export const pt: MessageSchema = {
     emptyShapes: {
       title: "Ainda sem digitações salvas",
       description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",
+    },
+  },
+  learn: {
+    title: "Trilhas de Aprendizado",
+    subtitle: "Um caminho guiado pela teoria que você já tem à mão — uma lição curta de cada vez.",
+    comingSoon: {
+      title: "Em breve",
+      description: "As lições guiadas estão sendo construídas — por enquanto, explore livremente pela barra lateral.",
+    },
+    lesson: {
+      backToTracks: "← Voltar às trilhas",
     },
   },
 };

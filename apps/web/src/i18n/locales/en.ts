@@ -5,6 +5,7 @@ export const en = {
     modeExplorer: "Mode Explorer",
     earTraining: "Ear Training",
     drills: "Drills",
+    learn: "Learn",
     openSidebar: "Open navigation",
     closeSidebar: "Close navigation",
   },
@@ -177,6 +178,17 @@ export const en = {
     emptyShapes: {
       title: "No saved shapes yet",
       description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",
+    },
+  },
+  learn: {
+    title: "Learning Tracks",
+    subtitle: "A guided path through the theory you already have at your fingertips — one short lesson at a time.",
+    comingSoon: {
+      title: "Coming soon",
+      description: "The guided lessons are being built — for now, explore freely from the sidebar.",
+    },
+    lesson: {
+      backToTracks: "← Back to tracks",
     },
   },
 };

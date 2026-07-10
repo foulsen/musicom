@@ -28,6 +28,16 @@ const routes = [
     component: () => import("@/modules/drills/pages/DrillsPage.vue"),
     meta: { titleKey: "drills.title" },
   },
+  {
+    path: "/learn",
+    component: () => import("@/modules/learn/pages/LearnPage.vue"),
+    meta: { titleKey: "learn.title" },
+  },
+  {
+    path: "/learn/:lessonId",
+    component: () => import("@/modules/learn/pages/LessonPage.vue"),
+    meta: { titleKey: "learn.title" },
+  },
 ];
 
 export const router = createRouter({

@@ -1,4 +1,4 @@
-import { Ear, Dumbbell, Guitar, Music, RefreshCw } from "@lucide/vue";
+import { Ear, Dumbbell, GraduationCap, Guitar, Music, RefreshCw } from "@lucide/vue";
 import type { NavigationItem } from "./types/navigation-item";
 
 export const navigation: NavigationItem[] = [
@@ -26,5 +26,10 @@ export const navigation: NavigationItem[] = [
     titleKey: "nav.drills",
     to: "/drills",
     icon: Dumbbell,
+  },
+  {
+    titleKey: "nav.learn",
+    to: "/learn",
+    icon: GraduationCap,
   },
 ];
