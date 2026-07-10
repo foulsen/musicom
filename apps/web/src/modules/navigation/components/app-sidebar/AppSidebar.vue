@@ -62,7 +62,8 @@ const { t } = useI18n();
         <chip-toggle-group
           :model-value="instrument"
           type="single"
-          wrap
+          orientation="vertical"
+          class="w-full flex-col items-stretch"
           :aria-label="t('common.instrument')"
           @update:model-value="(value) => value && (instrument = value as InstrumentId)"
         >
@@ -70,7 +71,7 @@ const { t } = useI18n();
             v-for="id in INSTRUMENT_IDS"
             :key="id"
             :value="id"
-            class="px-2.5 py-1 text-xs"
+            class="px-3 py-1.5 text-left text-xs"
           >
             {{ t(`common.instruments.${id}`) }}
           </chip-toggle-item>
