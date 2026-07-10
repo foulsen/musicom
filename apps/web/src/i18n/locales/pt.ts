@@ -17,6 +17,12 @@ export const pt: MessageSchema = {
     fretRange: "Faixa de casas",
     frets: "{count} casas",
     masterVolume: "Volume",
+    instrument: "Instrumento",
+    instruments: {
+      piano: "Piano",
+      guitar: "Violão",
+      "realistic-guitar": "Violão Realista",
+    },
   },
   scaleExplorer: {
     title: "Explorador de Escalas",

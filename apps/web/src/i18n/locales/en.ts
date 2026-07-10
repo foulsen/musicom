@@ -15,6 +15,12 @@ export const en = {
     fretRange: "Fret range",
     frets: "{count} frets",
     masterVolume: "Volume",
+    instrument: "Instrument",
+    instruments: {
+      piano: "Piano",
+      guitar: "Guitar",
+      "realistic-guitar": "Realistic Guitar",
+    },
   },
   scaleExplorer: {
     title: "Scale Explorer",
