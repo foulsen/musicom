@@ -183,9 +183,49 @@ export const en = {
   learn: {
     title: "Learning Tracks",
     subtitle: "A guided path through the theory you already have at your fingertips — one short lesson at a time.",
+    trackProgress: "{percent}% complete",
+    continue: "Continue",
+    status: {
+      locked: "Locked",
+      available: "Available",
+      "in-progress": "In progress",
+      completed: "Completed",
+    },
+    tracks: {
+      fundamentals: {
+        title: "Fundamentals",
+      },
+    },
+    lessons: {
+      majorScale: {
+        title: "The Major Scale & Degrees",
+        summary: "The scale everything else is built from — and the numbers musicians use to talk about it.",
+        concept: "Seven notes, one pattern of whole and half steps, repeating forever. Each note also has a number — its degree — that names its job in the scale, no matter which key you're in.",
+      },
+      triads: {
+        title: "Triads",
+        summary: "Stack the 1st, 3rd and 5th of a scale and you get a chord.",
+        concept: "Skip every other note of the scale starting from any degree — 1st, 3rd, 5th — and you get a triad. Do this from every degree of the scale and you get every chord that belongs to that key.",
+      },
+      diatonicField: {
+        title: "The Diatonic Field",
+        summary: "Every scale hides seven chords inside it — its harmonic field.",
+        concept: "The seven triads built on the seven degrees of a scale each have a job — tonic, subdominant, dominant — that shapes how a progression feels like it's resolving or pulling toward home.",
+      },
+      twoFiveOne: {
+        title: "The ii-V-I",
+        summary: "The three-chord move that makes almost every song feel like it's going home.",
+        concept: "Play the ii, then the V, then the I of a key back to back and you get the single most common chord move in Western music — the sound of \"arriving\" that shows up everywhere from jazz to pop.",
+      },
+      modes: {
+        title: "Modes",
+        summary: "Same notes, different starting point — seven flavors hiding in one scale.",
+        concept: "A mode is the same seven notes as a major scale, just starting on a different degree. Same notes, different tonic — and a completely different color, from bright Lydian to dark Locrian.",
+      },
+    },
     comingSoon: {
       title: "Coming soon",
-      description: "The guided lessons are being built — for now, explore freely from the sidebar.",
+      description: "This lesson's guided flow is being built — for now, explore freely from the sidebar.",
     },
     lesson: {
       backToTracks: "← Back to tracks",

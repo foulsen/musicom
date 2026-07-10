@@ -185,9 +185,49 @@ export const pt: MessageSchema = {
   learn: {
     title: "Trilhas de Aprendizado",
     subtitle: "Um caminho guiado pela teoria que você já tem à mão — uma lição curta de cada vez.",
+    trackProgress: "{percent}% concluído",
+    continue: "Continuar",
+    status: {
+      locked: "Bloqueada",
+      available: "Disponível",
+      "in-progress": "Em andamento",
+      completed: "Concluída",
+    },
+    tracks: {
+      fundamentals: {
+        title: "Fundamentos",
+      },
+    },
+    lessons: {
+      majorScale: {
+        title: "A Escala Maior & os Graus",
+        summary: "A escala da qual tudo mais é construído — e os números que os músicos usam para falar sobre ela.",
+        concept: "Sete notas, um padrão de tons e semitons que se repete para sempre. Cada nota também tem um número — seu grau — que nomeia sua função na escala, não importa em qual tom você esteja.",
+      },
+      triads: {
+        title: "Tríades",
+        summary: "Empilhe o 1º, 3º e 5º grau de uma escala e você tem um acorde.",
+        concept: "Pule uma nota da escala a cada passo a partir de qualquer grau — 1º, 3º, 5º — e você tem uma tríade. Faça isso a partir de cada grau da escala e tem todos os acordes que pertencem àquele tom.",
+      },
+      diatonicField: {
+        title: "O Campo Diatônico",
+        summary: "Toda escala esconde sete acordes dentro dela — seu campo harmônico.",
+        concept: "As sete tríades construídas sobre os sete graus de uma escala têm cada uma uma função — tônica, subdominante, dominante — que molda a sensação de uma progressão resolver ou puxar em direção a casa.",
+      },
+      twoFiveOne: {
+        title: "O ii-V-I",
+        summary: "A sequência de três acordes que faz quase toda música soar como se estivesse voltando para casa.",
+        concept: "Toque o ii, depois o V, depois o I de um tom em sequência e você tem o movimento de acordes mais comum da música ocidental — o som de \"chegar\" que aparece em tudo, do jazz ao pop.",
+      },
+      modes: {
+        title: "Modos",
+        summary: "Mesmas notas, ponto de partida diferente — sete sabores escondidos em uma escala.",
+        concept: "Um modo é a mesma escala de sete notas de uma escala maior, só que começando em um grau diferente. Mesmas notas, tônica diferente — e uma cor completamente diferente, do Lydian brilhante ao Locrian escuro.",
+      },
+    },
     comingSoon: {
       title: "Em breve",
-      description: "As lições guiadas estão sendo construídas — por enquanto, explore livremente pela barra lateral.",
+      description: "O fluxo guiado desta lição está sendo construído — por enquanto, explore livremente pela barra lateral.",
     },
     lesson: {
       backToTracks: "← Voltar às trilhas",
