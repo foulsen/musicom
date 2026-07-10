@@ -1,7 +1,13 @@
 import { defineStore } from "pinia";
 
+export interface CheckpointScore {
+  correct: number;
+  total: number;
+}
+
 export interface LessonProgress {
   completedStepIndexes: number[];
+  checkpoint?: CheckpointScore;
 }
 
 /** Progresso persistido (localStorage) das Trilhas de aprendizado, por lição. */

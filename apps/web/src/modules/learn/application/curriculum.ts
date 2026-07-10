@@ -12,6 +12,8 @@ import {
 
 import type { ExplorerLinkConfig } from "@/modules/shared/application/explorer-deeplink";
 
+import { generateCheckpoint, type CheckpointQuestion } from "./checkpoint-generators";
+
 /** Contexto musical base de uma lição — tônica + escala/tom-pai sobre a qual ela é construída. */
 export interface LessonContext {
   root: SingleNote;
@@ -41,7 +43,12 @@ export interface ExploreStep {
   deeplink: ExplorerLinkConfig;
 }
 
-export type LessonStep = ConceptStep | ExploreStep;
+export interface CheckpointStep {
+  kind: "checkpoint";
+  generate: (ctx: LessonContext) => CheckpointQuestion[];
+}
+
+export type LessonStep = ConceptStep | ExploreStep | CheckpointStep;
 
 export interface Lesson {
   id: string;
@@ -109,6 +116,7 @@ const majorScaleLesson: Lesson = {
       explorerPath: "/",
       deeplink: { root: TONIC, pattern: "Major" },
     },
+    { kind: "checkpoint", generate: (ctx) => generateCheckpoint("major-scale", ctx) },
   ],
 };
 
@@ -126,6 +134,7 @@ const triadsLesson: Lesson = {
       explorerPath: "/chords",
       deeplink: { root: TONIC, family: "Triads", quality: "Major" },
     },
+    { kind: "checkpoint", generate: (ctx) => generateCheckpoint("triads", ctx) },
   ],
 };
 
@@ -143,6 +152,7 @@ const diatonicFieldLesson: Lesson = {
       explorerPath: "/",
       deeplink: { root: TONIC, pattern: "Major" },
     },
+    { kind: "checkpoint", generate: (ctx) => generateCheckpoint("diatonic-field", ctx) },
   ],
 };
 
@@ -166,6 +176,7 @@ const twoFiveOneLesson: Lesson = {
       explorerPath: "/",
       deeplink: { root: TONIC, pattern: "Major", degree: 2 },
     },
+    { kind: "checkpoint", generate: (ctx) => generateCheckpoint("two-five-one", ctx) },
   ],
 };
 
@@ -188,6 +199,7 @@ const modesLesson: Lesson = {
       explorerPath: "/modes",
       deeplink: { root: TONIC, pattern: "Dorian" },
     },
+    { kind: "checkpoint", generate: (ctx) => generateCheckpoint("modes", ctx) },
   ],
 };
 

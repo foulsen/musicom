@@ -9,6 +9,7 @@ import { useLessonViewModel } from "../application/use-lesson-view-model";
 import { LessonStepper } from "../components/lesson-stepper";
 import { ConceptPanel } from "../components/concept-panel";
 import { InlineExplorer } from "../components/inline-explorer";
+import { LessonCheckpoint } from "../components/lesson-checkpoint";
 
 const {
   lesson,
@@ -19,9 +20,11 @@ const {
   listenCues,
   explorerLink,
   highlightDegree,
+  checkpointQuestions,
   isPlaying,
   listen,
   goNext,
+  completeCheckpoint,
   goPrevious,
 } = useLessonViewModel();
 
@@ -66,6 +69,12 @@ const { t } = useI18n();
         </router-link>
       </template>
 
+      <lesson-checkpoint
+        v-else-if="step.kind === 'checkpoint'"
+        :questions="checkpointQuestions"
+        @complete="completeCheckpoint"
+      />
+
       <div class="flex items-center justify-between gap-4">
         <button
           type="button"
@@ -78,6 +87,7 @@ const { t } = useI18n();
         </button>
 
         <button
+          v-if="step.kind !== 'checkpoint'"
           type="button"
           class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="goNext"

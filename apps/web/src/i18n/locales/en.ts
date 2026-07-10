@@ -233,6 +233,33 @@ export const en = {
       explore: "Explore",
       checkpoint: "Checkpoint",
     },
+    checkpointProgress: "Question {current} of {total}",
+    checkpointCorrect: "Correct!",
+    checkpointIncorrect: "Not quite — the highlighted answer was correct.",
+    checkpointNext: "Next question",
+    checkpointFinish: "Finish lesson",
+    checkpoints: {
+      majorScale: {
+        degreeName: "Which note is scale degree {degree} of {root} major?",
+        leadingTone: "In {root} major, which scale degree is called the leading tone?",
+      },
+      triads: {
+        triadNotes: "Which three notes make up the degree {degree} triad in {root} major?",
+        triadQuality: "What quality is the degree {degree} triad in {root} major?",
+      },
+      diatonicField: {
+        harmonicFunction: "What harmonic function does scale degree {degree} have in {root} major?",
+        dominantDegree: "Which scale degree carries the Dominant function in {root} major?",
+      },
+      twoFiveOne: {
+        chordName: "Which chord is the {roman} in {root} major?",
+        isProgression: "Is {sequence} a ii-V-I progression in {root} major?",
+      },
+      modes: {
+        modeOfMajor: "{tonic} {pattern} is the {degree} mode of which major scale?",
+        changingNote: "Which note is different between {root} {pattern} and {root} Aeolian?",
+      },
+    },
     notFound: {
       title: "Lesson not found",
       description: "This lesson doesn't exist (yet) — head back to the tracks overview.",

@@ -4,7 +4,9 @@ import { useRoute, useRouter } from "vue-router";
 import { buildExplorerLink } from "@/modules/shared/application/explorer-deeplink";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
+import type { CheckpointQuestion } from "./checkpoint-generators";
 import type { ListenCue } from "./curriculum";
+import type { CheckpointScore } from "./use-learn-store";
 import { useLearnViewModel } from "./use-learn-view-model";
 
 /** Duração estimada (ms) de um cue, para encadear vários e saber quando parar o "tocando". */
@@ -17,7 +19,7 @@ export function useLessonViewModel() {
   const route = useRoute();
   const router = useRouter();
 
-  const { track, markStepDone, visitLesson } = useLearnViewModel();
+  const { track, markStepDone, recordCheckpoint, visitLesson } = useLearnViewModel();
   const { playChord, playSequence } = useNoteAudio();
 
   const lessonId = computed(() => String(route.params.lessonId));
@@ -55,6 +57,16 @@ export function useLessonViewModel() {
     if (step.value?.kind !== "explore" || step.value.deeplink.degree === undefined) return undefined;
 
     return Number(step.value.deeplink.degree);
+  });
+
+  /**
+   * Geradas uma única vez por visita ao passo (não recomputa a cada render): o `computed`
+   * só reavalia quando `step`/`lesson` mudam, o que não acontece ao responder uma pergunta.
+   */
+  const checkpointQuestions = computed<CheckpointQuestion[]>(() => {
+    if (!lesson.value || step.value?.kind !== "checkpoint") return [];
+
+    return step.value.generate(lesson.value.context);
   });
 
   const isPlaying = ref(false);
@@ -106,6 +118,12 @@ export function useLessonViewModel() {
     if (stepIndex.value > 0) stepIndex.value -= 1;
   }
 
+  function completeCheckpoint(score: CheckpointScore) {
+    if (lesson.value) recordCheckpoint(lesson.value.id, score);
+
+    goNext();
+  }
+
   return {
     lesson,
     step,
@@ -115,10 +133,12 @@ export function useLessonViewModel() {
     listenCues,
     explorerLink,
     highlightDegree,
+    checkpointQuestions,
     isPlaying,
 
     listen,
     goNext,
+    completeCheckpoint,
     goPrevious,
   };
 }

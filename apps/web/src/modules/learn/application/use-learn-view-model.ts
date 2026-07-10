@@ -2,7 +2,7 @@ import { computed } from "vue";
 import { storeToRefs } from "pinia";
 
 import { FUNDAMENTALS_TRACK, type Lesson } from "./curriculum";
-import { useLearnStore } from "./use-learn-store";
+import { useLearnStore, type CheckpointScore } from "./use-learn-store";
 
 export type LessonStatus = "locked" | "available" | "in-progress" | "completed";
 
@@ -65,11 +65,18 @@ export function useLearnViewModel() {
 
     if (!current.completedStepIndexes.includes(stepIndex)) {
       progress.value[lessonId] = {
+        ...current,
         completedStepIndexes: [...current.completedStepIndexes, stepIndex],
       };
     }
 
     lastVisitedLessonId.value = lessonId;
+  }
+
+  function recordCheckpoint(lessonId: string, checkpoint: CheckpointScore) {
+    const current = progress.value[lessonId] ?? { completedStepIndexes: [] };
+
+    progress.value[lessonId] = { ...current, checkpoint };
   }
 
   function visitLesson(lessonId: string) {
@@ -88,6 +95,7 @@ export function useLearnViewModel() {
     continueLesson,
 
     markStepDone,
+    recordCheckpoint,
     visitLesson,
     resetProgress,
   };

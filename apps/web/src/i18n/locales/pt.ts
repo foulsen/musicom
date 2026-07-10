@@ -235,6 +235,33 @@ export const pt: MessageSchema = {
       explore: "Explorar",
       checkpoint: "Checkpoint",
     },
+    checkpointProgress: "Pergunta {current} de {total}",
+    checkpointCorrect: "Certo!",
+    checkpointIncorrect: "Quase — a resposta destacada era a correta.",
+    checkpointNext: "Próxima pergunta",
+    checkpointFinish: "Concluir lição",
+    checkpoints: {
+      majorScale: {
+        degreeName: "Qual nota é o grau {degree} de {root} maior?",
+        leadingTone: "Em {root} maior, qual grau da escala é chamado de sensível (leading tone)?",
+      },
+      triads: {
+        triadNotes: "Quais três notas formam a tríade do grau {degree} em {root} maior?",
+        triadQuality: "Qual a qualidade da tríade do grau {degree} em {root} maior?",
+      },
+      diatonicField: {
+        harmonicFunction: "Qual função harmônica o grau {degree} tem em {root} maior?",
+        dominantDegree: "Qual grau carrega a função Dominante em {root} maior?",
+      },
+      twoFiveOne: {
+        chordName: "Qual acorde é o {roman} em {root} maior?",
+        isProgression: "{sequence} é uma progressão ii-V-I em {root} maior?",
+      },
+      modes: {
+        modeOfMajor: "{tonic} {pattern} é o {degree}º modo de qual escala maior?",
+        changingNote: "Qual nota é diferente entre {root} {pattern} e {root} Aeolian?",
+      },
+    },
     notFound: {
       title: "Lição não encontrada",
       description: "Esta lição ainda não existe — volte para a visão geral das trilhas.",
