@@ -151,10 +151,10 @@ function play(note: Note) {
 
 <template>
   <section class="space-y-3">
-    <header class="flex flex-wrap items-center justify-between gap-3">
-      <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+    <header class="flex flex-wrap items-center justify-center gap-3">
+      <!-- <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {{ t("chromaticWheel.title") }}
-      </h2>
+      </h2> -->
 
       <chip-toggle-group
         v-model="mode"

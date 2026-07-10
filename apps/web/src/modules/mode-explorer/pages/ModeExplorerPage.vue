@@ -234,12 +234,15 @@ function brightnessTint(index: number): string {
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" @note-play="play" />
 
-      <fretboard-diagram :positions="fretboardPositions" context="scale" :pulse-trigger="selectedModeIndex"
-        class="min-w-0 max-w-3xl mx-auto lg:flex-1" @note-play="play" />
-
-      <chromatic-wheel :root="selectedMode.scale.root" :highlighted-notes="notes"
-        :label-by-pitch-class="spelledByPitchClass" class="lg:w-72 lg:shrink-0" @note-play="play" />
+      
+      <div class="w-full my-auto flex justify-center">
+        <chromatic-wheel :root="selectedMode.scale.root" :highlighted-notes="notes" :label-by-pitch-class="spelledByPitchClass"
+        class="lg:w-72 lg:shrink-0 lg:h-full" @note-play="play" />
+      </div>
     </div>
+
+    <fretboard-diagram :positions="fretboardPositions" context="scale" :pulse-trigger="selectedModeIndex"
+      class="min-w-0 lg:max-w-full lg:p-16" @note-play="play" />
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <harmonic-field v-model:mode="harmonicFieldMode" :triads="triads" :sevenths="sevenths"

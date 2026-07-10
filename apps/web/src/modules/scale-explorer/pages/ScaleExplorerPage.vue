@@ -54,17 +54,18 @@ const { t } = useI18n();
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" @note-play="play" />
 
-      <div class="min-w-0 space-y-4 lg:flex-1 flex-1">
-        <div class="flex justify-end">
-          <fret-range-selector v-model="fretCount" />
-        </div>
 
-        <fretboard-diagram :positions="fretboardPositions" context="scale" class="max-w-3xl mx-auto"
-          @note-play="play" />
+      <div class="w-full my-auto flex justify-center">
+        <chromatic-wheel :root="selectedRoot" :highlighted-notes="notes" :label-by-pitch-class="spelledByPitchClass"
+          class="lg:w-72 lg:shrink-0 lg:h-full" @note-play="play" />
+      </div>
+    </div>
+    <div class="min-w-0 space-y-4 lg:flex-1 flex-1">
+      <div class="flex justify-end">
+        <fret-range-selector v-model="fretCount" />
       </div>
 
-      <chromatic-wheel :root="selectedRoot" :highlighted-notes="notes" :label-by-pitch-class="spelledByPitchClass"
-        class="lg:w-72 lg:shrink-0" @note-play="play" />
+      <fretboard-diagram :positions="fretboardPositions" context="scale" class="lg:max-w-full lg:p-16" @note-play="play" />
     </div>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
@@ -76,8 +77,7 @@ const { t } = useI18n();
           class="min-w-0 lg:flex-1" @note-play="play" />
 
         <empty-state v-else :title="t('scaleExplorer.emptyShapes.title')"
-          :description="t('scaleExplorer.emptyShapes.description', { chord: selectedChord.name })"
-          class="lg:flex-1" />
+          :description="t('scaleExplorer.emptyShapes.description', { chord: selectedChord.name })" class="lg:flex-1" />
       </div>
     </div>
   </section>

@@ -25,12 +25,12 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
 </script>
 
 <template>
-  <figure class="space-y-4 rounded-xl border border-border bg-card/40 p-4">
+  <figure class="space-y-4 rounded-xl border border-border bg-card/40 py-4 px-16 w-fit">
     <figcaption v-if="props.showTitle" class="text-center text-3xl font-medium text-foreground">
       {{ props.name }}
     </figcaption>
 
-    <div class="flex items-start justify-center gap-6">
+    <div class="flex items-start justify-center gap-6" :class="{'pt-3': !props.showTitle}">
       <chord-voicing-diagram
         v-for="(shape, index) in visibleShapes"
         :key="index"
