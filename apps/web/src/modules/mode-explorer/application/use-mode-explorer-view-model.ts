@@ -15,9 +15,11 @@ import {
   createScale,
   relativeModesOf,
   type ScalePattern,
+  type SingleNote,
 } from "@music-workspace/music-theory";
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
+import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
 
 import { useModeExplorerStore } from "./use-mode-explorer-store";
 
@@ -178,6 +180,22 @@ export function useModeExplorerViewModel() {
     selectedTriadIndex.value = index;
   }
 
+  // Deep-link de entrada (Scale Explorer, futuras Trilhas de aprendizado) via query string.
+  const { returnLessonId } = useExplorerDeeplink((config) => {
+    if (config.root) {
+      selectedParentRoot.value = Note.from(config.root as SingleNote);
+    }
+
+    if (config.pattern) {
+      selectModeByPatternName(config.pattern);
+    }
+
+    if (config.degree !== undefined) {
+      const index = Number(config.degree) - 1;
+      if (Number.isInteger(index) && index >= 0) selectChord(index);
+    }
+  });
+
   return {
     selectedParentRoot,
     modes,
@@ -214,5 +232,7 @@ export function useModeExplorerViewModel() {
     selectedChordCard,
 
     selectChord,
+
+    returnLessonId,
   };
 }

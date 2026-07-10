@@ -23,9 +23,11 @@ import {
   Fretboard,
   Interval,
   STANDARD_GUITAR_TUNING,
+  type SingleNote,
 } from "@music-workspace/music-theory";
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
+import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
 
 import { useScaleExplorerStore } from "./use-scale-explorer-store";
 
@@ -139,6 +141,23 @@ export function useScaleExplorerViewModel() {
     fretCount.value = count;
   }
 
+  // Deep-link de entrada (Chord Explorer, futuras Trilhas de aprendizado) via query string.
+  const { returnLessonId } = useExplorerDeeplink((config) => {
+    if (config.root) {
+      selectRoot(Note.from(config.root as SingleNote));
+    }
+
+    if (config.pattern) {
+      const pattern = availablePatterns.find((item) => item.name === config.pattern);
+      if (pattern) selectPattern(pattern);
+    }
+
+    if (config.degree !== undefined) {
+      const index = Number(config.degree) - 1;
+      if (Number.isInteger(index) && index >= 0) selectChord(index);
+    }
+  });
+
   return {
     chromaticScale: CHROMATIC_SCALE,
 
@@ -167,5 +186,7 @@ export function useScaleExplorerViewModel() {
     selectRoot,
     selectPattern,
     selectChord,
+
+    returnLessonId,
   };
 }

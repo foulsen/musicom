@@ -21,6 +21,7 @@ export const en = {
       guitar: "Guitar",
       "realistic-guitar": "Realistic Guitar",
     },
+    backToLesson: "Back to lesson",
   },
   scaleExplorer: {
     title: "Scale Explorer",

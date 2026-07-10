@@ -1,6 +1,5 @@
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
 
 import {
   CHORD_FAMILIES,
@@ -15,14 +14,12 @@ import {
 import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
 import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
+import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
 
 import { useChordExplorerStore } from "./use-chord-explorer-store";
 
 /** Estado local da página de estudo de acordes (independente do Scale Explorer). */
 export function useChordExplorerViewModel() {
-  const route = useRoute();
-  const router = useRouter();
-
   const store = useChordExplorerStore();
   const { rootValue, familyName, qualityName, fretCount } = storeToRefs(store);
 
@@ -52,27 +49,19 @@ export function useChordExplorerViewModel() {
     },
   });
 
-  // Ao entrar vindo do Harmonic Field (Scale Explorer), aplica a seleção da query string.
-  onMounted(() => {
-    const queryRoot = route.query.root;
-    const queryFamily = route.query.family;
-    const queryQuality = route.query.quality;
-
-    if (typeof queryRoot === "string") {
-      rootValue.value = queryRoot as SingleNote;
+  // Ao entrar vindo do Harmonic Field (Scale Explorer) ou de uma lição, aplica a query string.
+  const { returnLessonId } = useExplorerDeeplink((config) => {
+    if (config.root) {
+      rootValue.value = config.root as SingleNote;
     }
 
-    if (typeof queryFamily === "string") {
-      const family = availableFamilies.find((item) => item.name === queryFamily);
+    if (config.family) {
+      const family = availableFamilies.find((item) => item.name === config.family);
       if (family) familyName.value = family.name;
     }
 
-    if (typeof queryQuality === "string") {
-      qualityName.value = queryQuality;
-    }
-
-    if (queryRoot || queryFamily || queryQuality) {
-      router.replace({ query: {} });
+    if (config.quality) {
+      qualityName.value = config.quality;
     }
   });
 
@@ -151,5 +140,6 @@ export function useChordExplorerViewModel() {
     fretboardPositions,
     fretCount,
     selectFretCount,
+    returnLessonId,
   };
 }

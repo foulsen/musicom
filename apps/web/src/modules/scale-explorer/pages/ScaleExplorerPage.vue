@@ -13,6 +13,7 @@ import { ChordCard } from "@/modules/shared/components/chord-card";
 import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
+import { LessonReturnBanner } from "@/modules/shared/components/lesson-return-banner";
 
 const {
   selectedRoot,
@@ -30,6 +31,7 @@ const {
   selectedChord,
   selectedChordCard,
   selectChord,
+  returnLessonId,
 } = useScaleExplorerViewModel();
 
 const { play } = useNoteAudio();
@@ -38,6 +40,8 @@ const { t } = useI18n();
 
 <template>
   <section class="flex flex-col gap-8 p-4 sm:p-6 lg:p-8">
+    <lesson-return-banner v-if="returnLessonId" :lesson-id="returnLessonId" />
+
     <header class="space-y-1">
       <h1 class="text-2xl font-medium tracking-wide">
         {{ t("scaleExplorer.title") }}

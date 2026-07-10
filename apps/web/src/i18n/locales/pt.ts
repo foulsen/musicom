@@ -23,6 +23,7 @@ export const pt: MessageSchema = {
       guitar: "Violão",
       "realistic-guitar": "Violão Realista",
     },
+    backToLesson: "Voltar à lição",
   },
   scaleExplorer: {
     title: "Explorador de Escalas",
