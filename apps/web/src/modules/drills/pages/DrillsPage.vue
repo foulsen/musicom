@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
+import { RotateCcw } from "@lucide/vue";
+
 import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
+import { NOTE_OPTIONS, useNoteIdDrill } from "../application/use-note-id-drill";
 import type { DeckId } from "../application/flashcard-decks";
 import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
+import { NoteIdFretboard } from "../components/note-id-fretboard";
+import { NoteOptionGrid } from "../components/note-option-grid";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 
@@ -15,10 +20,14 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-type Section = "fretboard" | "flashcards";
+type Section = "fretboard" | "noteId" | "flashcards";
 
 /** Aba ativa reflete `route.query.tab`: sobrevive à navegação e é linkável. */
-const section = computed<Section>(() => (route.query.tab === "flashcards" ? "flashcards" : "fretboard"));
+const section = computed<Section>(() => {
+  if (route.query.tab === "flashcards") return "flashcards";
+  if (route.query.tab === "noteId") return "noteId";
+  return "fretboard";
+});
 
 function setSection(value: unknown) {
   const next = Array.isArray(value) ? value[0] : value;
@@ -46,6 +55,34 @@ const {
 const progressAnnounce = computed(() =>
   isActive.value ? t("drills.fretboard.progressAnnounce", { found: foundKeys.value.size, total: totalTargets.value }) : "",
 );
+
+const {
+  positions: noteIdPositions,
+  target: noteIdTarget,
+  selectedNote,
+  isAnswered: isNoteIdAnswered,
+  isCorrect: isNoteIdCorrect,
+  score: noteIdScore,
+  streak: noteIdStreak,
+  bestStreak: noteIdBestStreak,
+  newRound: newNoteIdRound,
+  answer: answerNoteId,
+  resetScore: resetNoteIdScore,
+} = useNoteIdDrill();
+
+const noteIdScorePercent = computed(() =>
+  noteIdScore.value.total === 0 ? null : Math.round((noteIdScore.value.correct / noteIdScore.value.total) * 100),
+);
+
+const noteIdNextButton = useTemplateRef<HTMLButtonElement>("noteIdNextButton");
+
+// Move o foco para "Next" assim que a resposta é revelada (os botões de nota deixam
+// de ser o alvo natural) — mesmo padrão de foco do Ear Training (WCAG 4.1.3).
+watch(isNoteIdAnswered, (answered) => {
+  if (!answered) return;
+
+  nextTick(() => noteIdNextButton.value?.focus());
+});
 
 const {
   deckIds,
@@ -90,6 +127,9 @@ function formatMs(ms: number): string {
     >
       <chip-toggle-item value="fretboard" class="px-3 py-1.5 text-sm">
         {{ t("drills.sections.fretboard") }}
+      </chip-toggle-item>
+      <chip-toggle-item value="noteId" class="px-3 py-1.5 text-sm">
+        {{ t("drills.sections.noteId") }}
       </chip-toggle-item>
       <chip-toggle-item value="flashcards" class="px-3 py-1.5 text-sm">
         {{ t("drills.sections.flashcards") }}
@@ -168,6 +208,62 @@ function formatMs(ms: number): string {
           @click="start"
         >
           {{ t("drills.fretboard.playAgain") }}
+        </button>
+      </div>
+    </section>
+
+    <section v-else-if="section === 'noteId'" class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <p class="text-sm text-foreground">
+          {{ t("drills.noteId.intro") }}
+        </p>
+
+        <div class="flex items-center gap-3">
+          <p class="text-sm text-muted-foreground">
+            {{ t("drills.noteId.score", { correct: noteIdScore.correct, total: noteIdScore.total }) }}
+            <span v-if="noteIdScorePercent !== null">· {{ noteIdScorePercent }}%</span>
+            <span v-if="noteIdStreak > 1">· 🔥{{ noteIdStreak }}</span>
+          </p>
+
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :title="t('drills.noteId.resetScore')"
+            @click="resetNoteIdScore"
+          >
+            <rotate-ccw class="size-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <p v-if="noteIdBestStreak > 0" class="text-xs text-muted-foreground">
+        {{ t("drills.noteId.bestStreak", { streak: noteIdBestStreak }) }}
+      </p>
+
+      <note-id-fretboard :positions="noteIdPositions" :target="noteIdTarget" />
+
+      <note-option-grid
+        :options="NOTE_OPTIONS"
+        :correct="noteIdTarget.pitch.note.value"
+        :selected="selectedNote"
+        @select="answerNoteId"
+      />
+
+      <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-4">
+        <div v-if="isNoteIdAnswered" role="status" aria-live="polite" aria-atomic="true">
+          <p class="text-sm font-medium" :class="isNoteIdCorrect ? 'text-brand' : 'text-destructive'">
+            {{ isNoteIdCorrect ? t("drills.noteId.correct") : t("drills.noteId.incorrect") }}
+          </p>
+        </div>
+
+        <button
+          v-if="isNoteIdAnswered"
+          ref="noteIdNextButton"
+          type="button"
+          class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          @click="newNoteIdRound"
+        >
+          {{ t("drills.noteId.next") }}
         </button>
       </div>
     </section>

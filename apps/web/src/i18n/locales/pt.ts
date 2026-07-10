@@ -73,6 +73,7 @@ export const pt: MessageSchema = {
     subtitle: "Pratique contra o relógio no braço, ou treine teoria com flashcards de repetição espaçada.",
     sections: {
       fretboard: "Braço",
+      noteId: "Identificar",
       flashcards: "Flashcards",
     },
     fretboard: {
@@ -92,6 +93,17 @@ export const pt: MessageSchema = {
       progressAnnounce: "{found} de {total} encontradas",
       pressStart: "Pressione Começar para iniciar",
       dragHint: "Arraste para rolar →",
+    },
+    noteId: {
+      intro: "Uma casa acende no braço — diga a nota (afinação padrão).",
+      targetAriaLabel: "Destacada: corda {string}, casa {fret}",
+      targetAriaLabelOpen: "Destacada: corda {string}, solta",
+      correct: "Certo!",
+      incorrect: "Quase — a nota destacada era a correta.",
+      score: "Placar: {correct}/{total}",
+      bestStreak: "Melhor sequência: {streak}",
+      resetScore: "Zerar placar",
+      next: "Próxima",
     },
     flashcards: {
       deck: "Baralho",

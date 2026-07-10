@@ -71,6 +71,7 @@ export const en = {
     subtitle: "Practice against the clock on the fretboard, or drill theory with spaced-repetition flashcards.",
     sections: {
       fretboard: "Fretboard",
+      noteId: "Note ID",
       flashcards: "Flashcards",
     },
     fretboard: {
@@ -90,6 +91,17 @@ export const en = {
       progressAnnounce: "{found} of {total} found",
       pressStart: "Press Start to begin",
       dragHint: "Drag to scroll →",
+    },
+    noteId: {
+      intro: "A fret lights up on the fretboard — name the note (standard tuning).",
+      targetAriaLabel: "Highlighted: string {string}, fret {fret}",
+      targetAriaLabelOpen: "Highlighted: string {string}, open",
+      correct: "Correct!",
+      incorrect: "Not quite — the highlighted note was correct.",
+      score: "Score: {correct}/{total}",
+      bestStreak: "Best streak: {streak}",
+      resetScore: "Reset score",
+      next: "Next",
     },
     flashcards: {
       deck: "Deck",
