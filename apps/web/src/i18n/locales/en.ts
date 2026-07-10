@@ -23,6 +23,16 @@ export const en = {
       "realistic-guitar": "Realistic Guitar",
     },
     backToLesson: "Back to lesson",
+    guest: "Guest",
+  },
+  settings: {
+    title: "Settings",
+    description: "Your local profile, audio and language preferences.",
+    open: "Open settings",
+    close: "Close settings",
+    name: "Name",
+    namePlaceholder: "Your name",
+    language: "Language",
   },
   scaleExplorer: {
     title: "Scale Explorer",

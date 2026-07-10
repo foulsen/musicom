@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { computed, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 
-import { AudioWaveform, Volume2 } from "@lucide/vue";
+import { AudioWaveform, Settings as SettingsIcon } from "@lucide/vue";
 
 import { Separator } from "@/components/ui/separator";
 
-import { INSTRUMENT_IDS, type InstrumentId } from "@/modules/shared/application/instrument-presets";
-import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
-import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { SettingsDialog } from "@/modules/settings/components/settings-dialog";
+import { useUserStore } from "@/modules/settings/application/use-user-store";
 
 import { NavigationItem } from "../navigation-item";
 
@@ -25,8 +26,18 @@ const emit = defineEmits<{
   navigate: [];
 }>();
 
-const { masterVolume, instrument } = useNoteAudio();
 const { t } = useI18n();
+const { name } = storeToRefs(useUserStore());
+
+const settingsOpen = ref(false);
+
+const displayName = computed(() => name.value.trim() || t("common.guest"));
+
+const initials = computed(() => {
+  const words = name.value.trim().split(/\s+/).filter(Boolean).slice(0, 2);
+
+  return words.map((word) => word[0]!.toUpperCase()).join("");
+});
 </script>
 
 <template>
@@ -56,40 +67,24 @@ const { t } = useI18n();
 
     <separator />
 
-    <footer class="flex flex-col gap-3 px-6 py-4">
-      <div class="flex flex-col gap-2">
-        <span class="text-xs font-medium text-sidebar-foreground/70">{{ t("common.instrument") }}</span>
-        <chip-toggle-group
-          :model-value="instrument"
-          type="single"
-          orientation="vertical"
-          class="w-full flex-col items-stretch"
-          :aria-label="t('common.instrument')"
-          @update:model-value="(value) => value && (instrument = value as InstrumentId)"
-        >
-          <chip-toggle-item
-            v-for="id in INSTRUMENT_IDS"
-            :key="id"
-            :value="id"
-            class="px-3 py-1.5 text-left text-xs"
-          >
-            {{ t(`common.instruments.${id}`) }}
-          </chip-toggle-item>
-        </chip-toggle-group>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <volume-2 class="size-4 shrink-0 text-sidebar-foreground/70" />
-        <input
-          v-model.number="masterVolume"
-          type="range"
-          min="0"
-          max="0.5"
-          step="0.01"
-          :aria-label="t('common.masterVolume')"
-          class="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-sidebar-foreground/20 accent-brand"
-        />
-      </div>
+    <footer class="p-3">
+      <button
+        type="button"
+        class="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        :aria-label="t('settings.open')"
+        @click="settingsOpen = true"
+      >
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand">
+          {{ initials || "?" }}
+        </span>
+        <span class="flex min-w-0 flex-1 flex-col">
+          <span class="truncate text-sm font-medium">{{ displayName }}</span>
+          <span class="text-xs text-sidebar-foreground/60">{{ t("settings.title") }}</span>
+        </span>
+        <settings-icon class="size-4 shrink-0 text-sidebar-foreground/50" />
+      </button>
     </footer>
+
+    <settings-dialog v-model:open="settingsOpen" />
   </aside>
 </template>

@@ -25,6 +25,16 @@ export const pt: MessageSchema = {
       "realistic-guitar": "Violão Realista",
     },
     backToLesson: "Voltar à lição",
+    guest: "Convidado",
+  },
+  settings: {
+    title: "Configurações",
+    description: "Seu perfil local, preferências de áudio e idioma.",
+    open: "Abrir configurações",
+    close: "Fechar configurações",
+    name: "Nome",
+    namePlaceholder: "Seu nome",
+    language: "Idioma",
   },
   scaleExplorer: {
     title: "Explorador de Escalas",
