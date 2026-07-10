@@ -21,7 +21,8 @@ const { t } = useI18n();
 const STRING_GAP = 32;
 const FRET_WIDTH = 48;
 const LABEL_COL = 20;
-const OPEN_COL = LABEL_COL + 40;
+/** Folga extra (vs. o braço "de leitura" FretboardDiagram) para a nota solta não cobrir o nome da corda. */
+const OPEN_COL = LABEL_COL + 64;
 const MARGIN = 20;
 const HEADER_ROW = 16;
 const NOTE_RADIUS = 12;
@@ -114,7 +115,8 @@ const frets = computed(() =>
       x2: x,
       y2: height.value - MARGIN + HEADER_ROW,
       labelX: OPEN_COL + FRET_WIDTH * (fret - 0.5),
-      labelY: height.value - MARGIN + HEADER_ROW + 16,
+      /** +30 (não +16): folga para o número não ficar sob o círculo da corda mais grave. */
+      labelY: height.value - MARGIN + HEADER_ROW + 30,
     };
   }),
 );
