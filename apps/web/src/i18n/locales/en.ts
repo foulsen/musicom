@@ -238,6 +238,7 @@ export const en = {
     checkpointIncorrect: "Not quite — the highlighted answer was correct.",
     checkpointNext: "Next question",
     checkpointFinish: "Finish lesson",
+    checkpointShortcutHint: "Number keys to answer, Enter/Space for next.",
     checkpoints: {
       majorScale: {
         degreeName: "Which note is scale degree {degree} of {root} major?",

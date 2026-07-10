@@ -35,7 +35,6 @@ const STATUS_CLASS = {
         :to="status === 'locked' ? undefined : `/learn/${lesson.id}`"
         class="flex h-full flex-col gap-2 rounded-lg border px-4 py-3 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
         :class="STATUS_CLASS[status]"
-        :aria-label="status === 'locked' ? t('learn.status.locked') : undefined"
       >
         <div class="flex items-center justify-between gap-2">
           <span class="text-base font-medium">{{ t(lesson.titleKey) }}</span>

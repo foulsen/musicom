@@ -240,6 +240,7 @@ export const pt: MessageSchema = {
     checkpointIncorrect: "Quase — a resposta destacada era a correta.",
     checkpointNext: "Próxima pergunta",
     checkpointFinish: "Concluir lição",
+    checkpointShortcutHint: "Teclas numéricas para responder, Enter/Espaço para avançar.",
     checkpoints: {
       majorScale: {
         degreeName: "Qual nota é o grau {degree} de {root} maior?",

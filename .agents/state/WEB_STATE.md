@@ -5,20 +5,25 @@
 > ../plans/CHORD_STUDY_PAGE_PLAN.md (Página de Estudo de Acordes).
 
 ## Resumo
-- Última fase concluída: **Página de Estudo de Acordes — Fases 3–6** (completa). Chord Explorer
-  com seletores Root/Family/Chord, lista Notes, cartão de voicings e mapa das notas no braço.
-  Guiada pelos mockups em `apps/web/mockups/chord-explorer/`. Verificada no preview.
-- Antes: **Fases 0–2** (domínio `createChord` + rota/nav + estado local); cartão de acorde no
-  Scale Explorer; bancos de voicings e de fórmulas. Verificado.
-- **Módulo compartilhado criado** (`modules/shared/`): promovido o que as duas páginas usam
-  (RootNoteSelector, ScaleNotes, ChordCard, ChordVoicingDiagram, FretboardDiagram, `use-note-audio`,
-  `chord-cards`, tipos `fretboard-note`/`chord-shape`). Débito de acoplamento resolvido.
-- **Banco de voicings expandido** (+83, via subagent) e **famílias Extended/Altered/Add
-  preenchidas** (formula bank): 11 novas qualidades/padrões (9, maj9, m9, 11, 13; 7b9, 7#9, 7b5,
-  7#5; add9, add11) + graus compostos (9/11/13/b9/#9) no `Degree`. As 5 famílias agora ativas na UI.
-- Próximo: cobrir mais raízes nos voicings extended/altered/add (hoje parciais → alguns caem no
-  fallback). Pendências gerais: inlays do fretboard, hex do `--brand`.
-- Atualizado em: 2026-07-07
+- Última fase concluída: **Trilhas de aprendizado (`/learn`) — Fases 0–6** (completa). Ver
+  `.agents/plans/LEARNING_TRACKS_PLAN.md`. Currículo tipado de 5 lições (Escala maior → Tríades →
+  Campo diatônico → ii-V-I → Modos), cada uma com conceito (texto + "ouça" derivado do domínio),
+  exploração inline (reaproveita `ScaleNotes`/`ChromaticWheel`/`HarmonicField`/`ChordCard` + link
+  para o explorador completo) e checkpoint de 2 perguntas geradas do domínio (`Scale.degrees/
+  triads/seventhChords`, `Degree.functionName`, `detectTwoFiveOne`). Progresso persistido com
+  gating linear (`useLearnStore`). A11y no padrão do Ear Training (atalhos de teclado, foco move
+  para o próximo passo/pergunta). Verificado no preview (desktop + mobile 375px, sem overflow).
+  *(nota: entre esta fase e a anterior registrada aqui, o app ganhou várias páginas —
+  Mode Explorer, Ear Training Studio, suíte de Drills, Songbook — sem que este arquivo fosse
+  atualizado a cada uma; ver `git log` e `FEATURE_ROADMAP.md` para o histórico real dessas.)*
+- **Infra nova reaproveitável desta fase**: `shared/application/explorer-deeplink.ts`
+  (`buildExplorerLink`/`useExplorerDeeplink`) — contrato único de query string para deep-link,
+  agora usado pelos três exploradores (Scale/Chord/Mode); antes só o Chord Explorer hidratava da
+  query. `shared/application/scale-patterns.ts` (`ALL_SCALE_PATTERNS`/`findScalePattern`) —
+  promovido do Scale Explorer. `AnswerOptions` e `HarmonicField` promovidos para `shared/components`.
+- Próximo (do roadmap): Círculo de Quintas, Progression Builder (flagship — destrava upgrade do
+  deep-link do ii-V-I), demais visualizações.
+- Atualizado em: 2026-07-10
 
 ## Histórico de fases
 | Fase | Status | Data | Notas |
@@ -40,6 +45,14 @@
 | Acordes — Fase 1 (Domínio `createChord`)    | ✅ concluída | 2026-07-06 | `createChord` + `Degree.semitones` + `ChordPattern` por graus + `Chord.spelledNotes`. Verificado (14 qualidades). |
 | Acordes — Fase 2 (Rota e navegação)         | ✅ concluída | 2026-07-06 | Módulo `chord-explorer`, rota `/chords`, nav (`Guitar`), VM local; placeholder deriva o acorde. Estado separado do Scale Explorer. |
 | Acordes — Fases 3–6 (Página completa)       | ✅ concluída | 2026-07-06 | Family/Chord selectors, Notes, cartão de voicings e mapa no braço (reuso do `FretboardDiagram`). Guiada pelos mockups `chord-explorer/`. |
+| *(gap não registrado aqui — ver `git log`)* | —            | —          | Mode Explorer, Ear Training Studio, suíte de Drills, Songbook. |
+| Trilhas — Fase 0 (Promoções para `shared`)  | ✅ concluída | 2026-07-10 | `AnswerOptions` + `HarmonicField` movidos para `modules/shared` (refactor puro, sem mudança de comportamento). |
+| Trilhas — Fase 1 (Deep-link compartilhado)  | ✅ concluída | 2026-07-10 | `explorer-deeplink.ts` (contrato único de query); Scale/Mode Explorer passam a hidratar da query (só Chord Explorer fazia antes); banner "voltar à lição". |
+| Trilhas — Fase 2 (Esqueleto + rota + nav)   | ✅ concluída | 2026-07-10 | `modules/learn`, rotas `/learn` e `/learn/:lessonId`, item de nav (`GraduationCap`). |
+| Trilhas — Fase 3 (Currículo + progresso)    | ✅ concluída | 2026-07-10 | `curriculum.ts` (5 lições, concept+explore), `useLearnStore` persistido, `useLearnViewModel` (gating/%/continuar), `TrackMap`. |
+| Trilhas — Fase 4 (Fluxo de lição inline)    | ✅ concluída | 2026-07-10 | `LessonPage` real: `LessonStepper`, `ConceptPanel` (áudio), `InlineExplorer` (embute vizs compartilhadas). `scale-patterns.ts` promovido. |
+| Trilhas — Fase 5 (Checkpoints do domínio)   | ✅ concluída | 2026-07-10 | `checkpoint-generators.ts` (2 perguntas/lição, tudo derivado do domínio) + testes; `LessonCheckpoint` reusa `AnswerOptions`. |
+| Trilhas — Fase 6 (Polimento)                | ✅ concluída | 2026-07-10 | Atalhos de teclado + foco no checkpoint/troca de passo (padrão Ear Training); fix de a11y no `TrackMap`; verificado em mobile (375px, sem overflow). |
 
 ## Decisões da sessão do mockup (confirmadas com o usuário)
 - **Scale Type = 11 patterns flat** do domínio (Major, Natural Minor, Harmonic Minor, Melodic

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { ArrowUpRight, ChevronLeft } from "@lucide/vue";
@@ -29,6 +30,14 @@ const {
 } = useLessonViewModel();
 
 const { t } = useI18n();
+
+const stepRegion = useTemplateRef<HTMLElement>("stepRegion");
+
+// Ao trocar de passo, move o foco para o conteúdo novo — sem isso, leitores de tela não
+// percebem a mudança (o foco fica parado nos botões Previous/Next, que não se movem).
+watch(stepIndex, () => {
+  nextTick(() => stepRegion.value?.focus());
+});
 </script>
 
 <template>
@@ -48,32 +57,34 @@ const { t } = useI18n();
         <lesson-stepper :steps="lesson.steps" :current-index="stepIndex" />
       </header>
 
-      <concept-panel
-        v-if="step.kind === 'concept'"
-        :body-key="step.bodyKey"
-        :has-cues="listenCues.length > 0"
-        :is-playing="isPlaying"
-        @listen="listen"
-      />
+      <div ref="stepRegion" tabindex="-1" class="flex flex-col gap-8 outline-none">
+        <concept-panel
+          v-if="step.kind === 'concept'"
+          :body-key="step.bodyKey"
+          :has-cues="listenCues.length > 0"
+          :is-playing="isPlaying"
+          @listen="listen"
+        />
 
-      <template v-else-if="step.kind === 'explore'">
-        <inline-explorer :context="lesson.context" :viz="step.viz" :highlight-degree="highlightDegree" />
+        <template v-else-if="step.kind === 'explore'">
+          <inline-explorer :context="lesson.context" :viz="step.viz" :highlight-degree="highlightDegree" />
 
-        <router-link
-          v-if="explorerLink"
-          :to="explorerLink"
-          class="inline-flex w-fit items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-brand transition-colors hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {{ t("learn.openInExplorer") }}
-          <arrow-up-right class="size-4" />
-        </router-link>
-      </template>
+          <router-link
+            v-if="explorerLink"
+            :to="explorerLink"
+            class="inline-flex w-fit items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-brand transition-colors hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {{ t("learn.openInExplorer") }}
+            <arrow-up-right class="size-4" />
+          </router-link>
+        </template>
 
-      <lesson-checkpoint
-        v-else-if="step.kind === 'checkpoint'"
-        :questions="checkpointQuestions"
-        @complete="completeCheckpoint"
-      />
+        <lesson-checkpoint
+          v-else-if="step.kind === 'checkpoint'"
+          :questions="checkpointQuestions"
+          @complete="completeCheckpoint"
+        />
+      </div>
 
       <div class="flex items-center justify-between gap-4">
         <button
@@ -87,7 +98,7 @@ const { t } = useI18n();
         </button>
 
         <button
-          v-if="step.kind !== 'checkpoint'"
+          v-if="step.kind !== 'checkpoint' || checkpointQuestions.length === 0"
           type="button"
           class="rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           @click="goNext"
