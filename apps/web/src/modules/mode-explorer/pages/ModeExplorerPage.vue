@@ -12,7 +12,7 @@ import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chi
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
-import { HarmonicField } from "@/modules/scale-explorer/components/harmonic-field";
+import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { ChordCard } from "@/modules/shared/components/chord-card";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";

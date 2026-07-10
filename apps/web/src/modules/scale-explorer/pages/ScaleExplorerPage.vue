@@ -3,11 +3,11 @@ import { useI18n } from "vue-i18n";
 
 import { useScaleExplorerViewModel } from "../application/use-scale-explorer-view-model";
 import { ScalePatternSelector } from "../components/scale-pattern-selector";
-import { HarmonicField } from "../components/harmonic-field";
 
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
+import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
 import { ChordCard } from "@/modules/shared/components/chord-card";
 import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";

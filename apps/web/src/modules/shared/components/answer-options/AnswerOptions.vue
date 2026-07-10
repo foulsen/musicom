@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { QuizOption } from "../../application/question-generators";
+import type { QuizOption } from "@/modules/shared/application/quiz";
 
 const props = defineProps<{
   options: QuizOption[];

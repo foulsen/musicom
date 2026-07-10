@@ -25,6 +25,7 @@ import {
 } from "@music-workspace/music-theory";
 
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
+import type { QuizOption } from "@/modules/shared/application/quiz";
 
 /** Oitavas possíveis de playback — sorteada por questão para o ouvido não ancorar em frequências absolutas. */
 const PLAYBACK_OCTAVES = [3, 4, 5];
@@ -87,11 +88,6 @@ const SCALE_ENTRIES: [ScalePattern, number][] = [
 ];
 
 export type QuizKind = "interval" | "chordQuality" | "scale";
-
-export interface QuizOption {
-  id: string;
-  label: string;
-}
 
 export interface Question {
   kind: QuizKind;

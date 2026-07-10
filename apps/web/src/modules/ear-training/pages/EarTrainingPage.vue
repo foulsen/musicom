@@ -6,7 +6,7 @@ import { Play, RotateCcw } from "@lucide/vue";
 
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import type { Difficulty, QuizKind } from "../application/question-generators";
-import { AnswerOptions } from "../components/answer-options";
+import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 const {
