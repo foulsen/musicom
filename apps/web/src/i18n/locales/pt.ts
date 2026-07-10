@@ -225,9 +225,19 @@ export const pt: MessageSchema = {
         concept: "Um modo é a mesma escala de sete notas de uma escala maior, só que começando em um grau diferente. Mesmas notas, tônica diferente — e uma cor completamente diferente, do Lydian brilhante ao Locrian escuro.",
       },
     },
-    comingSoon: {
-      title: "Em breve",
-      description: "O fluxo guiado desta lição está sendo construído — por enquanto, explore livremente pela barra lateral.",
+    listen: "Ouvir",
+    openInExplorer: "Abrir no explorador completo",
+    previous: "Anterior",
+    next: "Próxima",
+    finish: "Concluir",
+    stepKind: {
+      concept: "Conceito",
+      explore: "Explorar",
+      checkpoint: "Checkpoint",
+    },
+    notFound: {
+      title: "Lição não encontrada",
+      description: "Esta lição ainda não existe — volte para a visão geral das trilhas.",
     },
     lesson: {
       backToTracks: "← Voltar às trilhas",

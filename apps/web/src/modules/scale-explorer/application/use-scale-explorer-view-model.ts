@@ -7,17 +7,7 @@ import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 import {
   CHROMATIC_SCALE,
   createScale,
-  DORIAN_SCALE_PATTERN,
   MAJOR_SCALE_PATTERN,
-  HARMONIC_MINOR_SCALE_PATTERN,
-  MELODIC_MINOR_SCALE_PATTERN,
-  NATURAL_MINOR_SCALE_PATTERN,
-  AEOLIAN_SCALE_PATTERN,
-  IONIAN_SCALE_PATTERN,
-  LOCRIAN_SCALE_PATTERN,
-  LYDIAN_SCALE_PATTERN,
-  MIXOLYDIAN_SCALE_PATTERN,
-  PHRYGIAN_SCALE_PATTERN,
   Note,
   ScalePattern,
   Fretboard,
@@ -28,6 +18,7 @@ import {
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
+import { ALL_SCALE_PATTERNS } from "@/modules/shared/application/scale-patterns";
 
 import { useScaleExplorerStore } from "./use-scale-explorer-store";
 
@@ -35,21 +26,7 @@ export function useScaleExplorerViewModel() {
   const store = useScaleExplorerStore();
   const { rootValue, patternName, fretCount, selectedTriadIndex: storedTriadIndex } = storeToRefs(store);
 
-  const availablePatterns: ScalePattern[] = [
-    MAJOR_SCALE_PATTERN,
-
-    NATURAL_MINOR_SCALE_PATTERN,
-    HARMONIC_MINOR_SCALE_PATTERN,
-    MELODIC_MINOR_SCALE_PATTERN,
-
-    DORIAN_SCALE_PATTERN,
-    AEOLIAN_SCALE_PATTERN,
-    IONIAN_SCALE_PATTERN,
-    LOCRIAN_SCALE_PATTERN,
-    LYDIAN_SCALE_PATTERN,
-    MIXOLYDIAN_SCALE_PATTERN,
-    PHRYGIAN_SCALE_PATTERN,
-  ];
+  const availablePatterns = ALL_SCALE_PATTERNS;
 
   const selectedRoot = computed<Note>({
     get: () => Note.from(rootValue.value),

@@ -25,7 +25,7 @@ export interface ListenCue {
 }
 
 /** Visualizações compartilhadas que um passo pode embutir inline (ver `modules/shared/components`). */
-export type InlineVizKind = "scale-notes" | "fretboard" | "chromatic-wheel" | "harmonic-field" | "chord-card";
+export type InlineVizKind = "scale-notes" | "chromatic-wheel" | "harmonic-field" | "chord-card";
 
 export interface ConceptStep {
   kind: "concept";
@@ -105,7 +105,7 @@ const majorScaleLesson: Lesson = {
     { kind: "concept", bodyKey: "learn.lessons.majorScale.concept", listen: majorScaleListen, viz: ["scale-notes"] },
     {
       kind: "explore",
-      viz: ["scale-notes", "fretboard"],
+      viz: ["scale-notes", "chromatic-wheel"],
       explorerPath: "/",
       deeplink: { root: TONIC, pattern: "Major" },
     },
@@ -169,11 +169,16 @@ const twoFiveOneLesson: Lesson = {
   ],
 };
 
+/** Tônica do Dorian usado nesta lição — 2º grau do tom-pai `TONIC` maior, não o tom-pai em si. */
+const DORIAN_TONIC = Note.from(TONIC).transpose(2).value;
+
 const modesLesson: Lesson = {
   id: "modes",
   titleKey: "learn.lessons.modes.title",
   summaryKey: "learn.lessons.modes.summary",
-  context: { root: TONIC, pattern: "Dorian" },
+  // O contexto inline mostra a escala resultante (D Dorian); o deep-link abaixo usa o
+  // tom-pai (C) porque é assim que o Mode Explorer interpreta `root` + `pattern`.
+  context: { root: DORIAN_TONIC, pattern: "Dorian" },
   prerequisiteId: twoFiveOneLesson.id,
   steps: [
     { kind: "concept", bodyKey: "learn.lessons.modes.concept", viz: ["chromatic-wheel"] },

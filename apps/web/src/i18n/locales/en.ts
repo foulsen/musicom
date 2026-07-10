@@ -223,9 +223,19 @@ export const en = {
         concept: "A mode is the same seven notes as a major scale, just starting on a different degree. Same notes, different tonic — and a completely different color, from bright Lydian to dark Locrian.",
       },
     },
-    comingSoon: {
-      title: "Coming soon",
-      description: "This lesson's guided flow is being built — for now, explore freely from the sidebar.",
+    listen: "Listen",
+    openInExplorer: "Open in full explorer",
+    previous: "Previous",
+    next: "Next",
+    finish: "Finish",
+    stepKind: {
+      concept: "Concept",
+      explore: "Explore",
+      checkpoint: "Checkpoint",
+    },
+    notFound: {
+      title: "Lesson not found",
+      description: "This lesson doesn't exist (yet) — head back to the tracks overview.",
     },
     lesson: {
       backToTracks: "← Back to tracks",
