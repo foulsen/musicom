@@ -13,6 +13,7 @@
     "@fontsource-variable/cascadia-code": "^5.2.2",
     "@lucide/vue": "^1.21.0",
     "@music-workspace/music-theory": "workspace:*",
+    "@music-workspace/shared-types": "workspace:*",
     "@vueuse/core": "^14.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
