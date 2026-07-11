@@ -10,7 +10,8 @@ not a replacement for the client's `localStorage`. No music-theory logic lives h
 ## Stack
 
 - **Fastify 5** + TypeScript (ESM), run directly with `tsx` (no build step, matching the rest of the monorepo).
-- **Drizzle ORM** over **better-sqlite3** (SQLite in dev; schema kept to the Postgres-common subset).
+- **Drizzle ORM** over **libSQL** (`@libsql/client`) — a local `file:` SQLite database in dev, a hosted
+  [Turso](https://turso.tech) database in production (schema kept to the Postgres-common subset).
 - **@fastify/cookie** for httpOnly session cookies; **zod** contracts from `@music-workspace/shared-types`.
 - Feature-based layout under `src/modules/<feature>/{routes,service,...}.ts`.
 - `buildApp()` in `src/app.ts` creates the instance without binding a port so tests drive it via
@@ -26,10 +27,22 @@ not a replacement for the client's `localStorage`. No music-theory logic lives h
 | `pnpm --filter api test` | Run Vitest |
 | `pnpm --filter api db:generate` | Generate a migration from `src/db/schema.ts` into `drizzle/` |
 
-Env: `PORT` (default `3001`), `HOST` (default `0.0.0.0`), `DATABASE_URL` (default `data/app.db`;
-use `:memory:` for tests), `NODE_ENV` (`production` makes the session cookie `secure` and emits JSON
-logs; dev uses pretty logs), `LOG_LEVEL` (default `info`), `RATE_LIMIT_MAX` (default `200`) and
-`RATE_LIMIT_WINDOW` (default `1 minute`) for the per-IP rate limit.
+Env: `PORT` (default `3001`), `HOST` (default `0.0.0.0`), `DATABASE_URL` (default: a local `file:`
+URL at `data/app.db`; use `:memory:` for tests, or a `libsql://<db>.turso.io` URL in production),
+`TURSO_AUTH_TOKEN` (only needed alongside a `libsql://` URL — ignored for local `file:` databases),
+`NODE_ENV` (`production` makes the session cookie `secure` and emits JSON logs; dev uses pretty
+logs), `LOG_LEVEL` (default `info`), `RATE_LIMIT_MAX` (default `200`) and `RATE_LIMIT_WINDOW`
+(default `1 minute`) for the per-IP rate limit.
+
+### Pointing at a real Turso database
+
+1. `turso db create scale-explorer` (or via the [dashboard](https://turso.tech)), then
+   `turso db show scale-explorer --url` and `turso db tokens create scale-explorer` for the credentials.
+2. Set `DATABASE_URL` to the `libsql://...` URL and `TURSO_AUTH_TOKEN` to the token in the
+   production environment. Local dev needs neither — it falls back to the local `file:` database.
+3. `pnpm --filter api db:generate` reads schema changes into `drizzle/` regardless of target; the
+   migrations themselves still run automatically on boot (`createDb`), against whichever database
+   `DATABASE_URL` points to.
 
 ## Routes
 

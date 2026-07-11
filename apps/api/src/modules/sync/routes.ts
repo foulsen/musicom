@@ -28,7 +28,7 @@ const AGGREGATES = [
 export async function syncRoutes(app: FastifyInstance): Promise<void> {
   for (const { path, table, envelope } of AGGREGATES) {
     app.get(`/sync/${path}`, { preHandler: authenticate }, async (request) => {
-      const stored = readSnapshot(app.db, table, request.user!.id);
+      const stored = await readSnapshot(app.db, table, request.user!.id);
 
       return stored ?? { data: null, updatedAt: 0 };
     });
@@ -40,7 +40,7 @@ export async function syncRoutes(app: FastifyInstance): Promise<void> {
         return reply.code(400).send({ error: "BadRequest", issues: parsed.error.issues });
       }
 
-      const result = writeSnapshot(
+      const result = await writeSnapshot(
         app.db,
         table,
         request.user!.id,

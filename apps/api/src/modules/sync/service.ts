@@ -13,8 +13,12 @@ export type WriteResult =
   | { status: "stale"; data: unknown; updatedAt: number };
 
 /** Returns the user's stored snapshot for an aggregate, or null if none yet. */
-export function readSnapshot(db: Db, table: SnapshotTable, userId: string): StoredSnapshot | null {
-  const row = db
+export async function readSnapshot(
+  db: Db,
+  table: SnapshotTable,
+  userId: string,
+): Promise<StoredSnapshot | null> {
+  const row = await db
     .select({ snapshot: table.snapshot, updatedAt: table.updatedAt })
     .from(table)
     .where(eq(table.userId, userId))
@@ -29,20 +33,20 @@ export function readSnapshot(db: Db, table: SnapshotTable, userId: string): Stor
  * can reconcile. We trust the client-supplied `updatedAt` (the ordering token
  * across devices) but guard against it going backwards.
  */
-export function writeSnapshot(
+export async function writeSnapshot(
   db: Db,
   table: SnapshotTable,
   userId: string,
   data: unknown,
   updatedAt: number,
-): WriteResult {
-  const existing = readSnapshot(db, table, userId);
+): Promise<WriteResult> {
+  const existing = await readSnapshot(db, table, userId);
 
   if (existing && updatedAt < existing.updatedAt) {
     return { status: "stale", data: existing.data, updatedAt: existing.updatedAt };
   }
 
-  db.insert(table)
+  await db.insert(table)
     .values({ userId, snapshot: data, updatedAt })
     .onConflictDoUpdate({ target: table.userId, set: { snapshot: data, updatedAt } })
     .run();

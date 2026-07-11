@@ -1,10 +1,12 @@
+import type { FastifyInstance } from "fastify";
 import { afterAll, beforeAll, expect, it } from "vitest";
 
 import { buildApp } from "./app";
 
-const app = buildApp({ databaseUrl: ":memory:" });
+let app: FastifyInstance;
 
 beforeAll(async () => {
+  app = await buildApp({ databaseUrl: ":memory:" });
   await app.ready();
 });
 

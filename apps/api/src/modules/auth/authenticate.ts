@@ -16,7 +16,7 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
     return;
   }
 
-  const user = resolveSession(request.server.db, rawToken);
+  const user = await resolveSession(request.server.db, rawToken);
 
   if (!user) {
     await reply.code(401).send({ error: "Unauthorized", message: "Invalid session" });

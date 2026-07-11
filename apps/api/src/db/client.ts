@@ -2,13 +2,13 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import Database from "better-sqlite3";
-import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { createClient } from "@libsql/client";
+import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
+import { migrate } from "drizzle-orm/libsql/migrator";
 
 import * as schema from "./schema";
 
-export type Db = BetterSQLite3Database<typeof schema>;
+export type Db = LibSQLDatabase<typeof schema>;
 
 const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 
@@ -18,20 +18,18 @@ export interface DbHandle {
 }
 
 /**
- * Opens a SQLite connection, applies pending migrations, and returns the
- * Drizzle client plus a close handle. Pass ":memory:" for isolated test DBs.
+ * Opens a libSQL connection — a local "file:" URL, ":memory:", or a remote
+ * "libsql://" Turso URL — applies pending migrations, and returns the
+ * Drizzle client plus a close handle.
  */
-export function createDb(url: string): DbHandle {
-  if (url !== ":memory:") {
-    mkdirSync(dirname(url), { recursive: true });
+export async function createDb(url: string, authToken?: string): Promise<DbHandle> {
+  if (url.startsWith("file:")) {
+    mkdirSync(dirname(fileURLToPath(url)), { recursive: true });
   }
 
-  const sqlite = new Database(url);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
+  const client = createClient({ url, authToken });
+  const db = drizzle(client, { schema });
+  await migrate(db, { migrationsFolder });
 
-  const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder });
-
-  return { db, close: () => sqlite.close() };
+  return { db, close: () => client.close() };
 }

@@ -7,7 +7,7 @@ import { SESSION_COOKIE } from "./session";
 let app: FastifyInstance;
 
 beforeAll(async () => {
-  app = buildApp({ databaseUrl: ":memory:" });
+  app = await buildApp({ databaseUrl: ":memory:" });
   await app.ready();
 });
 

@@ -11,8 +11,10 @@ import { syncRoutes } from "./modules/sync/routes";
 
 export interface BuildAppOptions {
   logger?: FastifyServerOptions["logger"];
-  /** Overrides the configured SQLite path — tests pass ":memory:". */
+  /** Overrides the configured libSQL URL — tests pass ":memory:". */
   databaseUrl?: string;
+  /** Overrides the configured Turso auth token. */
+  databaseAuthToken?: string;
 }
 
 /**
@@ -20,12 +22,15 @@ export interface BuildAppOptions {
  * via `app.inject()`. Actual listening happens in `server.ts`.
  * Feature routes register under the versioned `/v1` prefix.
  */
-export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
+export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({
     logger: options.logger ?? false,
   });
 
-  const { db, close } = createDb(options.databaseUrl ?? config.databaseUrl);
+  const { db, close } = await createDb(
+    options.databaseUrl ?? config.databaseUrl,
+    options.databaseAuthToken ?? config.databaseAuthToken,
+  );
   app.decorate("db", db);
   app.addHook("onClose", () => close());
 

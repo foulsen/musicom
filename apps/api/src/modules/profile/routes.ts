@@ -14,6 +14,6 @@ export async function profileRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: "BadRequest", issues: parsed.error.issues });
     }
 
-    return updateName(app.db, request.user!.id, parsed.data.name);
+    return await updateName(app.db, request.user!.id, parsed.data.name);
   });
 }

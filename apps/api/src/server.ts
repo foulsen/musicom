@@ -14,7 +14,7 @@ const logger: FastifyServerOptions["logger"] = config.isProduction
       },
     };
 
-const app = buildApp({ logger });
+const app = await buildApp({ logger });
 
 app.listen({ port: config.port, host: config.host }).catch((error) => {
   app.log.error(error);
