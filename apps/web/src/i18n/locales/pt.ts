@@ -35,6 +35,12 @@ export const pt: MessageSchema = {
     name: "Nome",
     namePlaceholder: "Seu nome",
     language: "Idioma",
+    sync: {
+      idle: "Sincronizado",
+      syncing: "Sincronizando…",
+      offline: "Offline — alterações salvas localmente",
+      error: "Falha ao sincronizar — tentaremos de novo",
+    },
   },
   scaleExplorer: {
     title: "Explorador de Escalas",

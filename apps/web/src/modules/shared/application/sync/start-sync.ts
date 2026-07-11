@@ -18,6 +18,9 @@ const PUSH_DEBOUNCE_MS = 2000;
 /** Serialized snapshot last known to match the server, for change detection. */
 const lastPushed: Record<string, string> = {};
 
+let pushersAttached = false;
+let onlineRetryArmed = false;
+
 function debounce(fn: () => void, ms: number): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
   return () => {
@@ -26,19 +29,57 @@ function debounce(fn: () => void, ms: number): () => void {
   };
 }
 
+/** Retries the whole sync once connectivity returns (one-shot `online` listener). */
+function armOnlineRetry(pinia: Pinia): void {
+  if (onlineRetryArmed || typeof window === "undefined") {
+    return;
+  }
+  onlineRetryArmed = true;
+
+  const handler = (): void => {
+    window.removeEventListener("online", handler);
+    onlineRetryArmed = false;
+    void startSync(pinia);
+  };
+  window.addEventListener("online", handler);
+}
+
+function reportOutcome(pinia: Pinia, ok: boolean): void {
+  const sync = useSyncStore(pinia);
+  if (ok) {
+    sync.status = "idle";
+    sync.lastSyncedAt = Date.now();
+  } else {
+    sync.status = "error";
+    armOnlineRetry(pinia);
+  }
+}
+
 /**
  * Boots the sync layer: establishes an anonymous session, reconciles server and
- * local state, then wires background pushes. Fire-and-forget — every network
- * call is guarded so the app stays fully usable offline.
+ * local state, then wires background pushes. Fire-and-forget and idempotent —
+ * safe to call again on reconnect. Every network call is guarded so the app
+ * stays fully usable offline.
  */
 export async function startSync(pinia: Pinia): Promise<void> {
+  const sync = useSyncStore(pinia);
+  sync.status = "syncing";
+
   const online = await bootstrapSession(pinia);
   if (!online) {
+    sync.status = "offline";
+    armOnlineRetry(pinia);
     return;
   }
 
-  await hydrate(pinia);
-  attachPushers(pinia);
+  const ok = await hydrate(pinia);
+
+  if (!pushersAttached) {
+    attachPushers(pinia);
+    pushersAttached = true;
+  }
+
+  reportOutcome(pinia, ok);
 }
 
 /** Resolves (or creates) a session and reconciles the profile. Returns false offline. */
@@ -68,9 +109,10 @@ async function bootstrapSession(pinia: Pinia): Promise<boolean> {
   }
 }
 
-/** For each aggregate: adopt server state if newer, else push local up. */
-async function hydrate(pinia: Pinia): Promise<void> {
+/** For each aggregate: adopt server state if newer, else push local up. Returns false if any aggregate failed. */
+async function hydrate(pinia: Pinia): Promise<boolean> {
   const sync = useSyncStore(pinia);
+  let ok = true;
 
   for (const aggregate of AGGREGATES) {
     try {
@@ -92,11 +134,13 @@ async function hydrate(pinia: Pinia): Promise<void> {
         }
       }
     } catch {
-      // Skip this aggregate; it will retry on the next local change.
+      ok = false;
     }
 
     lastPushed[aggregate.key] = JSON.stringify(aggregate.read(pinia));
   }
+
+  return ok;
 }
 
 /** Subscribes to every source store so future edits push (debounced) to the server. */
@@ -130,11 +174,18 @@ function attachPushers(pinia: Pinia): void {
 async function flush(pinia: Pinia): Promise<void> {
   const sync = useSyncStore(pinia);
 
-  for (const aggregate of AGGREGATES) {
+  const dirty = AGGREGATES.filter(
+    (aggregate) => JSON.stringify(aggregate.read(pinia)) !== lastPushed[aggregate.key],
+  );
+  if (dirty.length === 0) {
+    return;
+  }
+
+  sync.status = "syncing";
+  let ok = true;
+
+  for (const aggregate of dirty) {
     const current = JSON.stringify(aggregate.read(pinia));
-    if (current === lastPushed[aggregate.key]) {
-      continue;
-    }
 
     try {
       const result = await apiClient.putSnapshot(aggregate.slug, {
@@ -155,7 +206,10 @@ async function flush(pinia: Pinia): Promise<void> {
         }
       }
     } catch {
-      // Stay dirty; the next change (or reload) retries.
+      // Stay dirty; retry on reconnect or the next change.
+      ok = false;
     }
   }
+
+  reportOutcome(pinia, ok);
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
 
@@ -23,9 +23,17 @@ import { Select as SelectRoot, SelectContent, SelectItem, SelectTrigger, SelectV
 
 import { INSTRUMENT_IDS, type InstrumentId } from "@/modules/shared/application/instrument-presets";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
+import { useSyncStore } from "@/modules/shared/application/sync";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 import { useUserStore } from "../../application/use-user-store";
+
+const SYNC_DOT_CLASS: Record<string, string> = {
+  idle: "bg-emerald-500",
+  syncing: "bg-amber-500 animate-pulse",
+  offline: "bg-muted-foreground",
+  error: "bg-destructive",
+};
 
 const LANGUAGE_OPTIONS: { value: AppLocale; label: string }[] = [
   { value: "en", label: "English" },
@@ -43,6 +51,9 @@ const emit = defineEmits<{
 const { t, locale } = useI18n();
 const { masterVolume, instrument } = useNoteAudio();
 const { name } = storeToRefs(useUserStore());
+const { status: syncStatus } = storeToRefs(useSyncStore());
+
+const syncDotClass = computed(() => SYNC_DOT_CLASS[syncStatus.value] ?? SYNC_DOT_CLASS.offline);
 
 watch(locale, (value) => localStorage.setItem(LOCALE_STORAGE_KEY, value));
 </script>
@@ -142,6 +153,13 @@ watch(locale, (value) => localStorage.setItem(LOCALE_STORAGE_KEY, value));
               </select-item>
             </select-content>
           </select-root>
+        </div>
+
+        <separator class="my-4" />
+
+        <div class="flex items-center gap-2 text-xs text-muted-foreground">
+          <span class="size-2 shrink-0 rounded-full" :class="syncDotClass" />
+          <span>{{ t(`settings.sync.${syncStatus}`) }}</span>
         </div>
       </dialog-content>
     </dialog-portal>

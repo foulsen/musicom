@@ -33,6 +33,12 @@ export const en = {
     name: "Name",
     namePlaceholder: "Your name",
     language: "Language",
+    sync: {
+      idle: "Synced",
+      syncing: "Syncing…",
+      offline: "Offline — changes saved locally",
+      error: "Sync failed — will retry",
+    },
   },
   scaleExplorer: {
     title: "Scale Explorer",
