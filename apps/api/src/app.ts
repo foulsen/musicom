@@ -1,5 +1,6 @@
 import cookie from "@fastify/cookie";
-import Fastify, { type FastifyInstance } from "fastify";
+import rateLimit from "@fastify/rate-limit";
+import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 
 import { config } from "./config";
 import { createDb } from "./db/client";
@@ -9,7 +10,7 @@ import { profileRoutes } from "./modules/profile/routes";
 import { syncRoutes } from "./modules/sync/routes";
 
 export interface BuildAppOptions {
-  logger?: boolean;
+  logger?: FastifyServerOptions["logger"];
   /** Overrides the configured SQLite path — tests pass ":memory:". */
   databaseUrl?: string;
 }
@@ -29,6 +30,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.addHook("onClose", () => close());
 
   app.register(cookie);
+  app.register(rateLimit, { max: config.rateLimit.max, timeWindow: config.rateLimit.timeWindow });
 
   app.register(healthRoutes, { prefix: "/v1" });
   app.register(authRoutes, { prefix: "/v1" });

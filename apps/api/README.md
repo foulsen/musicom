@@ -27,7 +27,9 @@ not a replacement for the client's `localStorage`. No music-theory logic lives h
 | `pnpm --filter api db:generate` | Generate a migration from `src/db/schema.ts` into `drizzle/` |
 
 Env: `PORT` (default `3001`), `HOST` (default `0.0.0.0`), `DATABASE_URL` (default `data/app.db`;
-use `:memory:` for tests), `NODE_ENV` (`production` makes the session cookie `secure`).
+use `:memory:` for tests), `NODE_ENV` (`production` makes the session cookie `secure` and emits JSON
+logs; dev uses pretty logs), `LOG_LEVEL` (default `info`), `RATE_LIMIT_MAX` (default `200`) and
+`RATE_LIMIT_WINDOW` (default `1 minute`) for the per-IP rate limit.
 
 ## Routes
 

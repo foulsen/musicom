@@ -1,11 +1,22 @@
+import type { FastifyServerOptions } from "fastify";
+
 import { buildApp } from "./app";
+import { config } from "./config";
 
-const port = Number(process.env.PORT ?? 3001);
-const host = process.env.HOST ?? "0.0.0.0";
+/** JSON logs in production; human-readable (pino-pretty) in dev. */
+const logger: FastifyServerOptions["logger"] = config.isProduction
+  ? { level: config.logLevel }
+  : {
+      level: config.logLevel,
+      transport: {
+        target: "pino-pretty",
+        options: { translateTime: "HH:MM:ss", ignore: "pid,hostname" },
+      },
+    };
 
-const app = buildApp({ logger: true });
+const app = buildApp({ logger });
 
-app.listen({ port, host }).catch((error) => {
+app.listen({ port: config.port, host: config.host }).catch((error) => {
   app.log.error(error);
   process.exit(1);
 });

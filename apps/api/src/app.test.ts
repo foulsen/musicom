@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 
 import { buildApp } from "./app";
 
-const app = buildApp();
+const app = buildApp({ databaseUrl: ":memory:" });
 
 beforeAll(async () => {
   await app.ready();
@@ -26,4 +26,11 @@ it("returns 404 for unknown routes", async () => {
   const response = await app.inject({ method: "GET", url: "/v1/nope" });
 
   expect(response.statusCode).toBe(404);
+});
+
+it("applies rate limiting (exposes x-ratelimit headers)", async () => {
+  const response = await app.inject({ method: "GET", url: "/v1/health" });
+
+  expect(response.headers["x-ratelimit-limit"]).toBeDefined();
+  expect(response.headers["x-ratelimit-remaining"]).toBeDefined();
 });
