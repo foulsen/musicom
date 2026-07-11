@@ -36,6 +36,12 @@ use `:memory:` for tests), `NODE_ENV` (`production` makes the session cookie `se
   returns the profile.
 - `GET /v1/me` — the signed-in profile (401 without a valid session).
 - `PATCH /v1/me` — update the display name (`{ name }`, validated by shared-types).
+- `GET /v1/sync/<aggregate>` — the stored `{ data, updatedAt }` envelope, or `{ data: null,
+  updatedAt: 0 }` if nothing is stored yet.
+- `PUT /v1/sync/<aggregate>` — store a snapshot (validated against its shared-types contract).
+  Applies last-write-wins: a write older than what's stored gets `409` plus the current server
+  envelope so the client can reconcile.
 
-Migrations run automatically on boot (`createDb`). The `/v1/sync/*` snapshot endpoints arrive in
-phase 3.
+`<aggregate>` is one of `learn`, `drills`, `ear-training`, `preferences`.
+
+Migrations run automatically on boot (`createDb`).

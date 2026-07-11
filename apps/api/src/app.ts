@@ -6,6 +6,7 @@ import { createDb } from "./db/client";
 import { authRoutes } from "./modules/auth/routes";
 import { healthRoutes } from "./modules/health/routes";
 import { profileRoutes } from "./modules/profile/routes";
+import { syncRoutes } from "./modules/sync/routes";
 
 export interface BuildAppOptions {
   logger?: boolean;
@@ -32,6 +33,7 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   app.register(healthRoutes, { prefix: "/v1" });
   app.register(authRoutes, { prefix: "/v1" });
   app.register(profileRoutes, { prefix: "/v1" });
+  app.register(syncRoutes, { prefix: "/v1" });
 
   return app;
 }

@@ -25,3 +25,27 @@ export const sessions = sqliteTable("sessions", {
   createdAt: integer("created_at").notNull(),
   lastSeenAt: integer("last_seen_at").notNull(),
 });
+
+/**
+ * One synced aggregate per user, stored as an opaque JSON snapshot plus an
+ * `updatedAt` (epoch ms) that drives last-write-wins. The shape of `snapshot`
+ * is guarded by the matching zod contract at the route boundary, not by the
+ * DB — the server treats it as a blob (plan §2). Not normalized on purpose:
+ * per-item tables only earn their keep once a query needs them (plan §1).
+ */
+function snapshotTable(name: string) {
+  return sqliteTable(name, {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    snapshot: text("snapshot", { mode: "json" }).notNull(),
+    updatedAt: integer("updated_at").notNull(),
+  });
+}
+
+export type SnapshotTable = ReturnType<typeof snapshotTable>;
+
+export const learnProgress = snapshotTable("learn_progress");
+export const drillsState = snapshotTable("drills_state");
+export const earTraining = snapshotTable("ear_training");
+export const preferences = snapshotTable("preferences");
