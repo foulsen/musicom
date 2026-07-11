@@ -14,6 +14,7 @@ import { i18n, LOCALE_STORAGE_KEY, SUPPORTED_LOCALES, type AppLocale } from "@/i
 import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
+import { useThemeStore } from "@/modules/settings/application/use-theme-store";
 import { useAudioSettingsStore } from "@/modules/shared/application/use-audio-settings-store";
 
 import type { AggregateKey } from "./types";
@@ -123,6 +124,7 @@ const preferences = defineAggregate<PreferencesSnapshot>({
     const drillsStore = useDrillsStore(pinia);
     return {
       locale: currentLocale(),
+      theme: useThemeStore(pinia).mode,
       audio: { masterVolume: audio.masterVolume, instrument: audio.instrument },
       earTraining: { difficulty: ear.difficulty, intervalPlaybackMode: ear.intervalPlaybackMode },
       drills: {
@@ -134,6 +136,9 @@ const preferences = defineAggregate<PreferencesSnapshot>({
   apply: (pinia, data) => {
     if (data.locale) {
       applyLocale(data.locale);
+    }
+    if (data.theme) {
+      useThemeStore(pinia).mode = data.theme;
     }
 
     const audio = useAudioSettingsStore(pinia);

@@ -33,6 +33,9 @@ export const en = {
     name: "Name",
     namePlaceholder: "Your name",
     language: "Language",
+    theme: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
     sync: {
       idle: "Synced",
       syncing: "Syncing…",

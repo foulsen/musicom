@@ -2,12 +2,16 @@ import { z } from "zod";
 
 import { syncEnvelopeSchema } from "./sync/envelope";
 
-/** Kept in sync with `apps/web` SUPPORTED_LOCALES / instrument presets / deck ids. */
+/**
+ * Kept in sync with `apps/web` SUPPORTED_LOCALES / instrument presets / deck ids /
+ * `use-theme-store` ThemeMode.
+ */
 export const localeSchema = z.enum(["en", "pt"]);
 export const instrumentSchema = z.enum(["piano", "guitar", "realistic-guitar"]);
 export const difficultySchema = z.enum(["easy", "medium", "hard"]);
 export const deckIdSchema = z.enum(["intervals", "intervalNames", "chordFormulas", "chordSpelling"]);
 export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
+export const themeSchema = z.enum(["light", "dark"]);
 
 /**
  * Cross-store preferences aggregate. Gathers the settings scattered across
@@ -18,6 +22,7 @@ export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
  */
 export const preferencesSnapshotSchema = z.object({
   locale: localeSchema.optional(),
+  theme: themeSchema.optional(),
   audio: z
     .object({
       masterVolume: z.number().min(0).max(1),

@@ -105,4 +105,12 @@ describe("preferences snapshot", () => {
       preferencesSnapshotSchema.safeParse({ audio: { instrument: "kazoo" } }).success,
     ).toBe(false);
   });
+
+  it("accepts a theme preference", () => {
+    expect(preferencesSnapshotSchema.safeParse({ theme: "light" }).success).toBe(true);
+  });
+
+  it("rejects an unknown theme", () => {
+    expect(preferencesSnapshotSchema.safeParse({ theme: "sepia" }).success).toBe(false);
+  });
 });

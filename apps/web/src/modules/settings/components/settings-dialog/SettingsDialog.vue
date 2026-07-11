@@ -12,7 +12,7 @@ import {
   DialogRoot,
   DialogTitle,
 } from "reka-ui";
-import { Volume2, X } from "@lucide/vue";
+import { Moon, Sun, Volume2, X } from "@lucide/vue";
 
 import { LOCALE_STORAGE_KEY, type AppLocale } from "@/i18n";
 
@@ -27,6 +27,7 @@ import { useSyncStore } from "@/modules/shared/application/sync";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 import { useUserStore } from "../../application/use-user-store";
+import { useThemeStore, type ThemeMode } from "../../application/use-theme-store";
 
 const SYNC_DOT_CLASS: Record<string, string> = {
   idle: "bg-emerald-500",
@@ -51,6 +52,7 @@ const emit = defineEmits<{
 const { t, locale } = useI18n();
 const { masterVolume, instrument } = useNoteAudio();
 const { name } = storeToRefs(useUserStore());
+const { mode: theme } = storeToRefs(useThemeStore());
 const { status: syncStatus } = storeToRefs(useSyncStore());
 
 const syncDotClass = computed(() => SYNC_DOT_CLASS[syncStatus.value] ?? SYNC_DOT_CLASS.offline);
@@ -133,6 +135,27 @@ watch(locale, (value) => localStorage.setItem(LOCALE_STORAGE_KEY, value));
               class="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-brand"
             />
           </div>
+        </div>
+
+        <separator class="my-4" />
+
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-medium text-muted-foreground">{{ t("settings.theme") }}</span>
+          <chip-toggle-group
+            :model-value="theme"
+            type="single"
+            :aria-label="t('settings.theme')"
+            @update:model-value="(value) => value && (theme = value as ThemeMode)"
+          >
+            <chip-toggle-item value="light" class="flex items-center gap-1.5 px-3 py-1.5 text-xs">
+              <sun class="size-3.5" />
+              {{ t("settings.themeLight") }}
+            </chip-toggle-item>
+            <chip-toggle-item value="dark" class="flex items-center gap-1.5 px-3 py-1.5 text-xs">
+              <moon class="size-3.5" />
+              {{ t("settings.themeDark") }}
+            </chip-toggle-item>
+          </chip-toggle-group>
         </div>
 
         <separator class="my-4" />

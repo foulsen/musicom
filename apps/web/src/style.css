@@ -32,7 +32,7 @@
 
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.55 0 0);
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -47,10 +47,13 @@
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.55 0 0);
 
   --brand: oklch(0.65 0.22 354);
-  --brand-foreground: oklch(0.985 0 0);
+  /* Dark text on solid --brand: the light-mode pink (L 0.65) is too light for the
+     near-white foreground reused from dark mode (contrast ~3.46, fails WCAG AA).
+     Near-black instead (matches dark mode's own brand-foreground value) gives ~5.2:1. */
+  --brand-foreground: oklch(0.18 0 0);
   --brand-soft: oklch(0.9 0.07 350);
   --brand-soft-foreground: oklch(0.32 0.12 350);
 }

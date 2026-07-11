@@ -7,6 +7,7 @@ import { ApiError, apiClient } from "@/lib/api-client";
 import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
+import { useThemeStore } from "@/modules/settings/application/use-theme-store";
 import { useAudioSettingsStore } from "@/modules/shared/application/use-audio-settings-store";
 import { useUserStore } from "@/modules/settings/application/use-user-store";
 
@@ -152,6 +153,7 @@ function attachPushers(pinia: Pinia): void {
     useDrillsStore(pinia),
     useEarTrainingStore(pinia),
     useAudioSettingsStore(pinia),
+    useThemeStore(pinia),
   ];
   for (const store of sourceStores) {
     store.$subscribe(() => flushSoon(), { detached: true });

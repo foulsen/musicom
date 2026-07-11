@@ -5,6 +5,7 @@ import App from "./App.vue";
 import { setupPinia } from "@/app/create-pinia";
 import { router } from "@/router";
 import { i18n } from "@/i18n";
+import { watchTheme } from "@/modules/settings/application/use-theme-store";
 import { startSync } from "@/modules/shared/application/sync";
 
 import "@fontsource-variable/cascadia-code/index.css";
@@ -19,6 +20,9 @@ app.use(router);
 app.use(i18n);
 
 app.mount("#app");
+
+// Apply the persisted theme and keep <html>.dark in sync with future changes.
+watchTheme(pinia);
 
 // Local-first: the app is already usable; sync runs in the background and
 // degrades gracefully when the API is unreachable.

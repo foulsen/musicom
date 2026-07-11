@@ -35,6 +35,9 @@ export const pt: MessageSchema = {
     name: "Nome",
     namePlaceholder: "Seu nome",
     language: "Idioma",
+    theme: "Tema",
+    themeLight: "Claro",
+    themeDark: "Escuro",
     sync: {
       idle: "Sincronizado",
       syncing: "Sincronizando…",
