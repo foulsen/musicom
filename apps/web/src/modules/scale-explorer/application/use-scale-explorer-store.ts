@@ -9,6 +9,7 @@ export const useScaleExplorerStore = defineStore("scale-explorer", {
     patternName: "Major",
     fretCount: 12,
     selectedTriadIndex: 0,
+    tuningName: "Standard",
   }),
   persist: true,
 });

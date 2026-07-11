@@ -38,6 +38,11 @@ const routes = [
     component: () => import("@/modules/learn/pages/LessonPage.vue"),
     meta: { titleKey: "learn.title" },
   },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import("@/modules/navigation/pages/NotFoundPage.vue"),
+    meta: { titleKey: "common.notFound.title" },
+  },
 ];
 
 export const router = createRouter({
@@ -50,4 +55,8 @@ router.afterEach((to) => {
   const pageTitle = titleKey ? i18n.global.t(titleKey) : null;
 
   document.title = pageTitle ? `${pageTitle} · MUSICOM` : "MUSICOM";
+
+  // `<main>` is the scroll container (not window), so the router's own
+  // `scrollBehavior` option can't reach it — reset it here instead.
+  document.querySelector("main")?.scrollTo(0, 0);
 });

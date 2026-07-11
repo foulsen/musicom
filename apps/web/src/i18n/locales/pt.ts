@@ -26,6 +26,15 @@ export const pt: MessageSchema = {
     },
     backToLesson: "Voltar à lição",
     guest: "Convidado",
+    fretboard: "Braço",
+    playChordShape: "Tocar esta digitação",
+    showMoreVoicings: "+{count} mais",
+    showFewerVoicings: "Mostrar menos",
+    notFound: {
+      title: "Página não encontrada",
+      description: "A página que você procura não existe ou foi movida.",
+      backHome: "Voltar ao Explorador de Escalas",
+    },
   },
   settings: {
     title: "Configurações",
@@ -38,6 +47,7 @@ export const pt: MessageSchema = {
     theme: "Tema",
     themeLight: "Claro",
     themeDark: "Escuro",
+    themeSystem: "Sistema",
     sync: {
       idle: "Sincronizado",
       syncing: "Sincronizando…",
@@ -54,6 +64,8 @@ export const pt: MessageSchema = {
     triads: "Tríades",
     sevenths: "Sétimas",
     openInChordExplorer: "Abrir no Explorador de Acordes",
+    playChord: "Tocar {chord}",
+    listenToScale: "Ouvir escala",
     emptyShapes: {
       title: "Ainda sem digitações salvas",
       description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",
@@ -73,6 +85,7 @@ export const pt: MessageSchema = {
   fretboard: {
     showOutOfScale: "Mostrar todas as notas",
     showOutOfChord: "Mostrar todas as notas",
+    showReducedView: "Visão compacta",
   },
   tuning: {
     label: "Afinação",
@@ -113,7 +126,6 @@ export const pt: MessageSchema = {
       cellFound: "encontrada",
       progressAnnounce: "{found} de {total} encontradas",
       pressStart: "Pressione Começar para iniciar",
-      dragHint: "Arraste para rolar →",
     },
     noteId: {
       intro: "Uma casa acende no braço — diga a nota (afinação padrão).",
@@ -144,6 +156,12 @@ export const pt: MessageSchema = {
         chordFormulas: "Fórmulas de acorde",
         chordSpelling: "Grafia de acordes",
       },
+      deckContexts: {
+        intervals: "Nomeie este intervalo",
+        intervalNames: "Qual é o símbolo do grau?",
+        chordFormulas: "Qual é a fórmula?",
+        chordSpelling: "Soletre as notas",
+      },
     },
   },
   earTraining: {
@@ -156,6 +174,8 @@ export const pt: MessageSchema = {
     correct: "Certo!",
     incorrect: "Quase — a resposta destacada era a correta.",
     score: "Placar: {correct}/{total}",
+    scoreByKind: "Placar ({kind}): {correct}/{total}",
+    shortcutHint: "1–4 respondem · R repete · Enter/Espaço avançam",
     resetScore: "Zerar placar",
     difficulty: "Dificuldade",
     intervalPlaybackMode: "Modo de playback",
@@ -195,6 +215,7 @@ export const pt: MessageSchema = {
     notesUnchangedCaption: "As notas não mudam — só o ponto de partida.",
     compare: {
       title: "Comparar com outro modo em {root}",
+      caption: "Mesma tônica, padrão diferente — aqui as notas realmente mudam; os graus destacados são onde os dois modos diferem.",
     },
     emptyShapes: {
       title: "Ainda sem digitações salvas",
@@ -254,12 +275,22 @@ export const pt: MessageSchema = {
       explore: "Explorar",
       checkpoint: "Checkpoint",
     },
+    stepperGoTo: "Voltar ao passo {step}: {kind}",
+    checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Pergunta {current} de {total}",
     checkpointCorrect: "Certo!",
     checkpointIncorrect: "Quase — a resposta destacada era a correta.",
     checkpointNext: "Próxima pergunta",
     checkpointFinish: "Concluir lição",
     checkpointShortcutHint: "Teclas numéricas para responder, Enter/Espaço para avançar.",
+    completion: {
+      title: "Lição concluída!",
+      checkpointScore: "Você acertou {correct} de {total} perguntas do checkpoint.",
+      nextLessonUnlocked: "A seguir: {lesson}",
+      goToNextLesson: "Começar próxima lição",
+      backToTracks: "Voltar às trilhas",
+      trackComplete: "Você concluiu todas as lições desta trilha.",
+    },
     checkpoints: {
       majorScale: {
         degreeName: "Qual nota é o grau {degree} de {root} maior?",

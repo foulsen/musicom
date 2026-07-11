@@ -11,7 +11,7 @@ export const instrumentSchema = z.enum(["piano", "guitar", "realistic-guitar"]);
 export const difficultySchema = z.enum(["easy", "medium", "hard"]);
 export const deckIdSchema = z.enum(["intervals", "intervalNames", "chordFormulas", "chordSpelling"]);
 export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
-export const themeSchema = z.enum(["light", "dark"]);
+export const themeSchema = z.enum(["light", "dark", "system"]);
 
 /**
  * Cross-store preferences aggregate. Gathers the settings scattered across

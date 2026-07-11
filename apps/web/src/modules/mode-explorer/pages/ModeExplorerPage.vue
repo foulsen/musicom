@@ -12,6 +12,7 @@ import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chi
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
+import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
 import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { ChordCard } from "@/modules/shared/components/chord-card";
 import { EmptyState } from "@/modules/shared/components/empty-state";
@@ -40,6 +41,7 @@ const {
   differingDegreeIndexes,
   comparisonPitches,
   fretboardPositions,
+  fretCount,
   selectedTriadIndex,
   selectedChord,
   selectedChordCard,
@@ -47,7 +49,7 @@ const {
   returnLessonId,
 } = useModeExplorerViewModel();
 
-const { play, playSequence } = useNoteAudio();
+const { play, playChord, playSequence } = useNoteAudio();
 const { t, locale } = useI18n();
 
 function listenToMode() {
@@ -70,10 +72,9 @@ const degreeOrdinal = computed(() => {
 });
 
 /** Matiz de fundo sutil para cada pílula do eixo de brilho: quente (brilhante) -> frio (escuro). */
-function brightnessTint(index: number): string {
+function brightnessHue(index: number): number {
   const ratio = index / Math.max(brightnessOrder.length - 1, 1);
-  const hue = 45 + (230 - 45) * ratio;
-  return `hsl(${hue} 70% 55% / 0.16)`;
+  return 45 + (230 - 45) * ratio;
 }
 </script>
 
@@ -104,6 +105,10 @@ function brightnessTint(index: number): string {
       }}
     </p>
 
+    <p class="text-xs text-muted-foreground italic">
+      {{ t("modeExplorer.notesUnchangedCaption") }}
+    </p>
+
     <button
       type="button"
       class="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card/40 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -128,9 +133,9 @@ function brightnessTint(index: number): string {
             :class="
               index === brightnessRank
                 ? 'border-brand bg-brand-soft text-brand-soft-foreground font-semibold shadow-sm'
-                : 'border-border text-muted-foreground hover:text-foreground'
+                : 'brightness-pill border-border text-muted-foreground hover:text-foreground'
             "
-            :style="index === brightnessRank ? undefined : { backgroundColor: brightnessTint(index) }"
+            :style="index === brightnessRank ? undefined : { '--brightness-hue': brightnessHue(index) }"
             @click="selectModeByPatternName(name)"
           >
             {{ name }}
@@ -229,11 +234,11 @@ function brightnessTint(index: number): string {
           </ul>
         </div>
       </div>
-    </section>
 
-    <p class="text-xs text-muted-foreground italic">
-      {{ t("modeExplorer.notesUnchangedCaption") }}
-    </p>
+      <p class="text-xs text-muted-foreground italic">
+        {{ t("modeExplorer.compare.caption") }}
+      </p>
+    </section>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <scale-notes :degrees="degrees" class="lg:w-44 lg:shrink-0" @note-play="play" />
@@ -245,16 +250,26 @@ function brightnessTint(index: number): string {
       </div>
     </div>
 
-    <fretboard-diagram :positions="fretboardPositions" context="scale" :pulse-trigger="selectedModeIndex"
-      class="min-w-0 lg:max-w-full lg:p-16" @note-play="play" />
+    <section class="min-w-0 space-y-3 lg:flex-1 flex-1">
+      <header class="flex items-center justify-between gap-4">
+        <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {{ t("common.fretboard") }}
+        </h2>
+        <fret-range-selector v-model="fretCount" />
+      </header>
+
+      <fretboard-diagram :positions="fretboardPositions" context="scale" :pulse-trigger="selectedModeIndex"
+        class="lg:max-w-full lg:p-16" @note-play="play" />
+    </section>
 
     <div class="flex flex-col gap-8 lg:flex-row lg:items-start">
       <harmonic-field v-model:mode="harmonicFieldMode" :triads="triads" :sevenths="sevenths"
-        :selected-index="selectedTriadIndex" class="lg:w-56 lg:shrink-0" @select="selectChord" />
+        :selected-index="selectedTriadIndex" class="lg:w-56 lg:shrink-0" @select="selectChord"
+        @chord-play="playChord($event, { strum: true })" />
 
       <div class="flex-1">
         <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes"
-          class="min-w-0 lg:flex-1" @note-play="play" />
+          class="min-w-0 lg:flex-1" @note-play="play" @chord-play="playChord($event, { strum: true })" />
 
         <empty-state v-else :title="t('modeExplorer.emptyShapes.title')"
           :description="t('modeExplorer.emptyShapes.description', { chord: selectedChord.name })"
@@ -263,3 +278,14 @@ function brightnessTint(index: number): string {
     </div>
   </section>
 </template>
+
+<style scoped>
+/* Tint por matiz (quente→frio) com alfa/luminosidade por tema — 0.16/55% some no tema claro. */
+.brightness-pill {
+  background-color: hsl(var(--brightness-hue) 70% 45% / 0.3);
+}
+
+.dark .brightness-pill {
+  background-color: hsl(var(--brightness-hue) 70% 55% / 0.16);
+}
+</style>

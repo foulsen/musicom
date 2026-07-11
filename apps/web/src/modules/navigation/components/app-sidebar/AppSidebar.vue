@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { SettingsDialog } from "@/modules/settings/components/settings-dialog";
 import { useUserStore } from "@/modules/settings/application/use-user-store";
+import { useSyncStore } from "@/modules/shared/application/sync";
 
 import { NavigationItem } from "../navigation-item";
 
@@ -28,6 +29,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { name } = storeToRefs(useUserStore());
+const { status: syncStatus } = storeToRefs(useSyncStore());
 
 const settingsOpen = ref(false);
 
@@ -38,6 +40,9 @@ const initials = computed(() => {
 
   return words.map((word) => word[0]!.toUpperCase()).join("");
 });
+
+/** Só erro/offline precisam de atenção fora do Settings — idle/syncing são estados saudáveis. */
+const syncNeedsAttention = computed(() => syncStatus.value === "error" || syncStatus.value === "offline");
 </script>
 
 <template>
@@ -74,8 +79,15 @@ const initials = computed(() => {
         :aria-label="t('settings.open')"
         @click="settingsOpen = true"
       >
-        <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand">
+        <span class="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand">
           {{ initials || "?" }}
+          <span
+            v-if="syncNeedsAttention"
+            class="absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-sidebar"
+            :class="syncStatus === 'error' ? 'bg-destructive' : 'bg-muted-foreground'"
+            :aria-label="t(`settings.sync.${syncStatus}`)"
+            role="img"
+          />
         </span>
         <span class="flex min-w-0 flex-1 flex-col">
           <span class="truncate text-sm font-medium">{{ displayName }}</span>

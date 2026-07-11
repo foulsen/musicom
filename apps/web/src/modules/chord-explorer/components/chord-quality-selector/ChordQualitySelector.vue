@@ -56,6 +56,10 @@ const selectedName = computed<string>({
           {{ option.name }}
         </span>
 
+        <span class="text-xs opacity-70">
+          {{ option.pattern.name }}
+        </span>
+
         <span class="text-sm opacity-80">
           {{ option.formula }}
         </span>

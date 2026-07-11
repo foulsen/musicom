@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useMediaQuery } from "@vueuse/core";
 
 import type { FretPosition } from "@music-workspace/music-theory";
 
@@ -18,13 +19,22 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
+/** Abaixo de `md`, o braço vira vertical (pestana no topo) — mesmo breakpoint do FretboardDiagram,
+ * para não exigir rolagem horizontal durante um jogo cronometrado. */
+const isVertical = useMediaQuery("(max-width: 767px)");
+
+// Geometria em eixos abstratos: "along" = ao longo do braço (pestana → última casa),
+// "across" = através das cordas. `toScreen` decide, por orientação, qual eixo vira X e
+// qual vira Y — mesma técnica do FretboardDiagram.
 const STRING_GAP = 32;
 const FRET_WIDTH = 48;
-const LABEL_COL = 20;
-/** Folga extra (vs. o braço "de leitura" FretboardDiagram) para a nota solta não cobrir o nome da corda. */
-const OPEN_COL = LABEL_COL + 64;
+const ALONG_NUT = 84;
+const ALONG_LABEL = 20;
 const MARGIN = 20;
-const HEADER_ROW = 16;
+const HEADER_ROOM = 16;
+const ACROSS_START = MARGIN + HEADER_ROOM;
+const FRET_LABEL_GAP = 30;
+const TRAILING = 20;
 const NOTE_RADIUS = 12;
 /** Alvo de toque recomendado (~44px) — bem maior que o círculo visível, invisível. */
 const HIT_RADIUS = 22;
@@ -36,8 +46,24 @@ const DOUBLE_INLAY_FRETS = new Set([12]);
 const stringCount = computed(() => props.positions.length);
 const fretCount = computed(() => (props.positions[0]?.length ?? 1) - 1);
 
-const width = computed(() => OPEN_COL + fretCount.value * FRET_WIDTH + MARGIN);
-const height = computed(() => MARGIN * 2 + (stringCount.value - 1) * STRING_GAP);
+function toScreen(along: number, across: number) {
+  return isVertical.value ? { x: across, y: along } : { x: along, y: across };
+}
+
+const acrossLastString = computed(() => ACROSS_START + (stringCount.value - 1) * STRING_GAP);
+const acrossExtent = computed(() => acrossLastString.value + FRET_LABEL_GAP + TRAILING);
+const alongExtent = computed(() => ALONG_NUT + fretCount.value * FRET_WIDTH + TRAILING);
+
+const width = computed(() => (isVertical.value ? acrossExtent.value : alongExtent.value));
+const height = computed(() => (isVertical.value ? alongExtent.value : acrossExtent.value));
+
+const nut = computed(() => {
+  const start = toScreen(ALONG_NUT, ACROSS_START);
+  const end = toScreen(ALONG_NUT, acrossLastString.value);
+  return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+});
+
+const header = computed(() => toScreen(ALONG_NUT / 2, MARGIN));
 
 function keyFor(position: FretPosition): string {
   return `${position.string}-${position.fret}`;
@@ -52,18 +78,22 @@ interface Cell {
   ariaLabel: string;
 }
 
+/** Índice de exibição de uma corda: horizontal inverte (aguda no topo); vertical não (grave no topo). */
+function displayRowFor(stringIndex: number): number {
+  return isVertical.value ? stringIndex : stringCount.value - 1 - stringIndex;
+}
+
 const cells = computed<Cell[]>(() => {
   const rows = props.positions;
-  const count = rows.length;
   const result: Cell[] = [];
 
   rows.forEach((row, stringIndex) => {
-    const displayRow = count - 1 - stringIndex;
-    const cy = MARGIN + HEADER_ROW + displayRow * STRING_GAP;
+    const across = ACROSS_START + displayRowFor(stringIndex) * STRING_GAP;
     const stringLabel = row[0]?.pitch.note.toString() ?? "";
 
     row.forEach((position) => {
-      const cx = position.fret === 0 ? OPEN_COL / 2 : OPEN_COL + (position.fret - 0.5) * FRET_WIDTH;
+      const along = position.fret === 0 ? ALONG_NUT / 2 : ALONG_NUT + (position.fret - 0.5) * FRET_WIDTH;
+      const { x: cx, y: cy } = toScreen(along, across);
       const ariaLabel =
         position.fret === 0
           ? t("drills.fretboard.cellAriaLabelOpen", { string: stringLabel })
@@ -86,20 +116,22 @@ function strokeWidthFor(stringIndex: number): number {
 
 const strings = computed(() =>
   Array.from({ length: stringCount.value }, (_, row) => {
-    const displayRow = stringCount.value - 1 - row;
-    const y = MARGIN + HEADER_ROW + displayRow * STRING_GAP;
-    const label = props.positions[row]?.[0]?.pitch.note.toString() ?? "";
+    const across = ACROSS_START + displayRowFor(row) * STRING_GAP;
+    const start = toScreen(ALONG_NUT, across);
+    const end = toScreen(alongExtent.value - TRAILING, across);
+    const label = toScreen(ALONG_LABEL, across);
+    const text = props.positions[row]?.[0]?.pitch.note.toString() ?? "";
 
     return {
       key: row,
-      x1: OPEN_COL,
-      y1: y,
-      x2: width.value - MARGIN,
-      y2: y,
+      x1: start.x,
+      y1: start.y,
+      x2: end.x,
+      y2: end.y,
       strokeWidth: strokeWidthFor(row),
-      labelX: LABEL_COL,
-      labelY: y,
-      label,
+      labelX: label.x,
+      labelY: label.y,
+      label: text,
     };
   }),
 );
@@ -107,26 +139,20 @@ const strings = computed(() =>
 const frets = computed(() =>
   Array.from({ length: fretCount.value }, (_, i) => {
     const fret = i + 1;
-    const x = OPEN_COL + fret * FRET_WIDTH;
-    return {
-      fret,
-      x1: x,
-      y1: MARGIN + HEADER_ROW,
-      x2: x,
-      y2: height.value - MARGIN + HEADER_ROW,
-      labelX: OPEN_COL + FRET_WIDTH * (fret - 0.5),
-      /** +30 (não +16): folga para o número não ficar sob o círculo da corda mais grave. */
-      labelY: height.value - MARGIN + HEADER_ROW + 30,
-    };
+    const along = ALONG_NUT + fret * FRET_WIDTH;
+    const start = toScreen(along, ACROSS_START);
+    const end = toScreen(along, acrossLastString.value);
+    const label = toScreen(ALONG_NUT + FRET_WIDTH * (fret - 0.5), acrossLastString.value + FRET_LABEL_GAP);
+
+    return { fret, x1: start.x, y1: start.y, x2: end.x, y2: end.y, labelX: label.x, labelY: label.y };
   }),
 );
 
-const middleY = computed(() => MARGIN + HEADER_ROW + ((stringCount.value - 1) * STRING_GAP) / 2);
+const middleAcross = computed(() => ACROSS_START + ((stringCount.value - 1) * STRING_GAP) / 2);
 
 interface Inlay {
   key: string;
-  cx: number;
-  cy: number[];
+  points: { x: number; y: number }[];
 }
 
 /** Marcadores de casa (3/5/7/9 = um ponto; 12 = dois), centralizados no braço. */
@@ -134,13 +160,19 @@ const inlays = computed<Inlay[]>(() =>
   Array.from({ length: fretCount.value }, (_, i) => i + 1)
     .filter((fret) => SINGLE_INLAY_FRETS.has(fret) || DOUBLE_INLAY_FRETS.has(fret))
     .map((fret) => {
-      const cx = OPEN_COL + FRET_WIDTH * (fret - 0.5);
+      const along = ALONG_NUT + FRET_WIDTH * (fret - 0.5);
 
       if (DOUBLE_INLAY_FRETS.has(fret)) {
-        return { key: `inlay-${fret}`, cx, cy: [middleY.value - STRING_GAP / 2, middleY.value + STRING_GAP / 2] };
+        return {
+          key: `inlay-${fret}`,
+          points: [
+            toScreen(along, middleAcross.value - STRING_GAP / 2),
+            toScreen(along, middleAcross.value + STRING_GAP / 2),
+          ],
+        };
       }
 
-      return { key: `inlay-${fret}`, cx, cy: [middleY.value] };
+      return { key: `inlay-${fret}`, points: [toScreen(along, middleAcross.value)] };
     }),
 );
 
@@ -170,19 +202,18 @@ function onKeydown(event: KeyboardEvent, cell: Cell) {
 </script>
 
 <template>
-  <div class="relative w-full overflow-x-auto">
+  <div :class="isVertical ? 'relative w-full' : 'relative w-full overflow-x-auto'">
     <svg
-      :viewBox="`0 0 ${width} ${height + HEADER_ROW + 24}`"
-      :style="{ width: `${width}px` }"
-      class="min-w-full transition-opacity"
-      :class="active ? '' : 'opacity-50'"
+      :viewBox="`0 0 ${width} ${height}`"
+      :style="isVertical ? {} : { width: `${width}px` }"
+      :class="[isVertical ? 'h-auto w-full' : 'min-w-full', 'transition-opacity', active ? '' : 'opacity-50']"
       role="img"
       :aria-label="t('drills.fretboard.ariaLabel')"
     >
       <!-- Cabeçalho da coluna de cordas soltas -->
       <text
-        :x="OPEN_COL / 2"
-        :y="MARGIN"
+        :x="header.x"
+        :y="header.y"
         text-anchor="middle"
         font-size="11"
         class="fill-muted-foreground"
@@ -191,7 +222,7 @@ function onKeydown(event: KeyboardEvent, cell: Cell) {
       </text>
 
       <template v-for="inlay in inlays" :key="inlay.key">
-        <circle v-for="(cy, index) in inlay.cy" :key="`${inlay.key}-${index}`" :cx="inlay.cx" :cy="cy" r="3"
+        <circle v-for="(point, index) in inlay.points" :key="`${inlay.key}-${index}`" :cx="point.x" :cy="point.y" r="3"
           class="fill-muted" />
       </template>
 
@@ -230,7 +261,7 @@ function onKeydown(event: KeyboardEvent, cell: Cell) {
         stroke-width="1"
       />
 
-      <line :x1="OPEN_COL" :y1="MARGIN + HEADER_ROW" :x2="OPEN_COL" :y2="height - MARGIN + HEADER_ROW" class="stroke-muted-foreground" stroke-width="3" />
+      <line :x1="nut.x1" :y1="nut.y1" :x2="nut.x2" :y2="nut.y2" class="stroke-muted-foreground" stroke-width="3" />
 
       <text
         v-for="f in frets"
@@ -286,10 +317,6 @@ function onKeydown(event: KeyboardEvent, cell: Cell) {
         {{ t("drills.fretboard.pressStart") }}
       </p>
     </div>
-
-    <p class="mt-1 text-xs text-muted-foreground sm:hidden">
-      {{ t("drills.fretboard.dragHint") }}
-    </p>
   </div>
 </template>
 

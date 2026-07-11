@@ -13,7 +13,9 @@ import {
   Fretboard,
   Interval,
   STANDARD_GUITAR_TUNING,
+  TUNINGS,
   type SingleNote,
+  type Tuning,
 } from "@music-workspace/music-theory";
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
@@ -24,9 +26,17 @@ import { useScaleExplorerStore } from "./use-scale-explorer-store";
 
 export function useScaleExplorerViewModel() {
   const store = useScaleExplorerStore();
-  const { rootValue, patternName, fretCount, selectedTriadIndex: storedTriadIndex } = storeToRefs(store);
+  const { rootValue, patternName, fretCount, selectedTriadIndex: storedTriadIndex, tuningName } = storeToRefs(store);
 
   const availablePatterns = ALL_SCALE_PATTERNS;
+  const availableTunings = TUNINGS;
+
+  const selectedTuning = computed<Tuning>({
+    get: () => availableTunings.find((tuning) => tuning.name === tuningName.value) ?? STANDARD_GUITAR_TUNING,
+    set: (tuning) => {
+      tuningName.value = tuning.name;
+    },
+  });
 
   const selectedRoot = computed<Note>({
     get: () => Note.from(rootValue.value),
@@ -55,7 +65,7 @@ export function useScaleExplorerViewModel() {
   /** Tríades ou sétimas no Harmonic Field (índice de grau preservado entre as duas). */
   const harmonicFieldMode = ref<"triads" | "sevenths">("triads");
 
-  const fretboard = computed(() => new Fretboard(STANDARD_GUITAR_TUNING, fretCount.value));
+  const fretboard = computed(() => new Fretboard(selectedTuning.value, fretCount.value));
 
   /** Grafia enarmônica por classe de altura, derivada da escala selecionada. */
   const spelledByPitchClass = computed(() => {
@@ -155,6 +165,9 @@ export function useScaleExplorerViewModel() {
     fretboardPositions,
     fretCount,
     selectFretCount,
+
+    availableTunings,
+    selectedTuning,
 
     selectedTriadIndex,
     selectedChord,

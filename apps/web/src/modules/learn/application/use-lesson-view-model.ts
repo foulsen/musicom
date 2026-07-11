@@ -19,18 +19,31 @@ export function useLessonViewModel() {
   const route = useRoute();
   const router = useRouter();
 
-  const { track, markStepDone, recordCheckpoint, visitLesson } = useLearnViewModel();
+  const { track, completedStepCount, markStepDone, recordCheckpoint, visitLesson } = useLearnViewModel();
   const { playChord, playSequence } = useNoteAudio();
 
   const lessonId = computed(() => String(route.params.lessonId));
   const lesson = computed(() => track.lessons.find((item) => item.id === lessonId.value) ?? null);
+  const lessonIndex = computed(() => track.lessons.findIndex((item) => item.id === lessonId.value));
+  const nextLesson = computed(() => track.lessons[lessonIndex.value + 1] ?? null);
 
   const stepIndex = ref(0);
+  /** Verdadeiro após concluir o último passo — mostra o painel de conclusão em vez de sair direto. */
+  const isFinished = ref(false);
+  const lastCheckpointScore = ref<CheckpointScore | null>(null);
 
   watch(
     lessonId,
     (id) => {
-      stepIndex.value = 0;
+      const current = track.lessons.find((item) => item.id === id);
+      const done = current ? completedStepCount(id) : 0;
+
+      // Retoma no primeiro passo não concluído, não sempre do zero — os passos são
+      // marcados em sequência por `markStepDone`, então a contagem já é o próximo índice.
+      // Uma lição já 100% concluída reabre do início (não há "próximo passo" a retomar).
+      stepIndex.value = current && done < current.steps.length ? done : 0;
+      isFinished.value = false;
+      lastCheckpointScore.value = null;
       visitLesson(id);
     },
     { immediate: true },
@@ -107,7 +120,7 @@ export function useLessonViewModel() {
     markStepDone(lesson.value.id, stepIndex.value);
 
     if (isLastStep.value) {
-      router.push("/learn");
+      isFinished.value = true;
       return;
     }
 
@@ -115,13 +128,27 @@ export function useLessonViewModel() {
   }
 
   function goPrevious() {
+    if (isFinished.value) {
+      isFinished.value = false;
+      return;
+    }
+
     if (stepIndex.value > 0) stepIndex.value -= 1;
   }
 
   function completeCheckpoint(score: CheckpointScore) {
     if (lesson.value) recordCheckpoint(lesson.value.id, score);
 
+    lastCheckpointScore.value = score;
     goNext();
+  }
+
+  function backToTracks() {
+    router.push("/learn");
+  }
+
+  function goToNextLesson() {
+    if (nextLesson.value) router.push(`/learn/${nextLesson.value.id}`);
   }
 
   return {
@@ -135,10 +162,15 @@ export function useLessonViewModel() {
     highlightDegree,
     checkpointQuestions,
     isPlaying,
+    isFinished,
+    lastCheckpointScore,
+    nextLesson,
 
     listen,
     goNext,
     completeCheckpoint,
     goPrevious,
+    backToTracks,
+    goToNextLesson,
   };
 }

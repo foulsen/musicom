@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
+import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
 import type { CheckpointQuestion } from "../../application/checkpoint-generators";
 
@@ -78,8 +79,7 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-onMounted(() => window.addEventListener("keydown", handleKeydown));
-onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
+useTypingGuardedKeydown(handleKeydown);
 </script>
 
 <template>

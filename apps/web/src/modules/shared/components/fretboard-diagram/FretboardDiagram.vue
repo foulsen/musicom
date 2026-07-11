@@ -223,7 +223,6 @@ const tooltip = computed(() => {
       v-model="showOutOfScale"
       class="w-fit px-4"
       variant="outline"
-      aria-label="Toggle small"
       size="sm"
     >
     <check v-if="showOutOfScale" />
@@ -234,13 +233,12 @@ const tooltip = computed(() => {
       v-model="reducedView"
       class="w-fit px-4"
       variant="outline"
-      aria-label="Toggle small"
       size="sm"
       v-if="isVertical"
     >
     <check v-if="reducedView" />
     <x v-else />
-      {{ t('show-reduced-view') }}
+      {{ t('fretboard.showReducedView') }}
     </toggle>
     <div :class="isVertical ? 'w-full' : 'w-full overflow-x-auto'">
       <svg :viewBox="`0 0 ${width} ${height}`" :style="isVertical ? {} : { width: `${width}px` }"
@@ -263,8 +261,13 @@ const tooltip = computed(() => {
         </text>
 
         <!-- Notas -->
-        <g v-for="cell in cells" :key="cell.key" class="cursor-pointer" @mouseenter="hovered = cell"
-          @mouseleave="hovered = null" @click="playNote(cell)">
+        <g v-for="cell in cells" :key="cell.key" class="group cursor-pointer outline-none" tabindex="0" role="button"
+          :aria-label="`${cell.label} · ${cell.intervalName}`" @mouseenter="hovered = cell" @mouseleave="hovered = null"
+          @focusin="hovered = cell" @focusout="hovered = null" @click="playNote(cell)" @keydown.enter="playNote(cell)"
+          @keydown.space.prevent="playNote(cell)">
+          <circle :cx="cell.cx" :cy="cell.cy" :r="noteRadius + 5"
+            class="pointer-events-none fill-none stroke-ring opacity-0 transition-opacity group-focus-visible:opacity-100"
+            stroke-width="2" />
           <circle :cx="cell.cx" :cy="cell.cy"
             :r="hovered?.key === cell.key || playedKey === cell.key ? noteRadius + 3 : noteRadius"
             :class="[cell.circleClass, playedKey === cell.key ? 'transition-all duration-150' : 'transition-all duration-300']"

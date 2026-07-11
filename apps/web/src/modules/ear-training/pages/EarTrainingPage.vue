@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { Play, RotateCcw } from "@lucide/vue";
@@ -8,6 +8,7 @@ import { useEarTrainingViewModel } from "../application/use-ear-training-view-mo
 import type { Difficulty, QuizKind } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
 const {
   kind,
@@ -74,8 +75,7 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-onMounted(() => window.addEventListener("keydown", handleKeydown));
-onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
+useTypingGuardedKeydown(handleKeydown);
 </script>
 
 <template>
@@ -108,7 +108,7 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
 
       <div class="flex items-center gap-3">
         <p class="text-sm text-muted-foreground">
-          {{ t("earTraining.score", { correct: score.correct, total: score.total }) }}
+          {{ t("earTraining.scoreByKind", { kind: t(`earTraining.kinds.${kind}`), correct: score.correct, total: score.total }) }}
           <span v-if="scorePercent !== null">· {{ scorePercent }}%</span>
           <span v-if="streak > 1">· 🔥{{ streak }}</span>
         </p>
@@ -186,6 +186,10 @@ onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
         :selected-id="selectedOptionId"
         @select="answer"
       />
+
+      <p class="text-center text-xs text-muted-foreground">
+        {{ t("earTraining.shortcutHint") }}
+      </p>
 
       <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-4">
         <div v-if="isAnswered" role="status" aria-live="polite" aria-atomic="true" class="flex flex-wrap items-center gap-3">

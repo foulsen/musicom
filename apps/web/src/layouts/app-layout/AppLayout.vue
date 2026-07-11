@@ -33,7 +33,19 @@ const drawerOpen = ref(false);
 
       <main class="flex-1 overflow-auto">
         <div class="mx-auto max-w-6xl">
-          <router-view />
+          <router-view v-slot="{ Component }">
+            <suspense v-if="Component">
+              <component :is="Component" />
+
+              <template #fallback>
+                <div class="flex flex-col gap-8 p-4 sm:p-6 lg:p-8" aria-hidden="true">
+                  <div class="h-7 w-56 animate-pulse rounded-md bg-muted" />
+                  <div class="h-4 w-80 max-w-full animate-pulse rounded-md bg-muted" />
+                  <div class="h-40 animate-pulse rounded-xl bg-muted" />
+                </div>
+              </template>
+            </suspense>
+          </router-view>
         </div>
       </main>
     </div>

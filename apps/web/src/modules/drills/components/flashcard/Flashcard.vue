@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
 const props = withDefaults(
   defineProps<{
     prompt: string;
     answer: string;
+    /** Contexto curto acima do prompt (ex.: "Name this interval") — o que o baralho pede. */
+    context?: string;
     revealed: boolean;
     box?: number;
     boxCount?: number;
     position?: number;
     total?: number;
   }>(),
-  { box: 1, boxCount: 5, position: 1, total: 1 },
+  { context: undefined, box: 1, boxCount: 5, position: 1, total: 1 },
 );
 
 const emit = defineEmits<{
@@ -23,8 +26,6 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 function onKeydown(event: KeyboardEvent) {
-  if (event.target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-
   if (!props.revealed && event.code === "Space") {
     event.preventDefault();
     emit("reveal");
@@ -38,8 +39,7 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
-onMounted(() => window.addEventListener("keydown", onKeydown));
-onUnmounted(() => window.removeEventListener("keydown", onKeydown));
+useTypingGuardedKeydown(onKeydown);
 </script>
 
 <template>
@@ -58,9 +58,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
     </div>
 
     <div class="flex min-h-56 flex-col items-center justify-center gap-6 rounded-xl border border-border bg-card/40 p-8 text-center">
-      <p class="text-3xl font-semibold text-foreground">
-        {{ prompt }}
-      </p>
+      <div class="space-y-1.5">
+        <p v-if="context" class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {{ context }}
+        </p>
+        <p class="text-3xl font-semibold text-foreground">
+          {{ prompt }}
+        </p>
+      </div>
 
       <div class="flex min-h-14 items-center justify-center">
         <transition

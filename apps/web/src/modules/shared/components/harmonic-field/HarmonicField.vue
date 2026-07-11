@@ -3,10 +3,11 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { RouterLink } from "vue-router";
 
-import { ArrowUpRight } from "@lucide/vue";
+import { ArrowUpRight, Play } from "@lucide/vue";
 
-import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord } from "@music-workspace/music-theory";
+import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord, type Pitch } from "@music-workspace/music-theory";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { chordPitches } from "@/modules/shared/application/chord-pitches";
 
 const props = defineProps<{
   triads: Chord[];
@@ -16,7 +17,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [index: number];
+  chordPlay: [pitches: Pitch[]];
 }>();
+
+function playChord(event: Event, chord: Chord) {
+  event.stopPropagation();
+  emit("chordPlay", chordPitches(chord));
+}
 
 const { t } = useI18n();
 
@@ -69,10 +76,11 @@ const selectedChordExplorerQuery = computed(() => {
       <li
         v-for="(chord, index) in chords"
         :key="chord.degree.toString()"
+        class="flex items-stretch gap-1"
       >
         <button
           type="button"
-          class="w-full rounded-md px-3 py-2 text-left leading-tight transition-colors hover:bg-muted"
+          class="flex-1 rounded-md px-3 py-2 text-left leading-tight outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
           :class="index === selectedIndex ? 'bg-brand-soft' : ''"
           :aria-pressed="index === selectedIndex"
           @click="emit('select', index)"
@@ -90,6 +98,15 @@ const selectedChordExplorerQuery = computed(() => {
           >
             {{ chord.degree.position() }} - {{ chord.degree.functionName() }}
           </p>
+        </button>
+
+        <button
+          type="button"
+          class="flex shrink-0 items-center justify-center rounded-md px-2 text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          :aria-label="t('scaleExplorer.playChord', { chord: chord.name })"
+          @click="playChord($event, chord)"
+        >
+          <play class="size-4" />
         </button>
       </li>
     </ul>

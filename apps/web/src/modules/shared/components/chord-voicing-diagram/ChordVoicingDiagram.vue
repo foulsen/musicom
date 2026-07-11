@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+import { Play } from "@lucide/vue";
 
 import type { Pitch } from "@music-workspace/music-theory";
 
@@ -11,7 +14,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   notePlay: [pitch: Pitch];
+  chordPlay: [pitches: Pitch[]];
 }>();
+
+const { t } = useI18n();
+
+function playWholeChord() {
+  emit(
+    "chordPlay",
+    props.shape.notes.map((note) => note.pitch),
+  );
+}
 
 // Geometria em unidades do viewBox — bem menor que o fretboard (nota r=7.5).
 const STRING_COUNT = 6;
@@ -101,12 +114,22 @@ function playNote(cell: Cell) {
 </script>
 
 <template>
-  <svg
-    :viewBox="`0 0 ${width} ${height}`"
-    class="w-full"
-    role="img"
-    aria-label="Chord voicing"
-  >
+  <div class="flex flex-col items-end gap-1">
+    <button
+      type="button"
+      class="inline-flex items-center gap-1 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      :aria-label="t('common.playChordShape')"
+      @click="playWholeChord"
+    >
+      <play class="size-3.5" />
+    </button>
+
+    <svg
+      :viewBox="`0 0 ${width} ${height}`"
+      class="w-full"
+      role="img"
+      aria-label="Chord voicing"
+    >
     <!-- Cordas -->
     <line
       v-for="(y, row) in stringYs"
@@ -161,11 +184,25 @@ function playNote(cell: Cell) {
     <g
       v-for="cell in cells"
       :key="cell.key"
-      class="cursor-pointer"
+      class="group cursor-pointer outline-none"
+      tabindex="0"
+      role="button"
+      :aria-label="cell.label"
       @mouseenter="hovered = cell.key"
       @mouseleave="hovered = null"
+      @focusin="hovered = cell.key"
+      @focusout="hovered = null"
       @click="playNote(cell)"
+      @keydown.enter="playNote(cell)"
+      @keydown.space.prevent="playNote(cell)"
     >
+      <circle
+        :cx="cell.cx"
+        :cy="cell.cy"
+        :r="RADIUS + 4"
+        class="pointer-events-none fill-none stroke-ring opacity-0 transition-opacity group-focus-visible:opacity-100"
+        stroke-width="1.5"
+      />
       <circle
         :cx="cell.cx"
         :cy="cell.cy"
@@ -196,5 +233,6 @@ function playNote(cell: Cell) {
         {{ cell.label }}
       </text>
     </g>
-  </svg>
+    </svg>
+  </div>
 </template>

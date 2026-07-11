@@ -105,6 +105,8 @@ const {
 function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
+
+const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDeckId.value}`));
 </script>
 
 <template>
@@ -301,6 +303,7 @@ function formatMs(ms: number): string {
         :key="current.id"
         :prompt="current.prompt"
         :answer="current.answer"
+        :context="deckContext"
         :revealed="isRevealed"
         :box="currentBox"
         :box-count="boxCount"

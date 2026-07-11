@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 import type { Pitch } from "@music-workspace/music-theory";
 
@@ -11,7 +12,7 @@ const props = withDefaults(
     name: string;
     shapes: ChordShape[];
     showTitle?: boolean;
-    /** Máximo de variações exibidas; ajustável por chamada. */
+    /** Máximo de variações exibidas por padrão; ajustável por chamada. */
     maxVariations?: number;
   }>(),
   { maxVariations: 3, showTitle: true },
@@ -19,9 +20,18 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   notePlay: [pitch: Pitch];
+  chordPlay: [pitches: Pitch[]];
 }>();
 
-const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations));
+const { t } = useI18n();
+
+const expanded = ref(false);
+
+const hiddenCount = computed(() => Math.max(0, props.shapes.length - props.maxVariations));
+
+const visibleShapes = computed(() =>
+  expanded.value ? props.shapes : props.shapes.slice(0, props.maxVariations),
+);
 </script>
 
 <template>
@@ -30,14 +40,24 @@ const visibleShapes = computed(() => props.shapes.slice(0, props.maxVariations))
       {{ props.name }}
     </figcaption>
 
-    <div class="flex items-start justify-center gap-6" :class="{'pt-3': !props.showTitle}">
+    <div class="flex flex-wrap items-start justify-center gap-6" :class="{'pt-3': !props.showTitle}">
       <chord-voicing-diagram
         v-for="(shape, index) in visibleShapes"
         :key="index"
         :shape="shape"
         class="max-w-45 flex-1"
         @note-play="emit('notePlay', $event)"
+        @chord-play="emit('chordPlay', $event)"
       />
     </div>
+
+    <button
+      v-if="hiddenCount > 0"
+      type="button"
+      class="mx-auto block rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      @click="expanded = !expanded"
+    >
+      {{ expanded ? t("common.showFewerVoicings") : t("common.showMoreVoicings", { count: hiddenCount }) }}
+    </button>
   </figure>
 </template>

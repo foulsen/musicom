@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 
+import { Play as PlayIcon } from "@lucide/vue";
+
 import { useChordExplorerViewModel } from "../application/use-chord-explorer-view-model";
 import { ChordFamilySelector } from "../components/chord-family-selector";
 import { ChordQualitySelector } from "../components/chord-quality-selector";
 
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
+import { chordPitches } from "@/modules/shared/application/chord-pitches";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { ChordCard } from "@/modules/shared/components/chord-card";
@@ -30,8 +33,12 @@ const {
   returnLessonId,
 } = useChordExplorerViewModel();
 
-const { play } = useNoteAudio();
+const { play, playChord } = useNoteAudio();
 const { t } = useI18n();
+
+function listenToChord() {
+  playChord(chordPitches(chord.value), { strum: true });
+}
 </script>
 
 <template>
@@ -63,14 +70,23 @@ const { t } = useI18n();
 
     </div>
     <section class="space-y-3">
-      <header>
+      <header class="flex items-center justify-between gap-4">
         <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           {{ t("common.shapes") }}
         </h2>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          @click="listenToChord"
+        >
+          <play-icon class="size-3.5" />
+          {{ t("scaleExplorer.playChord", { chord: chord.name }) }}
+        </button>
       </header>
 
       <chord-card v-if="selectedChordCard" :name="selectedChordCard.name" :shapes="selectedChordCard.shapes"
-        :show-title="false" class="min-w-0 lg:flex-1" @note-play="play" />
+        :show-title="false" class="min-w-0 lg:flex-1" @note-play="play" @chord-play="playChord($event, { strum: true })" />
       <empty-state v-else :title="t('chordExplorer.emptyShapes.title')"
         :description="t('chordExplorer.emptyShapes.description', { chord: chord.name })" class="lg:flex-1" />
     </section>

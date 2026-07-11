@@ -24,6 +24,15 @@ export const en = {
     },
     backToLesson: "Back to lesson",
     guest: "Guest",
+    fretboard: "Fretboard",
+    playChordShape: "Play this voicing",
+    showMoreVoicings: "+{count} more",
+    showFewerVoicings: "Show fewer",
+    notFound: {
+      title: "Page not found",
+      description: "The page you're looking for doesn't exist or has moved.",
+      backHome: "Back to Scale Explorer",
+    },
   },
   settings: {
     title: "Settings",
@@ -36,6 +45,7 @@ export const en = {
     theme: "Theme",
     themeLight: "Light",
     themeDark: "Dark",
+    themeSystem: "System",
     sync: {
       idle: "Synced",
       syncing: "Syncing…",
@@ -52,6 +62,8 @@ export const en = {
     triads: "Triads",
     sevenths: "Sevenths",
     openInChordExplorer: "Open in Chord Explorer",
+    playChord: "Play {chord}",
+    listenToScale: "Listen to scale",
     emptyShapes: {
       title: "No saved shapes yet",
       description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",
@@ -71,6 +83,7 @@ export const en = {
   fretboard: {
     showOutOfScale: "Show all notes",
     showOutOfChord: "Show all notes",
+    showReducedView: "Compact view",
   },
   tuning: {
     label: "Tuning",
@@ -111,7 +124,6 @@ export const en = {
       cellFound: "found",
       progressAnnounce: "{found} of {total} found",
       pressStart: "Press Start to begin",
-      dragHint: "Drag to scroll →",
     },
     noteId: {
       intro: "A fret lights up on the fretboard — name the note (standard tuning).",
@@ -142,6 +154,12 @@ export const en = {
         chordFormulas: "Chord formulas",
         chordSpelling: "Chord spelling",
       },
+      deckContexts: {
+        intervals: "Name this interval",
+        intervalNames: "What's the degree symbol?",
+        chordFormulas: "What's the formula?",
+        chordSpelling: "Spell the notes",
+      },
     },
   },
   earTraining: {
@@ -154,6 +172,8 @@ export const en = {
     correct: "Correct!",
     incorrect: "Not quite — the highlighted answer was correct.",
     score: "Score: {correct}/{total}",
+    scoreByKind: "Score ({kind}): {correct}/{total}",
+    shortcutHint: "1–4 to answer · R replays · Enter/Space for next",
     resetScore: "Reset score",
     difficulty: "Difficulty",
     intervalPlaybackMode: "Interval playback",
@@ -193,6 +213,7 @@ export const en = {
     notesUnchangedCaption: "The notes don't change — only the starting point does.",
     compare: {
       title: "Compare with another {root} mode",
+      caption: "Same tonic, different pattern — here the notes actually change; highlighted degrees are where the two modes differ.",
     },
     emptyShapes: {
       title: "No saved shapes yet",
@@ -252,12 +273,22 @@ export const en = {
       explore: "Explore",
       checkpoint: "Checkpoint",
     },
+    stepperGoTo: "Go back to step {step}: {kind}",
+    checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Question {current} of {total}",
     checkpointCorrect: "Correct!",
     checkpointIncorrect: "Not quite — the highlighted answer was correct.",
     checkpointNext: "Next question",
     checkpointFinish: "Finish lesson",
     checkpointShortcutHint: "Number keys to answer, Enter/Space for next.",
+    completion: {
+      title: "Lesson complete!",
+      checkpointScore: "You got {correct} of {total} checkpoint questions right.",
+      nextLessonUnlocked: "Next up: {lesson}",
+      goToNextLesson: "Start next lesson",
+      backToTracks: "Back to tracks",
+      trackComplete: "You've completed every lesson in this track.",
+    },
     checkpoints: {
       majorScale: {
         degreeName: "Which note is scale degree {degree} of {root} major?",

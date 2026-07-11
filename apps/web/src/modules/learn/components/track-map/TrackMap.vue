@@ -29,7 +29,7 @@ const STATUS_CLASS = {
 
 <template>
   <ol class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-    <li v-for="{ lesson, status } in lessons" :key="lesson.id">
+    <li v-for="{ lesson, status, checkpoint } in lessons" :key="lesson.id">
       <component
         :is="status === 'locked' ? 'div' : RouterLink"
         :to="status === 'locked' ? undefined : `/learn/${lesson.id}`"
@@ -45,9 +45,15 @@ const STATUS_CLASS = {
           {{ t(lesson.summaryKey) }}
         </p>
 
-        <span class="text-xs font-medium uppercase tracking-wide opacity-70">
-          {{ t(`learn.status.${status}`) }}
-        </span>
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-medium uppercase tracking-wide opacity-70">
+            {{ t(`learn.status.${status}`) }}
+          </span>
+
+          <span v-if="checkpoint" class="text-xs font-medium opacity-70">
+            {{ t("learn.checkpointBadge", { correct: checkpoint.correct, total: checkpoint.total }) }}
+          </span>
+        </div>
       </component>
     </li>
   </ol>

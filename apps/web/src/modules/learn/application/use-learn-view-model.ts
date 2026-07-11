@@ -9,6 +9,7 @@ export type LessonStatus = "locked" | "available" | "in-progress" | "completed";
 export interface LessonWithStatus {
   lesson: Lesson;
   status: LessonStatus;
+  checkpoint: CheckpointScore | null;
 }
 
 /** Estado e navegação da trilha de aprendizado (MVP: uma única trilha, `FUNDAMENTALS_TRACK`). */
@@ -36,7 +37,11 @@ export function useLearnViewModel() {
   }
 
   const lessonsWithStatus = computed<LessonWithStatus[]>(() =>
-    track.lessons.map((lesson) => ({ lesson, status: lessonStatus(lesson) })),
+    track.lessons.map((lesson) => ({
+      lesson,
+      status: lessonStatus(lesson),
+      checkpoint: progress.value[lesson.id]?.checkpoint ?? null,
+    })),
   );
 
   /** % de passos concluídos na trilha inteira (soma de todas as lições). */
@@ -94,6 +99,7 @@ export function useLearnViewModel() {
     trackProgressPercent,
     continueLesson,
 
+    completedStepCount,
     markStepDone,
     recordCheckpoint,
     visitLesson,
