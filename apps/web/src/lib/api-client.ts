@@ -1,4 +1,6 @@
 import type {
+  LoginInput,
+  RegisterInput,
   SyncEnvelope,
   UpdateProfileInput,
   UserProfile,
@@ -49,6 +51,16 @@ export const apiClient = {
   getMe: () => request<UserProfile>("/me"),
 
   createAnonymous: () => request<UserProfile>("/auth/anonymous", { method: "POST" }),
+
+  /** Upgrades the current anonymous account in place — same `user.id`, progress preserved. */
+  register: (input: RegisterInput) =>
+    request<UserProfile>("/auth/register", { method: "POST", body: JSON.stringify(input) }),
+
+  /** Verifies credentials and issues a fresh session for the existing account. */
+  login: (input: LoginInput) =>
+    request<UserProfile>("/auth/login", { method: "POST", body: JSON.stringify(input) }),
+
+  logout: () => request<void>("/auth/logout", { method: "POST" }),
 
   updateMe: (input: UpdateProfileInput) =>
     request<UserProfile>("/me", { method: "PATCH", body: JSON.stringify(input) }),

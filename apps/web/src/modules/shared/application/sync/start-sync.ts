@@ -4,6 +4,7 @@ import { watch } from "vue";
 
 import { i18n } from "@/i18n";
 import { ApiError, apiClient } from "@/lib/api-client";
+import { useAuthStore } from "@/modules/auth/application/use-auth-store";
 import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
@@ -96,6 +97,8 @@ async function bootstrapSession(pinia: Pinia): Promise<boolean> {
         throw error;
       }
     }
+
+    useAuthStore(pinia).setUser(profile);
 
     const user = useUserStore(pinia);
     if (profile.name) {
