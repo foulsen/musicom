@@ -15,6 +15,8 @@ export interface BuildAppOptions {
   databaseUrl?: string;
   /** Overrides the configured Turso auth token. */
   databaseAuthToken?: string;
+  /** Serverless passes false so migrations don't run on the request path. */
+  migrate?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   const { db, close } = await createDb(
     options.databaseUrl ?? config.databaseUrl,
     options.databaseAuthToken ?? config.databaseAuthToken,
+    { migrate: options.migrate ?? true },
   );
   app.decorate("db", db);
   app.addHook("onClose", () => close());

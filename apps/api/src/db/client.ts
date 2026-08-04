@@ -22,14 +22,20 @@ export interface DbHandle {
  * "libsql://" Turso URL — applies pending migrations, and returns the
  * Drizzle client plus a close handle.
  */
-export async function createDb(url: string, authToken?: string): Promise<DbHandle> {
+export async function createDb(
+  url: string,
+  authToken?: string,
+  options?: { migrate?: boolean },
+): Promise<DbHandle> {
   if (url.startsWith("file:")) {
     mkdirSync(dirname(fileURLToPath(url)), { recursive: true });
   }
 
   const client = createClient({ url, authToken });
   const db = drizzle(client, { schema });
-  await migrate(db, { migrationsFolder });
+  if (options?.migrate !== false) {
+    await migrate(db, { migrationsFolder });
+  }
 
   return { db, close: () => client.close() };
 }
