@@ -115,7 +115,7 @@
 
 ## 🚀 Grandes apostas (esforço L)
 
-- [ ] **Progression Builder & Player** — `[página]` `[já existe]` `[L]` — *ver flagship acima.*
+- [x] **Progression Builder & Player** — `[página]` `[já existe]` `[L]` — *ver flagship acima.*
 
 - [x] **Ear Training Studio** — `[página]` `[parcial]` `[L]`
   `/ear-training` com quizzes de intervalo, qualidade de acorde e reconhecimento de escala: toca notas

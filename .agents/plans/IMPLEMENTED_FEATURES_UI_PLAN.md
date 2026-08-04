@@ -253,13 +253,13 @@
   **Onde:** `router/index.ts`, `index.html:7`
   **Correção:** `route.meta.title` + guard (resolve para as 5 rotas de uma vez).
 
-- [ ] 🟠 **Sidebar fixa no mobile atinge as novas páginas com mais força.** O drill de braço e o
+- [x] 🟠 **Sidebar fixa no mobile atinge as novas páginas com mais força.** O drill de braço e o
   quiz são as telas mais "de celular" do app (prática rápida), e são as que mais sofrem com os
   ~119px úteis (audit A1). Nenhuma correção nova aqui — só registrar que a prioridade do A1 sobe
   agora que existem páginas de prática.
   **Onde:** `AppLayout.vue`/`AppSidebar.vue` (audit A1)
 
-- [ ] ⚪ **Pulso visual de nota unificado.** Roda, braço do drill, ScaleNotes e (futuro) piano
+- [x] ⚪ **Pulso visual de nota unificado.** Roda, braço do drill, ScaleNotes e (futuro) piano
   precisam do mesmo feedback "nota soando"; implementar uma vez (composable
   `useNotePulse`/classe utilitária) e reusar — evita 4 variações do mesmo efeito.
   **Onde:** consumidores de `useNoteAudio`
