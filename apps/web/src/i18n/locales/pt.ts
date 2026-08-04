@@ -59,7 +59,8 @@ export const pt: MessageSchema = {
     sectionTitle: "Salvar minha conta",
     sectionDescription: "Adicione um email e senha para entrar de novo em outro aparelho — seu progresso atual continua exatamente onde está.",
     emailLabel: "Email",
-    emailPlaceholder: "voce@exemplo.com",
+    // `@` inicia a sintaxe de mensagem vinculada do vue-i18n; `{'@'}` emite um literal.
+    emailPlaceholder: "voce{'@'}exemplo.com",
     passwordLabel: "Senha",
     passwordPlaceholder: "Pelo menos 8 caracteres",
     noRecoveryWarning: "A recuperação de senha ainda não está disponível. Se você esquecer essa senha, não há como voltar a acessar esta conta — guarde-a em um lugar seguro.",

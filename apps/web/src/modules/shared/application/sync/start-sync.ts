@@ -131,10 +131,19 @@ async function hydrate(pinia: Pinia): Promise<boolean> {
         }
       } else {
         const data = aggregate.read(pinia);
-        const updatedAt = Math.max(local, Date.now());
-        const result = await apiClient.putSnapshot(aggregate.slug, { data, updatedAt });
-        if (result.ok) {
-          sync.updatedAt[aggregate.key] = result.envelope.updatedAt;
+        // Only upload when local actually differs from the server. Without this
+        // check, every reload re-PUTs unchanged snapshots (and bumps their
+        // timestamps), doubling the boot request count for no reason.
+        const inSync =
+          server.data !== null && JSON.stringify(server.data) === JSON.stringify(data);
+        if (inSync) {
+          sync.updatedAt[aggregate.key] = server.updatedAt;
+        } else {
+          const updatedAt = Math.max(local, Date.now());
+          const result = await apiClient.putSnapshot(aggregate.slug, { data, updatedAt });
+          if (result.ok) {
+            sync.updatedAt[aggregate.key] = result.envelope.updatedAt;
+          }
         }
       }
     } catch {

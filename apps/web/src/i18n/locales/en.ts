@@ -57,7 +57,8 @@ export const en = {
     sectionTitle: "Save my account",
     sectionDescription: "Add an email and password so you can sign back in from another device — your current progress stays right where it is.",
     emailLabel: "Email",
-    emailPlaceholder: "you@example.com",
+    // `@` starts vue-i18n's linked-message syntax; `{'@'}` emits a literal one.
+    emailPlaceholder: "you{'@'}example.com",
     passwordLabel: "Password",
     passwordPlaceholder: "At least 8 characters",
     noRecoveryWarning: "Password recovery isn't available yet. If you forget this password, there's no way to get back into this account — keep it somewhere safe.",

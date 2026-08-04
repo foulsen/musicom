@@ -10,7 +10,8 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
-    "web": "turbo run dev --filter=web"
+    "web": "turbo run dev --filter=web",
+    "api": "turbo run dev --filter=api"
   },
   "keywords": [],
   "author": "",
