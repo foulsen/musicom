@@ -1,5 +1,6 @@
 export * from "./primitives";
 export * from "./sync/envelope";
+export * from "./auth";
 export * from "./profile";
 export * from "./learn";
 export * from "./drills";

@@ -7,11 +7,39 @@ import {
   earTrainingSnapshotSchema,
   learnEnvelopeSchema,
   learnSnapshotSchema,
+  loginInputSchema,
   preferencesSnapshotSchema,
+  registerInputSchema,
   updateProfileInputSchema,
   userProfileSchema,
   type DrillsSnapshot,
 } from "./index";
+
+describe("auth", () => {
+  it("accepts a valid register input", () => {
+    expect(
+      registerInputSchema.safeParse({ email: "ada@example.com", password: "supersecret" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts a valid login input", () => {
+    expect(
+      loginInputSchema.safeParse({ email: "ada@example.com", password: "supersecret" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a bad email", () => {
+    expect(
+      registerInputSchema.safeParse({ email: "not-an-email", password: "supersecret" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects a password shorter than 8 characters", () => {
+    expect(
+      loginInputSchema.safeParse({ email: "ada@example.com", password: "short" }).success,
+    ).toBe(false);
+  });
+});
 
 describe("profile", () => {
   it("accepts a nullable email", () => {
