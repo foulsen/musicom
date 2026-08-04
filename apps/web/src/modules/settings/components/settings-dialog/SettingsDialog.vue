@@ -26,6 +26,8 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { useSyncStore } from "@/modules/shared/application/sync";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
+import { AuthSection } from "@/modules/auth/components/auth-section";
+
 import { useUserStore } from "../../application/use-user-store";
 import { useThemeStore, type ThemeMode } from "../../application/use-theme-store";
 
@@ -181,6 +183,10 @@ watch(locale, (value) => localStorage.setItem(LOCALE_STORAGE_KEY, value));
             </select-content>
           </select-root>
         </div>
+
+        <separator class="my-4" />
+
+        <auth-section />
 
         <separator class="my-4" />
 
