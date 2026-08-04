@@ -15,6 +15,13 @@
       "when": 1783729797259,
       "tag": "0001_real_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785804862125,
+      "tag": "0002_aberrant_the_fury",
+      "breakpoints": true
     }
   ]
 }

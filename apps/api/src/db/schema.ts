@@ -3,12 +3,15 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 /**
  * A person's account. Born anonymous (empty name, null email); `email` is
  * nullable + unique so an account can later link an address for multi-device
- * login without a migration (plan §2). Timestamps are epoch milliseconds.
+ * login without a migration (plan §2). `email` + `passwordHash` set together
+ * mark a claimed (upgraded) account; both remain null for anonymous accounts.
+ * Timestamps are epoch milliseconds.
  */
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull().default(""),
   email: text("email").unique(),
+  passwordHash: text("password_hash"),
   createdAt: integer("created_at").notNull(),
 });
 
