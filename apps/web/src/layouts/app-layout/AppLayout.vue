@@ -4,7 +4,7 @@ import { RouterView } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 import { DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from "reka-ui";
-import { Menu } from "@lucide/vue";
+import { Menu as MenuIcon } from "@lucide/vue";
 
 import { AppSidebar } from "@/modules/navigation/components/app-sidebar";
 
@@ -25,7 +25,7 @@ const drawerOpen = ref(false);
           :aria-label="t('nav.openSidebar')"
           @click="drawerOpen = true"
         >
-          <menu class="size-5" />
+          <menu-icon class="size-5" />
         </button>
 
         <span class="text-sm font-semibold tracking-wide">MUSICOM</span>
