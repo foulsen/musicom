@@ -8,6 +8,8 @@ export const en = {
     learn: "Learn",
     openSidebar: "Open navigation",
     closeSidebar: "Close navigation",
+    collapseSidebar: "Collapse sidebar",
+    expandSidebar: "Expand sidebar",
   },
   common: {
     rootNote: "Root note",

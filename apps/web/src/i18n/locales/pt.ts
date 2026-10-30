@@ -10,6 +10,8 @@ export const pt: MessageSchema = {
     learn: "Trilhas",
     openSidebar: "Abrir navegação",
     closeSidebar: "Fechar navegação",
+    collapseSidebar: "Recolher barra lateral",
+    expandSidebar: "Expandir barra lateral",
   },
   common: {
     rootNote: "Nota fundamental",

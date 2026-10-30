@@ -4,7 +4,7 @@ export { default as NavigationItem } from "./NavigationItem.vue";
 
 export const navigationItemVariants = cva(
   [
-    "flex w-full items-center gap-3 rounded-md border-l-2 border-transparent px-3 py-2",
+    "flex w-full items-center gap-3 rounded-md border-l-2 border-transparent py-2",
     "text-sm font-medium transition-colors",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
   ],
@@ -15,9 +15,14 @@ export const navigationItemVariants = cva(
         false:
           "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
       },
+      collapsed: {
+        true: "justify-center px-0",
+        false: "px-3",
+      },
     },
     defaultVariants: {
       active: false,
+      collapsed: false,
     },
   },
 );
