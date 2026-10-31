@@ -114,6 +114,39 @@ describe("ear-training snapshot", () => {
       }).success,
     ).toBe(true);
   });
+
+  const base = {
+    scores: { interval: { correct: 1, total: 2 } },
+    streak: 0,
+    bestStreak: 0,
+  };
+
+  it("parses an old snapshot (no per-item stats) with empty defaults", () => {
+    const result = earTrainingSnapshotSchema.parse(base);
+
+    expect(result.itemStats).toEqual({});
+    expect(result.confusions).toEqual({});
+  });
+
+  it("round-trips per-item stats and confusions", () => {
+    const snapshot = {
+      ...base,
+      itemStats: { interval: { "8": { correct: 1, total: 4 } }, scale: { Dorian: { correct: 2, total: 2 } } },
+      confusions: { interval: { "8": { "7": 2, "9": 1 } } },
+    };
+
+    expect(earTrainingSnapshotSchema.parse(snapshot)).toEqual(snapshot);
+  });
+
+  it("rejects a non-positive confusion count and an unknown kind", () => {
+    expect(
+      earTrainingSnapshotSchema.safeParse({ ...base, confusions: { interval: { "8": { "7": 0 } } } }).success,
+    ).toBe(false);
+    expect(
+      earTrainingSnapshotSchema.safeParse({ ...base, itemStats: { melody: { x: { correct: 0, total: 1 } } } })
+        .success,
+    ).toBe(false);
+  });
 });
 
 describe("preferences snapshot", () => {

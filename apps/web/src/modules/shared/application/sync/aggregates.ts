@@ -97,12 +97,25 @@ const earTraining = defineAggregate<EarTrainingSnapshot>({
   schema: earTrainingSnapshotSchema,
   read: (pinia) => {
     const store = useEarTrainingStore(pinia);
-    return { scores: store.scores, streak: store.streak, bestStreak: store.bestStreak };
+    return {
+      scores: store.scores,
+      streak: store.streak,
+      bestStreak: store.bestStreak,
+      itemStats: store.itemStats,
+      confusions: store.confusions,
+    };
   },
   apply: (pinia, data) => {
     const store = useEarTrainingStore(pinia);
     if (data.scores) {
       store.scores = { ...store.scores, ...data.scores };
+    }
+    // Mesmo merge por tipo de quiz: o que veio do servidor vence só nos tipos que ele conhece.
+    if (data.itemStats) {
+      store.itemStats = { ...store.itemStats, ...data.itemStats };
+    }
+    if (data.confusions) {
+      store.confusions = { ...store.confusions, ...data.confusions };
     }
     store.streak = data.streak;
     store.bestStreak = data.bestStreak;

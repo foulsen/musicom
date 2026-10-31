@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 
+import type { ConfusionsByKind, ItemStatsByKind } from "./item-stats";
 import type { Difficulty, QuizKind } from "./question-generators";
 
 export type IntervalPlaybackMode = "harmonic" | "melodic";
@@ -21,6 +22,10 @@ export const useEarTrainingStore = defineStore("ear-training", {
       chordQuality: emptyScore(),
       scale: emptyScore(),
     } as Record<QuizKind, QuizScore>,
+    /** Acertos por item (`itemStats[tipo][id]`) — base do sampling adaptativo e dos pontos fracos. */
+    itemStats: {} as ItemStatsByKind,
+    /** Erros por confusão (`confusions[tipo][idCorreto][idEscolhido]`); limitado ao tamanho dos pools. */
+    confusions: {} as ConfusionsByKind,
     streak: 0,
     bestStreak: 0,
     difficulty: "medium" as Difficulty,

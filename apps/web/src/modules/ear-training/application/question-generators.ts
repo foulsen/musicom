@@ -27,9 +27,12 @@ import {
   chordQualityLabel,
   intervalLabel,
   scaleLabel,
+  type TermLabel,
 } from "@/modules/shared/application/music-terms";
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
 import type { QuizOption } from "@/modules/shared/application/quiz";
+
+import { itemWeight, pickWeighted, topConfusionId, type ItemStatsState } from "./item-stats";
 
 /** Oitavas possíveis de playback — sorteada por questão para o ouvido não ancorar em frequências absolutas. */
 const PLAYBACK_OCTAVES = [3, 4, 5];
@@ -117,12 +120,45 @@ function pitchesFor(root: Note, octave: number, semitoneOffsets: number[]): Pitc
   return semitoneOffsets.map((offset) => rootPitch.transpose(offset));
 }
 
-function generateIntervalQuestion(difficulty: Difficulty): Question {
+export interface GenerateOptions {
+  /** Histórico por item: quando presente, o item correto é sorteado com viés para os pontos fracos. */
+  stats?: ItemStatsState;
+  /** Aleatoriedade [0, 1) do sorteio ponderado — injetável para testes. */
+  random?: () => number;
+}
+
+/**
+ * Sorteia o item correto (ponderado por erro suavizado, com piso — ver `itemWeight`) e 3 distratores.
+ * Se o usuário costuma confundir o correto com outro item que está no pool, esse item entra
+ * sempre como distrator: é o que torna a prática de discriminação útil.
+ */
+export function pickItemAndDistractors<T>(
+  pool: readonly T[],
+  idOf: (item: T) => string,
+  kind: QuizKind,
+  { stats, random = Math.random }: GenerateOptions = {},
+): { correct: T; distractors: T[] } {
+  const kindStats = stats?.itemStats?.[kind];
+  const correct = pickWeighted(
+    pool,
+    pool.map((item) => itemWeight(kindStats?.[idOf(item)])),
+    random,
+  );
+
+  const correctId = idOf(correct);
+  const confusedId = topConfusionId(stats?.confusions?.[kind]?.[correctId], pool.map(idOf), correctId);
+  const confused = confusedId === null ? undefined : pool.find((item) => idOf(item) === confusedId);
+
+  const others = sampleDistinct(pool, 3, (item) => idOf(item) === correctId || item === confused);
+  const distractors = (confused ? [confused, ...others] : others).slice(0, 3);
+
+  return { correct, distractors };
+}
+
+function generateIntervalQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
   const pool = poolForDifficulty(INTERVAL_SEMITONE_ENTRIES, difficulty);
   const root = randomRootNote();
-  const semitones = randomChoice(pool);
-
-  const distractors = sampleDistinct(pool, 3, (value) => value === semitones);
+  const { correct: semitones, distractors } = pickItemAndDistractors(pool, String, "interval", generate);
 
   const options = shuffle(
     [semitones, ...distractors].map((value) => ({ id: value.toString(), label: intervalLabel(value) })),
@@ -137,12 +173,15 @@ function generateIntervalQuestion(difficulty: Difficulty): Question {
   };
 }
 
-function generateChordQualityQuestion(difficulty: Difficulty): Question {
+function generateChordQualityQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
   const pool = poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty);
   const root = randomRootNote();
-  const pattern = randomChoice(pool);
-
-  const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
+  const { correct: pattern, distractors } = pickItemAndDistractors(
+    pool,
+    (item) => item.name,
+    "chordQuality",
+    generate,
+  );
 
   const options = shuffle(
     [pattern, ...distractors].map((item) => ({ id: item.name, label: chordQualityLabel(item.name) })),
@@ -161,12 +200,10 @@ function generateChordQualityQuestion(difficulty: Difficulty): Question {
   };
 }
 
-function generateScaleQuestion(difficulty: Difficulty): Question {
+function generateScaleQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
   const pool = poolForDifficulty(SCALE_ENTRIES, difficulty);
   const root = randomRootNote();
-  const pattern = randomChoice(pool);
-
-  const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
+  const { correct: pattern, distractors } = pickItemAndDistractors(pool, (item) => item.name, "scale", generate);
 
   const options = shuffle(
     [pattern, ...distractors].map((item) => ({ id: item.name, label: scaleLabel(item.name) })),
@@ -185,11 +222,42 @@ function generateScaleQuestion(difficulty: Difficulty): Question {
   };
 }
 
-export function generateQuestion(kind: QuizKind, difficulty: Difficulty = "medium"): Question {
-  if (kind === "chordQuality") return generateChordQualityQuestion(difficulty);
-  if (kind === "scale") return generateScaleQuestion(difficulty);
+export function generateQuestion(
+  kind: QuizKind,
+  difficulty: Difficulty = "medium",
+  options: GenerateOptions = {},
+): Question {
+  if (kind === "chordQuality") return generateChordQualityQuestion(difficulty, options);
+  if (kind === "scale") return generateScaleQuestion(difficulty, options);
 
-  return generateIntervalQuestion(difficulty);
+  return generateIntervalQuestion(difficulty, options);
+}
+
+/** Rótulo traduzível de um item pelo id estável (semitons, nome do padrão) — para listas fora de uma questão. */
+export function labelForItem(kind: QuizKind, id: string): TermLabel {
+  if (kind === "interval") return intervalLabel(Number(id));
+  if (kind === "chordQuality") return chordQualityLabel(id);
+
+  return scaleLabel(id);
+}
+
+/** Pitches de um item a partir de uma fundamental — base de `pitchesForOption` e do painel de pontos fracos. */
+export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[] | null {
+  if (kind === "interval") {
+    return [root, root.transpose(Number(id))];
+  }
+
+  if (kind === "chordQuality") {
+    const pattern = CHORD_QUALITY_ENTRIES.map(([item]) => item).find((item) => item.name === id);
+
+    return pattern ? pattern.degrees.map((degree) => root.transpose(degree.semitones())) : null;
+  }
+
+  const pattern = SCALE_ENTRIES.map(([item]) => item).find((item) => item.name === id);
+
+  return pattern
+    ? [...pattern.degrees.map((degree) => root.transpose(degree.semitones())), root.transpose(12)]
+    : null;
 }
 
 /**
@@ -198,21 +266,5 @@ export function generateQuestion(kind: QuizKind, difficulty: Difficulty = "mediu
  * feedback de erro. Reusa a mesma fundamental (`question.pitches[0]`) da questão.
  */
 export function pitchesForOption(question: Question, optionId: string): Pitch[] {
-  const root = question.pitches[0];
-
-  if (question.kind === "interval") {
-    return [root, root.transpose(Number(optionId))];
-  }
-
-  if (question.kind === "chordQuality") {
-    const pattern = CHORD_QUALITY_ENTRIES.map(([item]) => item).find((item) => item.name === optionId);
-    if (!pattern) return question.pitches;
-
-    return pattern.degrees.map((degree) => root.transpose(degree.semitones()));
-  }
-
-  const pattern = SCALE_ENTRIES.map(([item]) => item).find((item) => item.name === optionId);
-  if (!pattern) return question.pitches;
-
-  return [...pattern.degrees.map((degree) => root.transpose(degree.semitones())), root.transpose(12)];
+  return pitchesForItem(question.kind, optionId, question.pitches[0]) ?? question.pitches;
 }
