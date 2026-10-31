@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { Play as PlayIcon } from "@lucide/vue";
-import { Pitch } from "@music-workspace/music-theory";
+import { Pitch, scalePatternSteps } from "@music-workspace/music-theory";
 
 import { useScaleExplorerViewModel } from "../application/use-scale-explorer-view-model";
 import { ScalePatternSelector } from "../components/scale-pattern-selector";
 import { TuningSelector } from "../components/tuning-selector";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
+import { StepPattern } from "@/modules/shared/components/step-pattern";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
@@ -42,6 +45,11 @@ const {
 
 const { play, playChord, playSequence } = useNoteAudio();
 const { t } = useI18n();
+const { scaleDescription } = useMusicTerms();
+
+const patternDescription = computed(() => scaleDescription(selectedPattern.value));
+const patternSteps = computed(() => scalePatternSteps(selectedPattern.value));
+const patternDegreeLabels = computed(() => selectedPattern.value.degrees.map((degree) => degree.toString()));
 
 /** Escala ascendente, fechando na tônica uma oitava acima (via Pitch.transpose, nunca cai de registro). */
 function listenToScale() {
@@ -68,6 +76,20 @@ function listenToScale() {
     <root-note-selector v-model="selectedRoot" />
 
     <scale-pattern-selector v-model="selectedPattern" :patterns="availablePatterns" />
+
+    <section class="space-y-4 rounded-xl border border-border bg-card/40 p-4 sm:p-5">
+      <p v-if="patternDescription" class="max-w-prose text-sm leading-relaxed text-foreground">
+        {{ patternDescription }}
+      </p>
+
+      <div class="max-w-xl space-y-2">
+        <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {{ t("stepPattern.title") }}
+        </h2>
+
+        <step-pattern :steps="patternSteps" :degree-labels="patternDegreeLabels" legend />
+      </div>
+    </section>
 
     <tuning-selector v-model="selectedTuning" :tunings="availableTunings" class="max-w-xs" />
 

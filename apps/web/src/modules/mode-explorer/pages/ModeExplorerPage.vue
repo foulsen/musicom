@@ -4,11 +4,14 @@ import { useI18n } from "vue-i18n";
 
 import { Play as PlayIcon } from "@lucide/vue";
 
+import { scalePatternSteps } from "@music-workspace/music-theory";
+
 import { useModeExplorerViewModel } from "../application/use-mode-explorer-view-model";
 import { ModeSelector } from "../components/mode-selector";
 
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
+import { StepPattern } from "@/modules/shared/components/step-pattern";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
@@ -52,7 +55,11 @@ const {
 
 const { play, playChord, playSequence } = useNoteAudio();
 const { t, locale } = useI18n();
-const { scaleName } = useMusicTerms();
+const { scaleName, scaleDescription } = useMusicTerms();
+
+const modeDescription = computed(() => scaleDescription(selectedMode.value.pattern));
+const modeSteps = computed(() => scalePatternSteps(selectedMode.value.pattern));
+const modeDegreeLabels = computed(() => selectedMode.value.pattern.degrees.map((degree) => degree.toString()));
 
 function listenToMode() {
   playSequence(scalePitches.value);
@@ -110,6 +117,20 @@ function brightnessHue(index: number): number {
     <p class="text-xs text-muted-foreground italic">
       {{ t("modeExplorer.notesUnchangedCaption") }}
     </p>
+
+    <section class="space-y-4 rounded-xl border border-border bg-card/40 p-4 sm:p-5">
+      <p v-if="modeDescription" class="max-w-prose text-sm leading-relaxed text-foreground">
+        {{ modeDescription }}
+      </p>
+
+      <div class="max-w-xl space-y-2">
+        <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {{ t("stepPattern.title") }}
+        </h2>
+
+        <step-pattern :steps="modeSteps" :degree-labels="modeDegreeLabels" legend />
+      </div>
+    </section>
 
     <button
       type="button"

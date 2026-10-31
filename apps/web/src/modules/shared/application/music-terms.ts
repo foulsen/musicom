@@ -166,6 +166,35 @@ export const chordFamilyLabel = (name: string): TermLabel => termLabel("chordFam
 export const harmonicFunctionLabel = (name: string): TermLabel => termLabel("harmonicFunction", name);
 export const degreeFunctionLabel = (name: string): TermLabel => termLabel("degreeFunction", name);
 
+/**
+ * Chave i18n da descrição curta (caráter + uso típico) de uma escala/modo, ou `null` sem entrada.
+ * Reaproveita as chaves de `SCALE_KEYS`/`CHORD_QUALITY_KEYS`: `terms.descriptions.<scales|chords>.<chave>`.
+ */
+export function scaleDescriptionKey(name: string): string | null {
+  const key = SCALE_KEYS[name];
+
+  return key ? `terms.descriptions.scales.${key}` : null;
+}
+
+export function chordDescriptionKey(name: string): string | null {
+  const key = CHORD_QUALITY_KEYS[name];
+
+  return key ? `terms.descriptions.chords.${key}` : null;
+}
+
+/** Descrição traduzível de uma escala/modo; `null` quando o padrão não tem descrição. */
+export function scaleDescriptionLabel(name: string): LabelRef | null {
+  const key = scaleDescriptionKey(name);
+
+  return key ? { key } : null;
+}
+
+export function chordDescriptionLabel(name: string): LabelRef | null {
+  const key = chordDescriptionKey(name);
+
+  return key ? { key } : null;
+}
+
 /** Nome do intervalo em inglês (domínio) a partir de semitons — 12 vira "octave" (o domínio dobra para "tonic"). */
 export function intervalDomainName(semitones: number): string {
   return semitones === 12 ? "octave" : new Interval(semitones).name();
@@ -217,7 +246,7 @@ function nameOf(value: Named<{ name: string }>): string {
  * o nome-identificador (string); o que não tiver tradução volta como o texto cru do domínio.
  */
 export function useMusicTerms() {
-  const { t } = useI18n();
+  const { t, te } = useI18n();
 
   const translate: Translate = (key, named, plural) =>
     plural === undefined ? t(key, named ?? {}) : t(key, named ?? {}, plural);
@@ -227,8 +256,15 @@ export function useMusicTerms() {
     return resolveLabel(translate, value);
   }
 
+  /** Resolve a descrição se a chave existir no idioma ativo; senão `null` (a UI simplesmente omite o texto). */
+  function description(key: string | null): string | null {
+    return key && te(key) ? t(key) : null;
+  }
+
   return {
     label,
+    scaleDescription: (pattern: Named<{ name: string }>) => description(scaleDescriptionKey(nameOf(pattern))),
+    chordDescription: (pattern: Named<{ name: string }>) => description(chordDescriptionKey(nameOf(pattern))),
     scaleName: (pattern: Named<{ name: string }>) => label(scaleLabel(nameOf(pattern))),
     chordQualityName: (pattern: Named<{ name: string }>) => label(chordQualityLabel(nameOf(pattern))),
     chordFamilyName: (family: Named<{ name: string }>) => label(chordFamilyLabel(nameOf(family))),

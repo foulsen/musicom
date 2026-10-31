@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { Play as PlayIcon } from "@lucide/vue";
@@ -7,6 +8,7 @@ import { useChordExplorerViewModel } from "../application/use-chord-explorer-vie
 import { ChordFamilySelector } from "../components/chord-family-selector";
 import { ChordQualitySelector } from "../components/chord-quality-selector";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { chordPitches } from "@/modules/shared/application/chord-pitches";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
@@ -35,6 +37,13 @@ const {
 
 const { play, playChord } = useNoteAudio();
 const { t } = useI18n();
+const { chordDescription, intervalName } = useMusicTerms();
+
+const qualityDescription = computed(() => chordDescription(selectedQuality.value));
+
+/** Fórmula do acorde em graus ("1 – b3 – 5") e, ao lado, o nome de cada intervalo. */
+const formulaDegrees = computed(() => selectedQuality.value.degrees.map((degree) => degree.toString()).join(" – "));
+const formulaIntervals = computed(() => selectedQuality.value.degrees.map((degree) => intervalName(degree)).join(", "));
 
 function listenToChord() {
   playChord(chordPitches(chord.value), { strum: true });
@@ -59,6 +68,23 @@ function listenToChord() {
     <chord-family-selector v-model="selectedFamily" :families="availableFamilies" />
 
     <chord-quality-selector v-model="selectedQuality" :chords="chordOptions" />
+
+    <section class="space-y-3 rounded-xl border border-border bg-card/40 p-4 sm:p-5">
+      <p v-if="qualityDescription" class="max-w-prose text-sm leading-relaxed text-foreground">
+        {{ qualityDescription }}
+      </p>
+
+      <div class="space-y-1">
+        <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {{ t("chordExplorer.formula") }}
+        </h2>
+
+        <p class="text-sm">
+          <span class="font-semibold tracking-wide text-foreground" aria-hidden="true">{{ formulaDegrees }}</span>
+          <span class="text-muted-foreground"><span aria-hidden="true"> · </span>{{ formulaIntervals }}</span>
+        </p>
+      </div>
+    </section>
 
     <div class="flex flex-col gap-8 lg:gap-16 lg:flex-row lg:items-start">
       <scale-notes :degrees="chordNotes" class="lg:w-44 lg:shrink-0" @note-play="play" />
