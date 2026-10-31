@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { gradeLeitnerCard, initialLeitnerState, isDue, LEITNER_BOX_COUNT } from "./leitner";
+import {
+  gradeLeitnerCard,
+  HARD_BOX_1_INTERVAL_MS,
+  initialLeitnerState,
+  isDue,
+  LEITNER_BOX_COUNT,
+} from "./leitner";
 
 describe("initialLeitnerState", () => {
   it("starts in box 1, due immediately", () => {
@@ -60,5 +66,52 @@ describe("gradeLeitnerCard", () => {
     const cappedAgain = gradeLeitnerCard(state, true, now);
     expect(cappedAgain.box).toBe(LEITNER_BOX_COUNT);
     expect(cappedAgain.dueAt).toBe(state.dueAt);
+  });
+
+  it("keeps the legacy boolean grades working (true = good, false = again)", () => {
+    const now = 1_000;
+    const state = { box: 2, dueAt: now };
+
+    expect(gradeLeitnerCard(state, true, now)).toEqual(gradeLeitnerCard(state, "good", now));
+    expect(gradeLeitnerCard(state, false, now)).toEqual(gradeLeitnerCard(state, "again", now));
+  });
+});
+
+describe("gradeLeitnerCard with the 'hard' grade", () => {
+  const now = 1_000_000;
+
+  it("stays in box 1 but is only due again after a short wait", () => {
+    const state = gradeLeitnerCard(initialLeitnerState(now), "hard", now);
+
+    expect(state.box).toBe(1);
+    expect(state.dueAt).toBe(now + HARD_BOX_1_INTERVAL_MS);
+    expect(isDue(state, now)).toBe(false);
+    expect(isDue(state, now + HARD_BOX_1_INTERVAL_MS)).toBe(true);
+  });
+
+  it("stays in the same box and repeats that box's interval, never advancing", () => {
+    const box2 = gradeLeitnerCard(initialLeitnerState(now), "good", now);
+    const hardInBox2 = gradeLeitnerCard(box2, "hard", now);
+
+    expect(hardInBox2.box).toBe(2);
+    expect(hardInBox2.dueAt).toBe(box2.dueAt);
+
+    const lastBox = { box: LEITNER_BOX_COUNT, dueAt: now };
+    const hardInLastBox = gradeLeitnerCard(lastBox, "hard", now);
+
+    expect(hardInLastBox.box).toBe(LEITNER_BOX_COUNT);
+    expect(hardInLastBox.dueAt).toBeGreaterThan(now);
+  });
+
+  it("is gentler than 'again' and less rewarding than 'good'", () => {
+    const state = { box: 3, dueAt: now };
+    const again = gradeLeitnerCard(state, "again", now);
+    const hard = gradeLeitnerCard(state, "hard", now);
+    const good = gradeLeitnerCard(state, "good", now);
+
+    expect(hard.box).toBeGreaterThan(again.box);
+    expect(hard.box).toBeLessThan(good.box);
+    expect(hard.dueAt).toBeGreaterThan(again.dueAt);
+    expect(hard.dueAt).toBeLessThan(good.dueAt);
   });
 });

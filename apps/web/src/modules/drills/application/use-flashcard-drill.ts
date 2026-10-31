@@ -1,8 +1,15 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 
-import { buildDeck, DECK_IDS, type DeckId, type Flashcard } from "./flashcard-decks";
-import { gradeLeitnerCard, initialLeitnerState, isDue, LEITNER_BOX_COUNT, type LeitnerCardState } from "./leitner";
+import { buildDeck, DECK_IDS, isLegacyCardId, type DeckId, type Flashcard } from "./flashcard-decks";
+import {
+  gradeLeitnerCard,
+  initialLeitnerState,
+  isDue,
+  LEITNER_BOX_COUNT,
+  type LeitnerCardState,
+  type LeitnerGrade,
+} from "./leitner";
 import { useDrillsStore } from "./use-drills-store";
 
 /** Recalcula o placar "devidos" a cada tanto, para o badge não ficar parado enquanto o tempo passa. */
@@ -12,13 +19,21 @@ export function useFlashcardDrill() {
   const store = useDrillsStore();
   const { cardStates, activeDeckId } = storeToRefs(store);
 
+  // Ids de versões antigas dos baralhos (ex.: grafia com raiz fixa) não apontam mais para cartão algum.
+  for (const id of Object.keys(cardStates.value)) {
+    if (isLegacyCardId(id)) delete cardStates.value[id];
+  }
+
   const deck = ref<Flashcard[]>([]);
   const queue = ref<Flashcard[]>([]);
   const isRevealed = ref(false);
   const now = ref(Date.now());
   /** Tamanho da fila no início da sessão (para "cartão X de Y") — não recomputado a cada grade(). */
   const sessionSize = ref(0);
-  /** true quando a sessão começou sem nada devido — a fila caiu pro baralho inteiro. */
+  /**
+   * true quando a sessão começou sem nada devido — a fila caiu pro baralho inteiro.
+   * Prática livre não mexe no agendamento: responder cedo demais não deve adiar (nem antecipar) revisões.
+   */
   const isFreePractice = ref(false);
 
   /**
@@ -85,16 +100,19 @@ export function useFlashcardDrill() {
     isRevealed.value = true;
   }
 
-  function grade(correct: boolean) {
+  function grade(result: LeitnerGrade) {
     const card = current.value;
     if (!card) return;
 
-    const at = Date.now();
-    cardStates.value[card.id] = gradeLeitnerCard(stateFor(card.id, at), correct, at);
+    if (!isFreePractice.value) {
+      const at = Date.now();
+      cardStates.value[card.id] = gradeLeitnerCard(stateFor(card.id, at), result, at);
+    }
 
     queue.value = queue.value.slice(1);
-    if (!correct) {
-      queue.value.push(card);
+    if (result === "again") {
+      // Cartões com raiz sorteada voltam com outra raiz — senão o erro vira "decorar a resposta anterior".
+      queue.value.push(card.redraw?.() ?? card);
     } else {
       clearedIds.value.add(card.id);
     }

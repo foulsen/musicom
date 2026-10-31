@@ -7,6 +7,7 @@ import { AudioWaveform, PanelLeftClose, PanelLeftOpen, Settings as SettingsIcon 
 
 import { Separator } from "@/components/ui/separator";
 
+import { useDueReviews } from "@/modules/drills/application/use-due-reviews";
 import { SettingsDialog } from "@/modules/settings/components/settings-dialog";
 import { useUserStore } from "@/modules/settings/application/use-user-store";
 import { useSyncStore } from "@/modules/shared/application/sync";
@@ -37,6 +38,11 @@ const sidebarStore = useSidebarStore();
 const { collapsed: collapsedPreference } = storeToRefs(sidebarStore);
 
 const settingsOpen = ref(false);
+
+const { dueCount: dueReviewCount } = useDueReviews();
+
+/** Contadores por rota: hoje só os Treinos mostram badge (revisões de flashcards vencidas). */
+const badges = computed<Record<string, number>>(() => ({ "/drills": dueReviewCount.value }));
 
 /** O drawer mobile sempre mostra os rótulos; só o braço fixo pode recolher. */
 const collapsed = computed(() => props.variant === "sidebar" && collapsedPreference.value);
@@ -95,6 +101,7 @@ const syncNeedsAttention = computed(() => syncStatus.value === "error" || syncSt
         :key="item.to"
         :item="item"
         :collapsed="collapsed"
+        :badge="badges[item.to]"
       />
     </nav>
 

@@ -3,6 +3,8 @@ import { useI18n } from "vue-i18n";
 
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
+import type { LeitnerGrade } from "../../application/leitner";
+
 const props = withDefaults(
   defineProps<{
     prompt: string;
@@ -20,7 +22,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   reveal: [];
-  grade: [correct: boolean];
+  grade: [grade: LeitnerGrade];
 }>();
 
 const { t } = useI18n();
@@ -32,10 +34,14 @@ function onKeydown(event: KeyboardEvent) {
     return;
   }
 
-  if (props.revealed && event.key === "1") {
-    emit("grade", false);
-  } else if (props.revealed && event.key === "2") {
-    emit("grade", true);
+  if (!props.revealed) return;
+
+  if (event.key === "1") {
+    emit("grade", "again");
+  } else if (event.key === "2") {
+    emit("grade", "hard");
+  } else if (event.key === "3") {
+    emit("grade", "good");
   }
 }
 
@@ -88,19 +94,27 @@ useTypingGuardedKeydown(onKeydown);
         {{ t("drills.flashcards.reveal") }}
       </button>
 
-      <div v-else class="flex gap-3">
+      <div v-else class="flex flex-wrap justify-center gap-3">
         <button
           type="button"
           class="rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          @click="emit('grade', false)"
+          @click="emit('grade', 'again')"
         >
           {{ t("drills.flashcards.again") }}
         </button>
 
         <button
           type="button"
+          class="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          @click="emit('grade', 'hard')"
+        >
+          {{ t("drills.flashcards.hard") }}
+        </button>
+
+        <button
+          type="button"
           class="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          @click="emit('grade', true)"
+          @click="emit('grade', 'good')"
         >
           {{ t("drills.flashcards.gotIt") }}
         </button>
