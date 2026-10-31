@@ -33,10 +33,21 @@ describe("generateQuestion", () => {
   it("never puts both Ionian and Major (or Aeolian and Natural Minor) in the same scale question", () => {
     for (let i = 0; i < ITERATIONS; i++) {
       const question = generateQuestion("scale", "hard");
-      const names = question.options.map((option) => option.label);
+      const names = question.options.map((option) => option.id);
 
       expect(names).not.toContain("Ionian");
       expect(names).not.toContain("Aeolian");
+    }
+  });
+
+  it.each(KINDS)("labels options with translatable terms while ids stay stable (%s)", (kind) => {
+    for (let i = 0; i < ITERATIONS; i++) {
+      const question = generateQuestion(kind, "hard");
+
+      question.options.forEach((option) => {
+        expect(typeof option.label).toBe("object");
+        expect(option.id).not.toBe(typeof option.label === "string" ? option.label : option.label.key);
+      });
     }
   });
 });

@@ -4,7 +4,6 @@ import { storeToRefs } from "pinia";
 import {
   CHORD_FAMILIES,
   Fretboard,
-  Interval,
   Note,
   STANDARD_GUITAR_TUNING,
   createChord,
@@ -15,11 +14,13 @@ import type { FretboardNote } from "@/modules/shared/types/fretboard-note";
 import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 
 import { useChordExplorerStore } from "./use-chord-explorer-store";
 
 /** Estado local da página de estudo de acordes (independente do Scale Explorer). */
 export function useChordExplorerViewModel() {
+  const { intervalName } = useMusicTerms();
   const store = useChordExplorerStore();
   const { rootValue, familyName, qualityName, fretCount } = storeToRefs(store);
 
@@ -117,7 +118,7 @@ export function useChordExplorerViewModel() {
           label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
           isTonic: note.equals(current.root),
           inScale: current.notes.some((chordNote) => chordNote.equals(note)),
-          intervalName: new Interval(current.root.distanceTo(note)).name(),
+          intervalName: intervalName(current.root.distanceTo(note)),
         };
       }),
     );

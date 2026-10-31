@@ -6,11 +6,14 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import type { Mode } from "@music-workspace/music-theory";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
+
 const props = defineProps<{
   modes: Mode[];
 }>();
 
 const { t } = useI18n();
+const { scaleName } = useMusicTerms();
 
 const model = defineModel<number>({ required: true });
 
@@ -40,11 +43,11 @@ const selectedDegree = computed<string>({
         v-for="mode in modes"
         :key="mode.degree"
         :value="mode.degree.toString()"
-        :aria-label="`${mode.pattern.name} · ${t('modeExplorer.degree', { degree: mode.degree })}`"
+        :aria-label="`${scaleName(mode.pattern)} · ${t('modeExplorer.degree', { degree: mode.degree })}`"
         class="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/40 px-3 py-1.5 text-sm text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
         <span class="font-medium">
-          {{ mode.pattern.name }}
+          {{ scaleName(mode.pattern) }}
         </span>
 
         <span

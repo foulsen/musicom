@@ -3,6 +3,8 @@ import { useI18n } from "vue-i18n";
 
 import { Pitch, type Degree, type Note, type SpelledNote } from "@music-workspace/music-theory";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
+
 interface ScaleNote {
   note: Note;
   degree: Degree;
@@ -18,6 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { intervalName } = useMusicTerms();
 
 /** Oitava fixa apenas para sonorização (a nota em si não carrega oitava no domínio). */
 const PLAYBACK_OCTAVE = 4;
@@ -50,7 +53,7 @@ function play(note: Note) {
           </p>
 
           <p class="text-sm text-muted-foreground">
-            {{ item.degree.intervalName() }}
+            {{ intervalName(item.degree) }}
           </p>
         </button>
       </li>

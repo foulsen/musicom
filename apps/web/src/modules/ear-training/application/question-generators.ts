@@ -1,6 +1,5 @@
 import {
   CHROMATIC_SCALE,
-  Interval,
   MAJOR_7_CHORD_PATTERN,
   DIMINISHED_CHORD_PATTERN,
   DOMINANT_7_CHORD_PATTERN,
@@ -24,6 +23,11 @@ import {
   type ScalePattern,
 } from "@music-workspace/music-theory";
 
+import {
+  chordQualityLabel,
+  intervalLabel,
+  scaleLabel,
+} from "@/modules/shared/application/music-terms";
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
 import type { QuizOption } from "@/modules/shared/application/quiz";
 
@@ -101,10 +105,6 @@ function randomRootNote(): Note {
   return Note.from(randomChoice(CHROMATIC_SCALE));
 }
 
-function intervalName(semitones: number): string {
-  return semitones === 12 ? "octave" : new Interval(semitones).name();
-}
-
 /**
  * Constrói pitches **estritamente ascendentes** a partir de uma fundamental,
  * uma por semitom-offset, via `Pitch.transpose` (aritmética MIDI). Ao contrário
@@ -125,7 +125,7 @@ function generateIntervalQuestion(difficulty: Difficulty): Question {
   const distractors = sampleDistinct(pool, 3, (value) => value === semitones);
 
   const options = shuffle(
-    [semitones, ...distractors].map((value) => ({ id: value.toString(), label: intervalName(value) })),
+    [semitones, ...distractors].map((value) => ({ id: value.toString(), label: intervalLabel(value) })),
   );
 
   return {
@@ -145,7 +145,7 @@ function generateChordQualityQuestion(difficulty: Difficulty): Question {
   const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
 
   const options = shuffle(
-    [pattern, ...distractors].map((item) => ({ id: item.name, label: item.name })),
+    [pattern, ...distractors].map((item) => ({ id: item.name, label: chordQualityLabel(item.name) })),
   );
 
   return {
@@ -169,7 +169,7 @@ function generateScaleQuestion(difficulty: Difficulty): Question {
   const distractors = sampleDistinct(pool, 3, (item) => item.name === pattern.name);
 
   const options = shuffle(
-    [pattern, ...distractors].map((item) => ({ id: item.name, label: item.name })),
+    [pattern, ...distractors].map((item) => ({ id: item.name, label: scaleLabel(item.name) })),
   );
 
   // Fecha a sequência com a tônica uma oitava acima, para o contorno soar

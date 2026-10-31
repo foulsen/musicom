@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { CHROMATIC_SCALE, Interval, Note, Pitch } from "@music-workspace/music-theory";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 
 const props = withDefaults(
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { intervalName } = useMusicTerms();
 
 const mode = ref<"chromatic" | "interval">("chromatic");
 
@@ -66,7 +68,7 @@ const nodes = computed<WheelNote[]>(() =>
       isRoot: note.equals(props.root),
       isHighlighted: props.highlightedNotes.some((highlighted) => highlighted.equals(note)),
       semitonesFromRoot,
-      intervalName: interval.name(),
+      intervalName: intervalName(interval),
       shortInterval: interval.shortName(),
     };
   }),

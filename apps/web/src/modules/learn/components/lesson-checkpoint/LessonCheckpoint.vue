@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { label } = useMusicTerms();
 
 const index = ref(0);
 const selectedOptionId = ref<string | null>(null);
@@ -89,7 +91,7 @@ useTypingGuardedKeydown(handleKeydown);
     </p>
 
     <p class="text-base font-medium text-foreground">
-      {{ t(question.promptKey, question.promptParams ?? {}) }}
+      {{ label({ key: question.promptKey, params: question.promptParams }) }}
     </p>
 
     <answer-options

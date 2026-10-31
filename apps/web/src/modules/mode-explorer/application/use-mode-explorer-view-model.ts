@@ -6,7 +6,6 @@ import type { ChordCardData } from "@/modules/shared/types/chord-shape";
 
 import {
   Fretboard,
-  Interval,
   MAJOR_SCALE_MODE_PATTERNS,
   MODE_BRIGHTNESS_ORDER,
   Note,
@@ -20,6 +19,7 @@ import {
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 
 import { useModeExplorerStore } from "./use-mode-explorer-store";
 
@@ -30,6 +30,7 @@ function ascendingPitches(root: Note, degreeSemitones: number[]): Pitch[] {
 }
 
 export function useModeExplorerViewModel() {
+  const { intervalName } = useMusicTerms();
   const store = useModeExplorerStore();
   const {
     parentRootValue,
@@ -153,7 +154,7 @@ export function useModeExplorerViewModel() {
           label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
           isTonic: note.equals(scale.value.root),
           inScale: scale.value.contains(note),
-          intervalName: new Interval(scale.value.root.distanceTo(note)).name(),
+          intervalName: intervalName(scale.value.root.distanceTo(note)),
         };
       }),
     );

@@ -13,10 +13,12 @@ import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
 import { NoteIdFretboard } from "../components/note-id-fretboard";
 import { NoteOptionGrid } from "../components/note-option-grid";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 
 const { t } = useI18n();
+const { label } = useMusicTerms();
 const route = useRoute();
 const router = useRouter();
 
@@ -301,8 +303,8 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
       <flashcard
         v-if="current"
         :key="current.id"
-        :prompt="current.prompt"
-        :answer="current.answer"
+        :prompt="label(current.prompt)"
+        :answer="label(current.answer)"
         :context="deckContext"
         :revealed="isRevealed"
         :box="currentBox"

@@ -6,6 +6,8 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import type { ChordPattern } from "@music-workspace/music-theory";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
+
 /** Opção do seletor: a fórmula (padrão) + o nome e a fórmula já formatados. */
 export interface ChordOption {
   pattern: ChordPattern;
@@ -18,6 +20,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { chordQualityName } = useMusicTerms();
 
 const model = defineModel<ChordPattern>({ required: true });
 
@@ -57,7 +60,7 @@ const selectedName = computed<string>({
         </span>
 
         <span class="text-xs opacity-70">
-          {{ option.pattern.name }}
+          {{ chordQualityName(option.pattern) }}
         </span>
 
         <span class="text-sm opacity-80">

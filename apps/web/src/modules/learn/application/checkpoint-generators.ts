@@ -13,6 +13,12 @@ import {
   type ScalePattern,
 } from "@music-workspace/music-theory";
 
+import {
+  chordQualityLabel,
+  harmonicFunctionLabel,
+  scaleLabel,
+  type TermLabel,
+} from "@/modules/shared/application/music-terms";
 import type { QuizOption } from "@/modules/shared/application/quiz";
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
 import { findScalePattern } from "@/modules/shared/application/scale-patterns";
@@ -22,7 +28,8 @@ import type { LessonContext } from "./curriculum";
 export interface CheckpointQuestion {
   id: string;
   promptKey: string;
-  promptParams?: Record<string, string | number>;
+  /** Parâmetros do prompt; nomes de escala etc. vão como `TermLabel` e são traduzidos na renderização. */
+  promptParams?: Record<string, string | number | TermLabel>;
   options: QuizOption[];
   correctId: string;
 }
@@ -30,18 +37,19 @@ export interface CheckpointQuestion {
 /** Graus não-tônicos: perguntar sobre o 1º grau é trivial demais para um checkpoint. */
 const NON_TONIC_DEGREES = [2, 3, 4, 5, 6, 7];
 
-const TRIAD_QUALITY_LABELS: Record<string, string> = {
+/** Símbolo da qualidade -> nome do padrão no domínio (id estável da opção; o rótulo é traduzido na renderização). */
+const TRIAD_QUALITY_NAMES: Record<string, string> = {
   "": "Major",
   m: "Minor",
   dim: "Diminished",
   aug: "Augmented",
 };
 
-function triadQualityLabel(quality: ChordQuality): string {
-  return TRIAD_QUALITY_LABELS[quality.toString()] ?? quality.toString();
+function triadQualityName(quality: ChordQuality): string {
+  return TRIAD_QUALITY_NAMES[quality.toString()] ?? quality.toString();
 }
 
-function toOption(id: string, label: string): QuizOption {
+function toOption(id: string, label: TermLabel = id): QuizOption {
   return { id, label };
 }
 
@@ -115,22 +123,24 @@ function triadQualityQuestion(ctx: LessonContext): CheckpointQuestion {
   const triads = buildScale(ctx).triads();
   const degreeNumber = randomChoice(NON_TONIC_DEGREES);
   const correct = triads[degreeNumber - 1];
-  const correctLabel = triadQualityLabel(correct.quality);
+  const correctName = triadQualityName(correct.quality);
 
-  const distractorLabels = sampleDistinct(
-    Object.values(TRIAD_QUALITY_LABELS),
+  const distractorNames = sampleDistinct(
+    Object.values(TRIAD_QUALITY_NAMES),
     3,
-    (label) => label === correctLabel,
+    (name) => name === correctName,
   );
 
-  const options = shuffle([correctLabel, ...distractorLabels].map((label) => toOption(label, label)));
+  const options = shuffle(
+    [correctName, ...distractorNames].map((name) => toOption(name, chordQualityLabel(name))),
+  );
 
   return {
     id: "triad-quality",
     promptKey: "learn.checkpoints.triads.triadQuality",
     promptParams: { degree: degreeNumber, root: ctx.root },
     options,
-    correctId: correctLabel,
+    correctId: correctName,
   };
 }
 
@@ -145,18 +155,20 @@ function harmonicFunctionQuestion(ctx: LessonContext): CheckpointQuestion {
   const sevenths = buildScale(ctx).seventhChords();
   const degreeNumber = randomChoice(NON_TONIC_DEGREES);
   const correct = sevenths[degreeNumber - 1];
-  const correctLabel = correct.harmonicFunction?.name ?? TONIC.name;
+  const correctName = correct.harmonicFunction?.name ?? TONIC.name;
 
-  const distractorLabels = sampleDistinct(HARMONIC_FUNCTION_NAMES, 2, (label) => label === correctLabel);
+  const distractorNames = sampleDistinct(HARMONIC_FUNCTION_NAMES, 2, (name) => name === correctName);
 
-  const options = shuffle([correctLabel, ...distractorLabels].map((label) => toOption(label, label)));
+  const options = shuffle(
+    [correctName, ...distractorNames].map((name) => toOption(name, harmonicFunctionLabel(name))),
+  );
 
   return {
     id: "harmonic-function",
     promptKey: "learn.checkpoints.diatonicField.harmonicFunction",
     promptParams: { degree: degreeNumber, root: ctx.root },
     options,
-    correctId: correctLabel,
+    correctId: correctName,
   };
 }
 
@@ -220,7 +232,7 @@ function isProgressionQuestion(ctx: LessonContext): CheckpointQuestion {
   const isProgression = detectTwoFiveOne(chords).length > 0;
   const sequence = chords.map((chord) => chord.name).join(" – ");
 
-  const options = shuffle([toOption("yes", "Yes"), toOption("no", "No")]);
+  const options = shuffle([toOption("yes", { key: "common.yes" }), toOption("no", { key: "common.no" })]);
 
   return {
     id: "is-progression",
@@ -258,7 +270,7 @@ function modeOfMajorQuestion(ctx: LessonContext): CheckpointQuestion {
   return {
     id: "mode-of-major",
     promptKey: "learn.checkpoints.modes.modeOfMajor",
-    promptParams: { tonic: ctx.root, pattern: pattern.name, degree: index + 1 },
+    promptParams: { tonic: ctx.root, pattern: scaleLabel(pattern.name), degree: index + 1 },
     options,
     correctId: parentRoot.value,
   };
@@ -285,7 +297,7 @@ function changingNoteQuestion(ctx: LessonContext): CheckpointQuestion {
   return {
     id: "changing-note",
     promptKey: "learn.checkpoints.modes.changingNote",
-    promptParams: { root: ctx.root, pattern: pattern.name },
+    promptParams: { root: ctx.root, pattern: scaleLabel(pattern.name) },
     options,
     correctId: correct,
   };

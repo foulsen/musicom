@@ -6,11 +6,14 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import type { ChordFamily } from "@music-workspace/music-theory";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
+
 const props = defineProps<{
   families: ChordFamily[];
 }>();
 
 const { t } = useI18n();
+const { chordFamilyName } = useMusicTerms();
 
 const model = defineModel<ChordFamily>({ required: true });
 
@@ -46,7 +49,7 @@ const selectedName = computed<string>({
         :disabled="family.isEmpty()"
         class="h-10 rounded-lg border border-transparent text-sm font-medium text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-muted-foreground sm:flex-1 data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
-        {{ family.name }}
+        {{ chordFamilyName(family) }}
       </toggle-group-item>
     </toggle-group-root>
   </section>

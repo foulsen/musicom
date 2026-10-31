@@ -8,6 +8,7 @@ import { ArrowUpRight, Play } from "@lucide/vue";
 import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord, type Pitch } from "@music-workspace/music-theory";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { chordPitches } from "@/modules/shared/application/chord-pitches";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 
 const props = defineProps<{
   triads: Chord[];
@@ -26,6 +27,7 @@ function playChord(event: Event, chord: Chord) {
 }
 
 const { t } = useI18n();
+const { degreeFunctionName } = useMusicTerms();
 
 /** Tríades ou sétimas do mesmo grau (índice preservado — ambas derivam de `scale.degrees()`). */
 const mode = defineModel<"triads" | "sevenths">("mode", { default: "triads" });
@@ -96,7 +98,7 @@ const selectedChordExplorerQuery = computed(() => {
             class="text-sm"
             :class="index === selectedIndex ? 'text-brand-soft-foreground/80' : 'text-muted-foreground'"
           >
-            {{ chord.degree.position() }} - {{ chord.degree.functionName() }}
+            {{ chord.degree.position() }} - {{ degreeFunctionName(chord.degree) }}
           </p>
         </button>
 

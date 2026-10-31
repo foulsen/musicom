@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import type { QuizOption } from "@/modules/shared/application/quiz";
 
 const props = defineProps<{
@@ -10,6 +14,15 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [id: string];
 }>();
+
+const { locale } = useI18n();
+const { label } = useMusicTerms();
+
+/**
+ * Os rótulos de termos vêm em minúsculas ("minor third", "terça menor"). Em inglês o `capitalize`
+ * (Title Case) é o visual de sempre; em pt, só a primeira letra — "Sétima da dominante", não "Da".
+ */
+const labelCaseClass = computed(() => (locale.value.startsWith("en") ? "capitalize" : "first-letter:uppercase"));
 
 function stateClass(option: QuizOption, correctId: string, selectedId: string | null): string {
   if (!selectedId) {
@@ -46,7 +59,7 @@ function handleClick(optionId: string) {
       :key="option.id"
       type="button"
       :aria-disabled="selectedId !== null"
-      class="rounded-lg border px-4 py-3 text-left text-sm font-medium capitalize transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      class="rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
       :class="stateClass(option, correctId, selectedId)"
       @click="handleClick(option.id)"
     >
@@ -54,7 +67,7 @@ function handleClick(optionId: string) {
         aria-hidden="true"
         class="mr-2 inline-flex size-5 items-center justify-center rounded border border-current/30 align-middle text-[10px] font-semibold opacity-70"
       >{{ index + 1 }}</span>
-      {{ option.label }}
+      <span class="inline-block" :class="labelCaseClass">{{ label(option.label) }}</span>
     </button>
   </div>
 </template>

@@ -6,6 +6,8 @@ import { ToggleGroupItem, ToggleGroupRoot } from "reka-ui";
 
 import type { Interval, ScalePattern } from "@music-workspace/music-theory";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
+
 interface Props {
   patterns: ScalePattern[];
 }
@@ -13,6 +15,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const { t } = useI18n();
+const { scaleName } = useMusicTerms();
 
 const model = defineModel<ScalePattern>({ required: true });
 
@@ -65,7 +68,7 @@ function intervalLabel(interval: Interval): string {
         class="flex flex-col items-start gap-1 rounded-lg border border-border bg-card/40 px-4 py-3 text-left text-muted-foreground transition-colors outline-none hover:bg-accent/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=on]:border-brand-soft data-[state=on]:bg-brand-soft data-[state=on]:text-brand-soft-foreground"
       >
         <span class="text-base font-medium">
-          {{ pattern.name }}
+          {{ scaleName(pattern) }}
         </span>
 
         <span class="text-sm opacity-80">

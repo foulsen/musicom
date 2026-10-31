@@ -7,6 +7,7 @@ import { Play as PlayIcon } from "@lucide/vue";
 import { useModeExplorerViewModel } from "../application/use-mode-explorer-view-model";
 import { ModeSelector } from "../components/mode-selector";
 
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
@@ -51,6 +52,7 @@ const {
 
 const { play, playChord, playSequence } = useNoteAudio();
 const { t, locale } = useI18n();
+const { scaleName } = useMusicTerms();
 
 function listenToMode() {
   playSequence(scalePitches.value);
@@ -98,7 +100,7 @@ function brightnessHue(index: number): number {
     <p class="text-sm text-muted-foreground">
       {{
         t("modeExplorer.relationSummary", {
-          mode: `${selectedMode.scale.root.toString()} ${selectedMode.pattern.name}`,
+          mode: `${selectedMode.scale.root.toString()} ${scaleName(selectedMode.pattern)}`,
           parentRoot: selectedParentRoot.toString(),
           degreeOrdinal,
         })
@@ -115,7 +117,7 @@ function brightnessHue(index: number): number {
       @click="listenToMode"
     >
       <play-icon class="size-4" />
-      {{ t("modeExplorer.listenToMode", { mode: selectedMode.pattern.name }) }}
+      {{ t("modeExplorer.listenToMode", { mode: scaleName(selectedMode.pattern) }) }}
     </button>
 
     <section class="space-y-3">
@@ -138,7 +140,7 @@ function brightnessHue(index: number): number {
             :style="index === brightnessRank ? undefined : { '--brightness-hue': brightnessHue(index) }"
             @click="selectModeByPatternName(name)"
           >
-            {{ name }}
+            {{ scaleName(name) }}
           </button>
 
           <span
@@ -176,7 +178,7 @@ function brightnessHue(index: number): number {
             :value="pattern.name"
             class="px-2.5 py-1 text-xs"
           >
-            {{ pattern.name }}
+            {{ scaleName(pattern) }}
           </chip-toggle-item>
         </chip-toggle-group>
       </header>
@@ -185,7 +187,7 @@ function brightnessHue(index: number): number {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-2">
             <p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {{ selectedMode.pattern.name }}
+              {{ scaleName(selectedMode.pattern) }}
             </p>
             <button
               type="button"
@@ -211,7 +213,7 @@ function brightnessHue(index: number): number {
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-2">
             <p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {{ comparisonPattern.name }}
+              {{ scaleName(comparisonPattern) }}
             </p>
             <button
               type="button"

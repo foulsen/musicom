@@ -11,7 +11,6 @@ import {
   Note,
   ScalePattern,
   Fretboard,
-  Interval,
   STANDARD_GUITAR_TUNING,
   TUNINGS,
   type SingleNote,
@@ -20,11 +19,13 @@ import {
 
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
 import { useExplorerDeeplink } from "@/modules/shared/application/explorer-deeplink";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { ALL_SCALE_PATTERNS } from "@/modules/shared/application/scale-patterns";
 
 import { useScaleExplorerStore } from "./use-scale-explorer-store";
 
 export function useScaleExplorerViewModel() {
+  const { intervalName } = useMusicTerms();
   const store = useScaleExplorerStore();
   const { rootValue, patternName, fretCount, selectedTriadIndex: storedTriadIndex, tuningName } = storeToRefs(store);
 
@@ -86,7 +87,7 @@ export function useScaleExplorerViewModel() {
           label: spelledByPitchClass.value.get(note.index()) ?? note.toString(),
           isTonic: note.equals(scale.value.root),
           inScale: scale.value.contains(note),
-          intervalName: new Interval(scale.value.root.distanceTo(note)).name(),
+          intervalName: intervalName(scale.value.root.distanceTo(note)),
         };
       }),
     );

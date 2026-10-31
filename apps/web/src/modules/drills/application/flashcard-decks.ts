@@ -1,21 +1,29 @@
 import { CHORD_PATTERNS, Degree, Note, createChord, type SingleNote } from "@music-workspace/music-theory";
 
+import {
+  chordQualityLabel,
+  intervalLabel,
+  withSemitonesLabel,
+  type TermLabel,
+} from "@/modules/shared/application/music-terms";
+
+/** `prompt`/`answer` são rótulos ainda não resolvidos: a página os traduz (`useMusicTerms().label`) ao exibir. */
 export interface Flashcard {
   id: string;
-  prompt: string;
-  answer: string;
+  prompt: TermLabel;
+  answer: TermLabel;
 }
 
 const INTERVAL_DEGREES = ["b2", "2", "b3", "3", "4", "#4", "5", "b6", "6", "b7", "7"].map(
   (value) => new Degree(value),
 );
 
-/** Grau -> nome + semitons (ex.: "b3" -> "minor third — 3 semitones"). */
+/** Grau -> nome + semitons (ex.: "b3" -> "minor third — 3 semitones" / "terça menor — 3 semitons"). */
 function buildIntervalDeck(): Flashcard[] {
   return INTERVAL_DEGREES.map((degree) => ({
     id: `interval-${degree.toString()}`,
     prompt: degree.toString(),
-    answer: `${degree.intervalName()} — ${degree.semitones()} semitones`,
+    answer: withSemitonesLabel(intervalLabel(degree), degree.semitones()),
   }));
 }
 
@@ -23,15 +31,15 @@ function buildIntervalDeck(): Flashcard[] {
 function buildIntervalNameDeck(): Flashcard[] {
   return INTERVAL_DEGREES.map((degree) => ({
     id: `interval-name-${degree.toString()}`,
-    prompt: degree.intervalName(),
-    answer: `${degree.toString()} — ${degree.semitones()} semitones`,
+    prompt: intervalLabel(degree),
+    answer: withSemitonesLabel(degree.toString(), degree.semitones()),
   }));
 }
 
 function buildChordFormulaDeck(): Flashcard[] {
   return CHORD_PATTERNS.map((pattern) => ({
     id: `chord-${pattern.name}`,
-    prompt: pattern.name,
+    prompt: chordQualityLabel(pattern.name),
     answer: pattern.degrees.map((degree) => degree.toString()).join(" - "),
   }));
 }

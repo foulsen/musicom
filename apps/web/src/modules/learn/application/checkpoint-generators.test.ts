@@ -40,4 +40,23 @@ describe("generateCheckpoint", () => {
 
     expect(seenAnswers).toEqual(new Set(["yes", "no"]));
   });
+
+  it("keeps yes/no ids stable and labels them through i18n keys", () => {
+    const twoFiveOne = FUNDAMENTALS_TRACK.lessons.find((lesson) => lesson.id === "two-five-one");
+    if (!twoFiveOne) throw new Error("two-five-one lesson missing from curriculum");
+
+    const [, isProgressionQuestion] = generateCheckpoint(twoFiveOne.id, twoFiveOne.context);
+
+    expect(isProgressionQuestion.options.map((option) => option.id).sort()).toEqual(["no", "yes"]);
+    expect(isProgressionQuestion.options.map((option) => option.label)).toContainEqual({ key: "common.yes" });
+  });
+
+  it("passes scale names in prompt params as translatable labels", () => {
+    const modes = FUNDAMENTALS_TRACK.lessons.find((lesson) => lesson.id === "modes");
+    if (!modes) throw new Error("modes lesson missing from curriculum");
+
+    const [modeOfMajor] = generateCheckpoint(modes.id, modes.context);
+
+    expect(modeOfMajor.promptParams?.pattern).toEqual({ key: "terms.scales.dorian" });
+  });
 });
