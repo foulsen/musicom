@@ -9,6 +9,7 @@ export * from "./scales/scale-pattern";
 export * from "./scales/scale-patterns";
 export * from "./scales/create-scale";
 export * from "./scales/modes";
+export * from "./scales/scale-steps";
 export * from "./chords/chord";
 export * from "./chords/chord-quality";
 export * from "./chords/chord-qualities";
