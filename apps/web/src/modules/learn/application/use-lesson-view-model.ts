@@ -14,6 +14,15 @@ function cueDurationMs(cue: ListenCue): number {
   return cue.mode === "chord" ? 700 : cue.pitches.length * 450 + 200;
 }
 
+/** Índice de passo válido (0-based) vindo da query `?step=`, ou `null` se ausente/inválido. */
+export function parseStepQuery(raw: unknown, stepCount: number): number | null {
+  if (typeof raw !== "string" || !/^\d+$/.test(raw)) return null;
+
+  const index = Number(raw);
+
+  return index < stepCount ? index : null;
+}
+
 /** Uma lição em andamento: passo atual, navegação, e o "ouça" dos passos de conceito. */
 export function useLessonViewModel() {
   const route = useRoute();
@@ -38,10 +47,12 @@ export function useLessonViewModel() {
       const current = track.lessons.find((item) => item.id === id);
       const done = current ? completedStepCount(id) : 0;
 
-      // Retoma no primeiro passo não concluído, não sempre do zero — os passos são
-      // marcados em sequência por `markStepDone`, então a contagem já é o próximo índice.
-      // Uma lição já 100% concluída reabre do início (não há "próximo passo" a retomar).
-      stepIndex.value = current && done < current.steps.length ? done : 0;
+      // `?step=<n>` (banner "Voltar à lição" dos exploradores) volta ao passo de origem. Senão,
+      // retoma no primeiro passo não concluído, não sempre do zero — os passos são marcados em
+      // sequência por `markStepDone`, então a contagem já é o próximo índice. Uma lição já 100%
+      // concluída reabre do início (não há "próximo passo" a retomar).
+      const requestedStep = parseStepQuery(route.query.step, current?.steps.length ?? 0);
+      stepIndex.value = requestedStep ?? (current && done < current.steps.length ? done : 0);
       isFinished.value = false;
       lastCheckpointScore.value = null;
       visitLesson(id);
@@ -62,7 +73,11 @@ export function useLessonViewModel() {
   const explorerLink = computed(() => {
     if (step.value?.kind !== "explore") return null;
 
-    return buildExplorerLink(step.value.explorerPath, step.value.deeplink);
+    // `from=learn&lesson=…&step=…` faz o explorador mostrar o banner "Voltar à lição" (neste passo).
+    return buildExplorerLink(step.value.explorerPath, step.value.deeplink, {
+      lessonId: lessonId.value,
+      stepIndex: stepIndex.value,
+    });
   });
 
   /** Grau (1-based) que o passo de exploração destaca — mesmo `degree` usado no deep-link. */

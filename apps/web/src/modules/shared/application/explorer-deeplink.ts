@@ -16,10 +16,23 @@ export interface ExplorerLinkConfig {
   degree?: string | number;
 }
 
+/** Lição (e passo, 0-based) para onde o banner "voltar à lição" do explorador deve levar de volta. */
+export interface ExplorerReturnTarget {
+  lessonId: string;
+  stepIndex?: number;
+}
+
 const CONFIG_KEYS = ["root", "pattern", "family", "quality", "tuning", "degree"] as const;
 
-/** Monta a rota de deep-link para um explorador, descartando campos vazios. */
-export function buildExplorerLink(path: string, config: ExplorerLinkConfig): RouteLocationRaw {
+/**
+ * Monta a rota de deep-link para um explorador, descartando campos vazios. Com `returnTo`,
+ * acrescenta `from=learn&lesson=<id>[&step=<n>]` para o explorador mostrar o banner de retorno.
+ */
+export function buildExplorerLink(
+  path: string,
+  config: ExplorerLinkConfig,
+  returnTo?: ExplorerReturnTarget,
+): RouteLocationRaw {
   const query: Record<string, string> = {};
 
   for (const key of CONFIG_KEYS) {
@@ -29,13 +42,20 @@ export function buildExplorerLink(path: string, config: ExplorerLinkConfig): Rou
     }
   }
 
+  if (returnTo) {
+    query.from = "learn";
+    query.lesson = returnTo.lessonId;
+    if (returnTo.stepIndex !== undefined) query.step = String(returnTo.stepIndex);
+  }
+
   return { path, query };
 }
 
 /**
  * Hidrata um explorador a partir da query string ao montar (root/pattern/family/quality/…),
  * então limpa esses params da URL. Reconhece `from=learn&lesson=<id>` para o banner "voltar à
- * lição" — esses dois **não** são consumidos por `apply`, só preservados na URL para o retorno.
+ * lição" (e o `step` opcional do passo de origem) — esses **não** são consumidos por `apply`, só
+ * preservados na URL para o retorno.
  */
 export function useExplorerDeeplink(apply: (config: ExplorerLinkConfig) => void) {
   const route = useRoute();
@@ -66,6 +86,9 @@ export function useExplorerDeeplink(apply: (config: ExplorerLinkConfig) => void)
         preserved.from = "learn";
         preserved.lesson = returnLessonId.value;
       }
+      const step = route.query.step;
+      if (returnLessonId.value && typeof step === "string") preserved.step = step;
+
       router.replace({ query: preserved });
     }
   });
