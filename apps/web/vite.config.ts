@@ -10,6 +10,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Windows 7 caps at Chrome/Edge 109 and Firefox 115 ESR. Lightning CSS (the
+    // CSS minifier) lowers Tailwind v4's oklch()/color-mix() for these targets.
+    target: ["chrome109", "edge109", "firefox115", "safari15.4"],
+    cssTarget: ["chrome109", "edge109", "firefox115", "safari15.4"],
+  },
   server: {
     port: Number(process.env.PORT) || 5173,
     proxy: {
