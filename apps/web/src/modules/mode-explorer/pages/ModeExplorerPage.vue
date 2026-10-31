@@ -22,6 +22,8 @@ import { ChordCard } from "@/modules/shared/components/chord-card";
 import { EmptyState } from "@/modules/shared/components/empty-state";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 import { LessonReturnBanner } from "@/modules/shared/components/lesson-return-banner";
+import { LearnAboutLink } from "@/modules/shared/components/learn-about-link";
+import { lessonForMode, lessonPath } from "@/modules/learn/application/lesson-suggestions";
 
 const {
   selectedParentRoot,
@@ -58,6 +60,10 @@ const { t, locale } = useI18n();
 const { scaleName, scaleDescription } = useMusicTerms();
 
 const modeDescription = computed(() => scaleDescription(selectedMode.value.pattern));
+
+// Atalho para a lição mais relevante; escondido quando o explorador foi aberto de uma lição (o banner de retorno já aparece).
+const lessonLink = computed(() => lessonPath(lessonForMode()));
+
 const modeSteps = computed(() => scalePatternSteps(selectedMode.value.pattern));
 const modeDegreeLabels = computed(() => selectedMode.value.pattern.degrees.map((degree) => degree.toString()));
 
@@ -99,6 +105,8 @@ function brightnessHue(index: number): number {
         {{ t("modeExplorer.subtitle") }}
       </p>
     </header>
+
+    <learn-about-link v-if="!returnLessonId" :to="lessonLink" />
 
     <root-note-selector v-model="selectedParentRoot" :title="t('modeExplorer.parentKeyTitle')" />
 

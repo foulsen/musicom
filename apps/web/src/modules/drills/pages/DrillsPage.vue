@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onMounted, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
@@ -8,6 +8,7 @@ import { RotateCcw } from "@lucide/vue";
 import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
 import { NOTE_OPTIONS, useNoteIdDrill } from "../application/use-note-id-drill";
+import { parseDrillsQuery, type DrillsSection } from "../application/drills-link";
 import type { DeckId } from "../application/flashcard-decks";
 import type { NoteIdLevelId } from "../application/note-id-levels";
 import { DrillFretboard } from "../components/drill-fretboard";
@@ -23,10 +24,8 @@ const { label } = useMusicTerms();
 const route = useRoute();
 const router = useRouter();
 
-type Section = "fretboard" | "noteId" | "flashcards";
-
 /** Aba ativa reflete `route.query.tab`: sobrevive à navegação e é linkável. */
-const section = computed<Section>(() => {
+const section = computed<DrillsSection>(() => {
   if (route.query.tab === "flashcards") return "flashcards";
   if (route.query.tab === "noteId") return "noteId";
   return "fretboard";
@@ -126,6 +125,18 @@ const {
   sessionPosition,
   sessionSize,
 } = useFlashcardDrill();
+
+// Deep-link das lições (`?tab=flashcards&deck=<id>`): seleciona o baralho e limpa só o `deck` da URL
+// (a aba continua na query, como no resto da página).
+onMounted(() => {
+  const { deck } = parseDrillsQuery(route.query);
+  if (deck) selectDeck(deck);
+
+  if ("deck" in route.query) {
+    const { deck: _deck, ...rest } = route.query;
+    router.replace({ query: rest });
+  }
+});
 
 function formatMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;

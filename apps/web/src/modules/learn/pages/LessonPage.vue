@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { nextTick, useTemplateRef, watch } from "vue";
+import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { ArrowUpRight, ChevronLeft, CircleCheckBig, PartyPopper, RotateCcw } from "@lucide/vue";
+import { ArrowUpRight, ChevronLeft, CircleCheckBig, Dumbbell, PartyPopper, RotateCcw } from "@lucide/vue";
 
 import { EmptyState } from "@/modules/shared/components/empty-state";
 
+import { MAX_PRACTICE_LINKS, practiceLabel, practiceLink } from "../application/practice";
 import { useLessonViewModel } from "../application/use-lesson-view-model";
 import { LessonStepper } from "../components/lesson-stepper";
 import { ConceptPanel } from "../components/concept-panel";
@@ -56,6 +57,15 @@ watch(
     document.title = current ? `${t(current.titleKey)} · MUSICOM` : "MUSICOM";
   },
   { immediate: true },
+);
+
+/** Atalhos "Pratique agora" do painel de conclusão, montados a partir do `practice` da lição. */
+const practiceItems = computed(() =>
+  (lesson.value?.practice ?? []).slice(0, MAX_PRACTICE_LINKS).map((target) => {
+    const { key, deckKey } = practiceLabel(target);
+
+    return { to: practiceLink(target), label: deckKey ? t(key, { deck: t(deckKey) }) : t(key) };
+  }),
 );
 
 function selectStep(index: number) {
@@ -116,6 +126,24 @@ function selectStep(index: number) {
             {{ t("learn.completion.redoCheckpoint") }}
           </button>
         </div>
+
+        <section v-if="practiceItems.length > 0" aria-labelledby="lesson-practice-title" class="flex flex-col items-center gap-3">
+          <h3 id="lesson-practice-title" class="text-sm font-medium text-foreground">
+            {{ t("learn.practice.title") }}
+          </h3>
+
+          <ul class="flex flex-wrap justify-center gap-2">
+            <li v-for="item in practiceItems" :key="item.label">
+              <router-link
+                :to="item.to"
+                class="inline-flex items-center gap-1.5 rounded-md border border-border bg-card/60 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <dumbbell class="size-4 text-brand" aria-hidden="true" />
+                {{ item.label }}
+              </router-link>
+            </li>
+          </ul>
+        </section>
 
         <div class="flex flex-col items-center gap-3 pt-2">
           <template v-if="nextLesson">

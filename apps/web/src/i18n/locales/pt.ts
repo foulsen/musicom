@@ -30,6 +30,7 @@ export const pt: MessageSchema = {
     yes: "Sim",
     no: "Não",
     backToLesson: "Voltar à lição",
+    learnAboutThis: "Aprenda sobre isso",
     guest: "Convidado",
     fretboard: "Braço",
     playChordShape: "Tocar esta digitação",
@@ -714,6 +715,17 @@ export const pt: MessageSchema = {
       goToNextLesson: "Começar próxima lição",
       backToTracks: "Voltar às trilhas",
       trackComplete: "Você concluiu todas as lições desta trilha.",
+    },
+    practice: {
+      title: "Pratique agora",
+      earTraining: {
+        interval: "Treinar intervalos de ouvido",
+        chordQuality: "Treinar qualidades de acorde de ouvido",
+        scale: "Treinar escalas de ouvido",
+      },
+      flashcards: "Flashcards: {deck}",
+      noteId: "Identificar notas no braço",
+      fretboard: "Encontrar notas no braço",
     },
     checkpoints: {
       notes: {

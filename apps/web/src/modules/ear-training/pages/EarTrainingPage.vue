@@ -6,6 +6,7 @@ import { Play, RotateCcw } from "@lucide/vue";
 
 import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
+import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
 import type { Difficulty, QuizKind } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
@@ -39,9 +40,6 @@ const {
 
 const { t } = useI18n();
 const { label } = useMusicTerms();
-
-const KINDS: QuizKind[] = ["interval", "chordQuality", "scale"];
-const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 const scorePercent = computed(() =>
   score.value.total === 0 ? null : Math.round((score.value.correct / score.value.total) * 100),
@@ -102,7 +100,7 @@ useTypingGuardedKeydown(handleKeydown);
         @update:model-value="(value) => value && selectKind(value as QuizKind)"
       >
         <chip-toggle-item
-          v-for="option in KINDS"
+          v-for="option in QUIZ_KINDS"
           :key="option"
           :value="option"
           class="px-3 py-1.5 text-sm"

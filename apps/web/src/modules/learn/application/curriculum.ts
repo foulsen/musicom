@@ -17,6 +17,7 @@ import type { ExplorerLinkConfig } from "@/modules/shared/application/explorer-d
 import { findScalePattern } from "@/modules/shared/application/scale-patterns";
 
 import { generateCheckpoint, type CheckpointQuestion } from "./checkpoint-generators";
+import type { PracticeTarget } from "./practice";
 
 /** Contexto musical base de uma lição — tônica + escala/tom-pai sobre a qual ela é construída. */
 export interface LessonContext {
@@ -82,6 +83,8 @@ export interface Lesson {
   summaryKey: string;
   context: LessonContext;
   steps: LessonStep[];
+  /** Exercícios sugeridos no painel de conclusão ("Pratique agora") — até `MAX_PRACTICE_LINKS`. */
+  practice?: PracticeTarget[];
   /** Id da lição que precisa estar concluída antes desta ficar disponível (gating linear). */
   prerequisiteId?: string;
 }
@@ -176,6 +179,7 @@ const notesLesson: Lesson = {
   id: "notes",
   titleKey: "learn.lessons.notes.title",
   summaryKey: "learn.lessons.notes.summary",
+  practice: [{ kind: "note-id" }, { kind: "fretboard" }],
   context: { root: TONIC, pattern: "Major" },
   steps: [
     {
@@ -213,6 +217,10 @@ const intervalsLesson: Lesson = {
   id: "intervals",
   titleKey: "learn.lessons.intervals.title",
   summaryKey: "learn.lessons.intervals.summary",
+  practice: [
+    { kind: "ear-training", quiz: "interval", difficulty: "easy" },
+    { kind: "flashcards", deck: "intervals" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: notesLesson.id,
   steps: [
@@ -255,6 +263,10 @@ const majorScaleLesson: Lesson = {
   id: "major-scale",
   titleKey: "learn.lessons.majorScale.title",
   summaryKey: "learn.lessons.majorScale.summary",
+  practice: [
+    { kind: "ear-training", quiz: "scale", difficulty: "easy" },
+    { kind: "flashcards", deck: "intervalNames" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: intervalsLesson.id,
   steps: [
@@ -292,6 +304,11 @@ const triadsLesson: Lesson = {
   id: "triads",
   titleKey: "learn.lessons.triads.title",
   summaryKey: "learn.lessons.triads.summary",
+  practice: [
+    { kind: "ear-training", quiz: "chordQuality", difficulty: "easy" },
+    { kind: "flashcards", deck: "chordFormulas" },
+    { kind: "flashcards", deck: "chordSpelling" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: majorScaleLesson.id,
   steps: [
@@ -329,6 +346,11 @@ const seventhChordsLesson: Lesson = {
   id: "seventh-chords",
   titleKey: "learn.lessons.seventhChords.title",
   summaryKey: "learn.lessons.seventhChords.summary",
+  practice: [
+    { kind: "ear-training", quiz: "chordQuality", difficulty: "medium" },
+    { kind: "flashcards", deck: "chordFormulas" },
+    { kind: "flashcards", deck: "chordSpelling" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: triadsLesson.id,
   steps: [
@@ -375,6 +397,10 @@ const diatonicFieldLesson: Lesson = {
   id: "diatonic-field",
   titleKey: "learn.lessons.diatonicField.title",
   summaryKey: "learn.lessons.diatonicField.summary",
+  practice: [
+    { kind: "ear-training", quiz: "chordQuality", difficulty: "medium" },
+    { kind: "flashcards", deck: "chordSpelling" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: seventhChordsLesson.id,
   steps: [
@@ -404,6 +430,10 @@ const twoFiveOneLesson: Lesson = {
   id: "two-five-one",
   titleKey: "learn.lessons.twoFiveOne.title",
   summaryKey: "learn.lessons.twoFiveOne.summary",
+  practice: [
+    { kind: "ear-training", quiz: "chordQuality", difficulty: "medium" },
+    { kind: "flashcards", deck: "chordSpelling" },
+  ],
   context: { root: TONIC, pattern: "Major" },
   prerequisiteId: diatonicFieldLesson.id,
   steps: [
@@ -442,6 +472,10 @@ const naturalMinorLesson: Lesson = {
   id: "natural-minor",
   titleKey: "learn.lessons.naturalMinor.title",
   summaryKey: "learn.lessons.naturalMinor.summary",
+  practice: [
+    { kind: "ear-training", quiz: "scale", difficulty: "easy" },
+    { kind: "flashcards", deck: "intervalNames" },
+  ],
   // O contexto inline mostra A menor natural; o deep-link usa a mesma tônica e padrão (Scale Explorer).
   context: { root: MINOR_TONIC, pattern: NATURAL_MINOR_SCALE_PATTERN.name },
   prerequisiteId: twoFiveOneLesson.id,
@@ -484,6 +518,7 @@ const modesLesson: Lesson = {
   id: "modes",
   titleKey: "learn.lessons.modes.title",
   summaryKey: "learn.lessons.modes.summary",
+  practice: [{ kind: "ear-training", quiz: "scale", difficulty: "medium" }],
   // O contexto inline mostra a escala resultante (D Dorian); o deep-link abaixo usa o
   // tom-pai (C) porque é assim que o Mode Explorer interpreta `root` + `pattern`.
   context: { root: DORIAN_TONIC, pattern: "Dorian" },

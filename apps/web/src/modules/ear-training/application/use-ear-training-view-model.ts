@@ -1,5 +1,6 @@
-import { computed, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 
 import { Pitch } from "@music-workspace/music-theory";
 
@@ -8,6 +9,7 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import type { TermLabel } from "@/modules/shared/application/music-terms";
 
+import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
 import {
   generateQuestion,
@@ -131,6 +133,27 @@ export function useEarTrainingViewModel() {
 
   onUnmounted(() => {
     if (playingTimeout) clearTimeout(playingTimeout);
+  });
+
+  // Deep-link das lições (`?quiz=<tipo>&difficulty=<nível>`): aplica na montagem — sem tocar o áudio,
+  // já que ninguém interagiu ainda — e limpa a query, como os exploradores fazem.
+  const route = useRoute();
+  const router = useRouter();
+
+  onMounted(() => {
+    const config = parseEarTrainingQuery(route.query);
+
+    if (config.kind) kind.value = config.kind;
+    if (config.difficulty) difficulty.value = config.difficulty;
+    if (config.kind || config.difficulty) {
+      question.value = generateQuestion(kind.value, difficulty.value, { stats: store });
+      selectedOptionId.value = null;
+    }
+
+    if ("quiz" in route.query || "difficulty" in route.query) {
+      const { quiz: _quiz, difficulty: _difficulty, ...rest } = route.query;
+      router.replace({ query: rest });
+    }
   });
 
   function newQuestion() {

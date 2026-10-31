@@ -21,6 +21,8 @@ import { FretRangeSelector } from "@/modules/shared/components/fret-range-select
 import { EmptyState } from "@/modules/shared/components/empty-state";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 import { LessonReturnBanner } from "@/modules/shared/components/lesson-return-banner";
+import { LearnAboutLink } from "@/modules/shared/components/learn-about-link";
+import { lessonForScale, lessonPath } from "@/modules/learn/application/lesson-suggestions";
 
 const {
   selectedRoot,
@@ -48,6 +50,10 @@ const { t } = useI18n();
 const { scaleDescription } = useMusicTerms();
 
 const patternDescription = computed(() => scaleDescription(selectedPattern.value));
+
+// Atalho para a lição mais relevante; escondido quando o explorador foi aberto de uma lição (o banner de retorno já aparece).
+const lessonLink = computed(() => lessonPath(lessonForScale(selectedPattern.value.name)));
+
 const patternSteps = computed(() => scalePatternSteps(selectedPattern.value));
 const patternDegreeLabels = computed(() => selectedPattern.value.degrees.map((degree) => degree.toString()));
 
@@ -72,6 +78,8 @@ function listenToScale() {
         {{ t("scaleExplorer.subtitle") }}
       </p>
     </header>
+
+    <learn-about-link v-if="!returnLessonId" :to="lessonLink" />
 
     <root-note-selector v-model="selectedRoot" />
 

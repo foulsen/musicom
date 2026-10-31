@@ -28,6 +28,7 @@ export const en = {
     yes: "Yes",
     no: "No",
     backToLesson: "Back to lesson",
+    learnAboutThis: "Learn about this",
     guest: "Guest",
     fretboard: "Fretboard",
     playChordShape: "Play this voicing",
@@ -712,6 +713,17 @@ export const en = {
       goToNextLesson: "Start next lesson",
       backToTracks: "Back to tracks",
       trackComplete: "You've completed every lesson in this track.",
+    },
+    practice: {
+      title: "Practice now",
+      earTraining: {
+        interval: "Train intervals by ear",
+        chordQuality: "Train chord qualities by ear",
+        scale: "Train scales by ear",
+      },
+      flashcards: "Flashcards: {deck}",
+      noteId: "Identify notes on the fretboard",
+      fretboard: "Find notes on the fretboard",
     },
     checkpoints: {
       notes: {

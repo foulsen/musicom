@@ -19,6 +19,8 @@ import { FretRangeSelector } from "@/modules/shared/components/fret-range-select
 import { EmptyState } from "@/modules/shared/components/empty-state";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 import { LessonReturnBanner } from "@/modules/shared/components/lesson-return-banner";
+import { LearnAboutLink } from "@/modules/shared/components/learn-about-link";
+import { lessonForChord, lessonPath } from "@/modules/learn/application/lesson-suggestions";
 
 const {
   selectedRoot,
@@ -41,6 +43,9 @@ const { chordDescription, intervalName } = useMusicTerms();
 
 const qualityDescription = computed(() => chordDescription(selectedQuality.value));
 
+// Atalho para a lição mais relevante; escondido quando o explorador foi aberto de uma lição (o banner de retorno já aparece).
+const lessonLink = computed(() => lessonPath(lessonForChord(selectedFamily.value.name)));
+
 /** Fórmula do acorde em graus ("1 – b3 – 5") e, ao lado, o nome de cada intervalo. */
 const formulaDegrees = computed(() => selectedQuality.value.degrees.map((degree) => degree.toString()).join(" – "));
 const formulaIntervals = computed(() => selectedQuality.value.degrees.map((degree) => intervalName(degree)).join(", "));
@@ -62,6 +67,8 @@ function listenToChord() {
         {{ t("chordExplorer.subtitle") }}
       </p>
     </header>
+
+    <learn-about-link v-if="!returnLessonId" :to="lessonLink" />
 
     <root-note-selector v-model="selectedRoot" />
 
