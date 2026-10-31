@@ -143,4 +143,13 @@ describe("useLearnViewModel with legacy progress", () => {
 
     expect(model.continueLesson.value?.id).toBe("triads");
   });
+
+  it("never sends 'Continue' to a locked lesson that was only visited", () => {
+    const store = useLearnStore();
+    store.lastVisitedLessonId = "major-scale";
+
+    const model = useLearnViewModel();
+
+    expect(model.continueLesson.value?.id).toBe("notes");
+  });
 });

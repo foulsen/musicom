@@ -129,7 +129,8 @@ export function useLearnViewModel() {
   const continueLesson = computed<Lesson | null>(() => {
     const lastId = lastVisitedLessonId.value;
     const last = lastId ? track.lessons.find((lesson) => lesson.id === lastId) : undefined;
-    if (last && !isLessonComplete(last)) return last;
+    // Visitada mas bloqueada (ex.: aberta por URL antes do pré-requisito) não vale como "continuar".
+    if (last && !isLessonComplete(last) && lessonStatus(last) !== "locked") return last;
 
     const items = lessonsWithStatus.value;
     const lastCompletedIndex = items.reduce(
