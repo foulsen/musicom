@@ -5,6 +5,7 @@ import { Play } from "@lucide/vue";
 
 withDefaults(
   defineProps<{
+    titleKey: string;
     bodyKey: string;
     hasCues?: boolean;
     isPlaying?: boolean;
@@ -21,6 +22,10 @@ const { t } = useI18n();
 
 <template>
   <section class="space-y-4 rounded-xl border border-border bg-card/40 p-6">
+    <h2 class="text-lg font-medium text-foreground">
+      {{ t(titleKey) }}
+    </h2>
+
     <p class="text-base leading-relaxed text-foreground">
       {{ t(bodyKey) }}
     </p>

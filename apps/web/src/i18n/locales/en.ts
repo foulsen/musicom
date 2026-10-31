@@ -478,27 +478,84 @@ export const en = {
       majorScale: {
         title: "The Major Scale & Degrees",
         summary: "The scale everything else is built from — and the numbers musicians use to talk about it.",
-        concept: "Seven notes, one pattern of whole and half steps, repeating forever. Each note also has a number — its degree — that names its job in the scale, no matter which key you're in.",
+        steps: {
+          whatIsScale: {
+            title: "What is a scale",
+            body: "A scale is a set of notes in order, running from a starting note — the tonic — until it comes back one octave higher. The major scale has seven different notes. Play the one on C and listen: it's probably the scale you already know by ear.",
+          },
+          formula: {
+            title: "The tone and semitone formula",
+            body: "What makes a scale sound major is the distance between its notes. A semitone (half step, H) is the smallest step, from one key to the next; a tone (whole step, W) is two semitones. The major scale always follows W – W – H – W – W – W – H, in any key. Listen, and see the steps below.",
+          },
+          degrees: {
+            title: "Degrees: notes become numbers",
+            body: "Each note gets a number, its degree, counted from the tonic: 1st, 2nd, 3rd… up to the 7th. The degree tells you the note's role in the scale, in any key: the 5th degree of C is G; the 5th degree of D is A. That's why musicians talk in degrees.",
+          },
+        },
       },
       triads: {
         title: "Triads",
         summary: "Stack the 1st, 3rd and 5th of a scale and you get a chord.",
-        concept: "Skip every other note of the scale starting from any degree — 1st, 3rd, 5th — and you get a triad. Do this from every degree of the scale and you get every chord that belongs to that key.",
+        steps: {
+          stacking: {
+            title: "Three stacked notes",
+            body: "A triad is a chord with three notes. To build one, start on a note of the scale, skip one and take the next, skip another and take the next. In C major: C, E, G — the 1st, 3rd and 5th degrees. It's like stacking thirds.",
+          },
+          thirdAndFifth: {
+            title: "Third and fifth",
+            body: "The two upper notes are measured from the root: the third (C to E, 4 semitones) and the fifth (C to G, 7 semitones). The third sets the character: at 4 semitones (major third) the chord sounds major; at 3 (minor third) it sounds minor. Click the intervals and hear the chord.",
+          },
+          everyDegree: {
+            title: "A triad on every degree",
+            body: "Repeat the process from every degree of the scale and you get every chord in the key. Not all of them come out major: in a major key you get major triads, minor triads and one diminished triad — whatever the scale's notes allow to stack.",
+          },
+        },
       },
       diatonicField: {
         title: "The Diatonic Field",
         summary: "Every scale hides seven chords inside it — its harmonic field.",
-        concept: "The seven triads built on the seven degrees of a scale each have a job — tonic, subdominant, dominant — that shapes how a progression feels like it's resolving or pulling toward home.",
+        steps: {
+          oneChordPerDegree: {
+            title: "One chord per degree",
+            body: "Stack thirds from each of the seven degrees of a scale and you get seven chords. That set is the harmonic field: every chord that uses only the notes of that key. Switch between triads and seventh chords to see both.",
+          },
+          functions: {
+            title: "Every chord has a job",
+            body: "Each chord in the field has a job. The Tonic (I, iii, vi) is home: rest. The Subdominant (ii, IV) moves away from home. The Dominant (V, vii°) builds tension and asks to go back. That push and pull between tension and rest is what gives a progression direction.",
+          },
+        },
       },
       twoFiveOne: {
         title: "The ii-V-I",
         summary: "The three-chord move that makes almost every song feel like it's going home.",
-        concept: "Play the ii, then the V, then the I of a key back to back and you get the single most common chord move in Western music — the sound of \"arriving\" that shows up everywhere from jazz to pop.",
+        steps: {
+          threeChords: {
+            title: "Three chords, three degrees",
+            body: "The ii-V-I uses the chords of degrees 2, 5 and 1 of the key. In C major: Dm7, G7 and Cmaj7. The roman numerals name the degree: lowercase for minor chords (ii), uppercase for major and dominant ones (V, I). Listen to the three in a row.",
+          },
+          arriving: {
+            title: "The feeling of arriving",
+            body: "The ii prepares, the V builds tension and the I resolves: tension turns into rest. That path from tension to rest is the sound of \"arriving home\" — and it shows up in everything from jazz to pop. Listen to just the V and the I and feel the resolution.",
+          },
+        },
       },
       modes: {
         title: "Modes",
         summary: "Same notes, different starting point — seven flavors hiding in one scale.",
-        concept: "A mode is the same seven notes as a major scale, just starting on a different degree. Same notes, different tonic — and a completely different color, from bright Lydian to dark Locrian.",
+        steps: {
+          otherStart: {
+            title: "Same notes, different starting point",
+            body: "A mode is a major scale played from a different degree. These are the notes of C major, but starting on D: D, E, F, G, A, B, C. The notes haven't changed, only the starting point — and that changes the colour of the scale. It's the Dorian mode.",
+          },
+          sevenModes: {
+            title: "Seven degrees, seven modes",
+            body: "Each degree of the major scale starts a mode: 1st Ionian (the major scale itself), 2nd Dorian, 3rd Phrygian, 4th Lydian, 5th Mixolydian, 6th Aeolian (the natural minor) and 7th Locrian. Each has its own colour: Lydian is bright and Locrian is the darkest.",
+          },
+          formulaChanges: {
+            title: "What changes is the formula",
+            body: "Because the starting point changes, the order of tones and semitones changes too. In Dorian, one of the semitones sits between the 2nd and 3rd degrees — not between the 3rd and 4th, as in the major scale. Those differences in the formula give each mode its colour.",
+          },
+        },
       },
     },
     listen: "Listen",
@@ -512,6 +569,10 @@ export const en = {
       checkpoint: "Checkpoint",
     },
     stepperGoTo: "Go back to step {step}: {kind}",
+    stepperStep: "{kind} — step {step} of {total}",
+    interval: {
+      play: "Play {from} and {to}: {name}",
+    },
     checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Question {current} of {total}",
     checkpointCorrect: "Correct!",

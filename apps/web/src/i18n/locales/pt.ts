@@ -480,27 +480,84 @@ export const pt: MessageSchema = {
       majorScale: {
         title: "A Escala Maior & os Graus",
         summary: "A escala da qual tudo mais é construído — e os números que os músicos usam para falar sobre ela.",
-        concept: "Sete notas, um padrão de tons e semitons que se repete para sempre. Cada nota também tem um número — seu grau — que nomeia sua função na escala, não importa em qual tom você esteja.",
+        steps: {
+          whatIsScale: {
+            title: "O que é uma escala",
+            body: "Uma escala é um conjunto de notas em ordem, indo de uma nota de partida — a tônica — até ela voltar uma oitava acima. A escala maior tem sete notas diferentes. Toque a de C e ouça: é aquela escala que você provavelmente já conhece de ouvido.",
+          },
+          formula: {
+            title: "A fórmula de tons e semitons",
+            body: "O que faz uma escala soar maior é a distância entre as notas. Um semitom (ST) é o menor passo, de uma tecla à vizinha; um tom (T) são dois semitons. A escala maior sempre segue T – T – ST – T – T – T – ST, em qualquer tom. Ouça e veja os passos abaixo.",
+          },
+          degrees: {
+            title: "Graus: as notas viram números",
+            body: "Cada nota ganha um número, o grau, contado a partir da tônica: 1º, 2º, 3º… até o 7º. O grau diz o papel da nota na escala, em qualquer tom: o 5º grau de C é G; o 5º grau de D é A. Por isso os músicos falam em graus.",
+          },
+        },
       },
       triads: {
         title: "Tríades",
         summary: "Empilhe o 1º, 3º e 5º grau de uma escala e você tem um acorde.",
-        concept: "Pule uma nota da escala a cada passo a partir de qualquer grau — 1º, 3º, 5º — e você tem uma tríade. Faça isso a partir de cada grau da escala e tem todos os acordes que pertencem àquele tom.",
+        steps: {
+          stacking: {
+            title: "Três notas empilhadas",
+            body: "Uma tríade é um acorde de três notas. Para montá-la, comece em uma nota da escala, pule uma e pegue a seguinte, pule outra e pegue a seguinte. Em C maior: C, E, G — o 1º, o 3º e o 5º graus. É como empilhar terças.",
+          },
+          thirdAndFifth: {
+            title: "Terça e quinta",
+            body: "As duas notas de cima são medidas a partir da fundamental: a terça (de C a E, 4 semitons) e a quinta (de C a G, 7 semitons). É a terça que dá o caráter: com 4 semitons (terça maior) o acorde soa maior; com 3 (terça menor), soa menor. Clique nos intervalos e ouça o acorde.",
+          },
+          everyDegree: {
+            title: "Uma tríade em cada grau",
+            body: "Repita o processo a partir de cada grau da escala e você obtém todos os acordes do tom. Nem todos saem maiores: em um tom maior aparecem tríades maiores, menores e uma diminuta — o que as notas da escala permitem empilhar.",
+          },
+        },
       },
       diatonicField: {
         title: "O Campo Diatônico",
         summary: "Toda escala esconde sete acordes dentro dela — seu campo harmônico.",
-        concept: "As sete tríades construídas sobre os sete graus de uma escala têm cada uma uma função — tônica, subdominante, dominante — que molda a sensação de uma progressão resolver ou puxar em direção a casa.",
+        steps: {
+          oneChordPerDegree: {
+            title: "Um acorde por grau",
+            body: "Empilhe terças a partir de cada um dos sete graus de uma escala e você tem sete acordes. Esse conjunto é o campo harmônico: todos os acordes que usam só as notas daquele tom. Alterne entre tríades e acordes com sétima para ver os dois.",
+          },
+          functions: {
+            title: "Cada acorde tem uma função",
+            body: "Cada acorde do campo faz um papel. A Tônica (I, iii, vi) é a casa: repouso. A Subdominante (ii, IV) afasta da casa. A Dominante (V, vii°) cria tensão e pede para voltar. É esse vai e volta entre tensão e repouso que dá direção a uma progressão.",
+          },
+        },
       },
       twoFiveOne: {
         title: "O ii-V-I",
         summary: "A sequência de três acordes que faz quase toda música soar como se estivesse voltando para casa.",
-        concept: "Toque o ii, depois o V, depois o I de um tom em sequência e você tem o movimento de acordes mais comum da música ocidental — o som de \"chegar\" que aparece em tudo, do jazz ao pop.",
+        steps: {
+          threeChords: {
+            title: "Três acordes, três graus",
+            body: "O ii-V-I usa os acordes dos graus 2, 5 e 1 do tom. Em C maior: Dm7, G7 e Cmaj7. Os números romanos dizem o grau: minúsculo para acordes menores (ii), maiúsculo para os maiores e dominantes (V, I). Ouça os três em sequência.",
+          },
+          arriving: {
+            title: "A sensação de chegar",
+            body: "O ii prepara, o V cria tensão e o I resolve: a tensão vira repouso. Esse caminho da tensão ao repouso é o som de \"chegar em casa\" — e aparece em tudo, do jazz ao pop. Ouça só o V e o I e sinta a resolução.",
+          },
+        },
       },
       modes: {
         title: "Modos",
         summary: "Mesmas notas, ponto de partida diferente — sete sabores escondidos em uma escala.",
-        concept: "Um modo é a mesma escala de sete notas de uma escala maior, só que começando em um grau diferente. Mesmas notas, tônica diferente — e uma cor completamente diferente, do Lídio brilhante ao Lócrio escuro.",
+        steps: {
+          otherStart: {
+            title: "Mesmas notas, outro ponto de partida",
+            body: "Um modo é uma escala maior tocada a partir de outro grau. Estas são as notas de C maior, mas começando no D: D, E, F, G, A, B, C. As notas não mudaram, só o ponto de partida — e isso muda a cor da escala. É o modo Dórico.",
+          },
+          sevenModes: {
+            title: "Sete graus, sete modos",
+            body: "Cada grau da escala maior é o início de um modo: 1º Jônio (a própria escala maior), 2º Dórico, 3º Frígio, 4º Lídio, 5º Mixolídio, 6º Eólio (a menor natural) e 7º Lócrio. Cada um tem a sua cor: o Lídio é brilhante e o Lócrio é o mais escuro.",
+          },
+          formulaChanges: {
+            title: "O que muda é a fórmula",
+            body: "Como o ponto de partida muda, a ordem de tons e semitons também muda. No Dórico, um dos semitons fica entre o 2º e o 3º graus — e não entre o 3º e o 4º, como na escala maior. São essas diferenças na fórmula que dão a cor de cada modo.",
+          },
+        },
       },
     },
     listen: "Ouvir",
@@ -514,6 +571,10 @@ export const pt: MessageSchema = {
       checkpoint: "Checkpoint",
     },
     stepperGoTo: "Voltar ao passo {step}: {kind}",
+    stepperStep: "{kind} — passo {step} de {total}",
+    interval: {
+      play: "Tocar {from} e {to}: {name}",
+    },
     checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Pergunta {current} de {total}",
     checkpointCorrect: "Certo!",

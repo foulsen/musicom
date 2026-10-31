@@ -149,13 +149,17 @@ function selectStep(index: number) {
 
       <template v-else>
         <div ref="stepRegion" tabindex="-1" class="flex flex-col gap-8 outline-none">
-          <concept-panel
-            v-if="step.kind === 'concept'"
-            :body-key="step.bodyKey"
-            :has-cues="listenCues.length > 0"
-            :is-playing="isPlaying"
-            @listen="listen"
-          />
+          <template v-if="step.kind === 'concept'">
+            <concept-panel
+              :title-key="step.titleKey"
+              :body-key="step.bodyKey"
+              :has-cues="listenCues.length > 0"
+              :is-playing="isPlaying"
+              @listen="listen"
+            />
+
+            <inline-explorer v-if="step.viz?.length" :context="lesson.context" :viz="step.viz" :intervals="step.intervals" />
+          </template>
 
           <template v-else-if="step.kind === 'explore'">
             <inline-explorer :context="lesson.context" :viz="step.viz" :highlight-degree="highlightDegree" />

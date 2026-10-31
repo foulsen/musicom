@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-import { Note, createScale } from "@music-workspace/music-theory";
+import { Note, createScale, scalePatternSteps } from "@music-workspace/music-theory";
 
 import { findScalePattern } from "@/modules/shared/application/scale-patterns";
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
@@ -10,8 +10,10 @@ import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { ChordCard } from "@/modules/shared/components/chord-card";
+import { StepPattern } from "@/modules/shared/components/step-pattern";
 
 import type { InlineVizKind, LessonContext } from "../../application/curriculum";
+import { IntervalPair } from "../interval-pair";
 
 const props = withDefaults(
   defineProps<{
@@ -19,8 +21,10 @@ const props = withDefaults(
     viz: InlineVizKind[];
     /** Grau (1-based) em destaque no Harmonic Field / usado como acorde do Chord Card. */
     highlightDegree?: number;
+    /** Semitons dos intervalos da viz "interval", a partir da tônica do contexto. */
+    intervals?: number[];
   }>(),
-  { highlightDegree: undefined },
+  { highlightDegree: undefined, intervals: () => [] },
 );
 
 const { play } = useNoteAudio();
@@ -29,6 +33,8 @@ const scale = computed(() => createScale(Note.from(props.context.root), findScal
 
 const notes = computed(() => scale.value.notes());
 const degrees = computed(() => scale.value.degrees());
+const patternSteps = computed(() => scalePatternSteps(findScalePattern(props.context.pattern)));
+const patternDegreeLabels = computed(() => degrees.value.map((item) => item.degree.toString()));
 const triads = computed(() => scale.value.triads());
 const sevenths = computed(() => scale.value.seventhChords());
 
@@ -63,6 +69,13 @@ function selectChord(index: number) {
     <div v-if="viz.includes('chromatic-wheel')" class="w-full max-w-xs">
       <chromatic-wheel :root="scale.root" :highlighted-notes="notes" :label-by-pitch-class="spelledByPitchClass"
         @note-play="play" />
+    </div>
+
+    <step-pattern v-if="viz.includes('step-pattern')" :steps="patternSteps" :degree-labels="patternDegreeLabels" legend
+      class="w-full" />
+
+    <div v-if="viz.includes('interval') && intervals.length" class="flex w-full flex-col gap-2 sm:max-w-md">
+      <interval-pair v-for="semitones in intervals" :key="semitones" :root="context.root" :semitones="semitones" />
     </div>
 
     <harmonic-field v-if="viz.includes('harmonic-field')" v-model:mode="harmonicFieldMode" :triads="triads"

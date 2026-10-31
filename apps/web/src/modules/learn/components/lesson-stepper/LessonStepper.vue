@@ -37,7 +37,7 @@ function dotClass(index: number, currentIndex: number): string {
         class="size-2.5 rounded-full transition-colors"
         :class="dotClass(index, currentIndex)"
         :aria-current="index === currentIndex ? 'step' : undefined"
-        :aria-label="t(`learn.stepKind.${step.kind}`)"
+        :aria-label="t('learn.stepperStep', { kind: t(`learn.stepKind.${step.kind}`), step: index + 1, total: steps.length })"
       />
       <span v-if="index < steps.length - 1" class="h-px w-6 bg-border" aria-hidden="true" />
     </li>
