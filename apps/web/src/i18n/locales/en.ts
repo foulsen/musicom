@@ -411,6 +411,7 @@ export const en = {
       locked: "Locked",
       available: "Available",
       "in-progress": "In progress",
+      review: "Review",
       completed: "Completed",
     },
     tracks: {
@@ -462,6 +463,12 @@ export const en = {
     checkpointIncorrect: "Not quite — the highlighted answer was correct.",
     checkpointWhy: "Why?",
     explanations: {
+      degreeOfNote: "Counting up from {root}: {notes} — {note} is degree {degree}.",
+      triadName: "Degree {degree} of {root} major is {note}. Stacking scale thirds — {notes} — gives the triad {chord}.",
+      diatonicChord: "Degree {degree} of {root} major is {note}. Stacking scale thirds — {notes} — gives {chord}.",
+      romanQuality: "The {roman} of {root} major is {chord} ({notes}) — quality: {quality}.",
+      completeProgression: "The ii-V-I ends on the tonic: after {sequence}, it resolves to the degree 1 chord of {root} major, {chord}.",
+      modeAtDegree: "{parent} major: {parentNotes}. Starting on degree {degree} ({tonic}) with the same notes gives {tonic} {pattern}.",
       degreeName: "Counting up from {root}: {notes} — degree {degree} is {note}.",
       leadingTone: "In {root} major, the 7th degree ({note}) sits one semitone below the tonic {root} and \"pulls\" up to it — that's why it's called the leading tone.",
       triadNotes: "Degree {degree} of {root} major is {note}. From there, skip every other scale note (stack thirds): {notes}.",
@@ -479,7 +486,11 @@ export const en = {
     checkpointShortcutHint: "Number keys to answer, Enter/Space for next.",
     completion: {
       title: "Lesson complete!",
-      checkpointScore: "You got {correct} of {total} checkpoint questions right.",
+      checkpointScore: "You got {correct} of {total} checkpoint questions right ({percent}%).",
+      checkpointTarget: "Mastery target: {target}% correct.",
+      checkpointMastered: "Target reached — you've got this down.",
+      reviewRecommended: "We recommend redoing the checkpoint before moving on. The next lesson is already unlocked, but this one stays marked \"Review\" until you reach the target.",
+      redoCheckpoint: "Redo checkpoint",
       nextLessonUnlocked: "Next up: {lesson}",
       goToNextLesson: "Start next lesson",
       backToTracks: "Back to tracks",
@@ -489,22 +500,28 @@ export const en = {
       majorScale: {
         degreeName: "Which note is scale degree {degree} of {root} major?",
         leadingTone: "In {root} major, which scale degree is called the leading tone?",
+        degreeOfNote: "In {root} major, which scale degree is the note {note}?",
       },
       triads: {
         triadNotes: "Which three notes make up the degree {degree} triad in {root} major?",
         triadQuality: "What quality is the degree {degree} triad in {root} major?",
+        triadName: "What is the chord symbol of the degree {degree} triad in {root} major?",
       },
       diatonicField: {
         harmonicFunction: "What harmonic function does scale degree {degree} have in {root} major?",
         dominantDegree: "Which scale degree carries the Dominant function in {root} major?",
+        diatonicChord: "What is the seventh-chord symbol on scale degree {degree} in {root} major?",
       },
       twoFiveOne: {
         chordName: "Which chord is the {roman} in {root} major?",
         isProgression: "Is {sequence} a ii-V-I progression in {root} major?",
+        romanQuality: "What type of seventh chord is the {roman} in {root} major?",
+        completeProgression: "Which chord completes the ii-V-I in {root} major? {sequence} – ?",
       },
       modes: {
-        modeOfMajor: "{tonic} {pattern} is the {degree} mode of which major scale?",
-        changingNote: "Which note is different between {root} {pattern} and {root} Aeolian?",
+        modeOfMajor: "{tonic} {pattern} is mode number {degree} of which major scale?",
+        changingNote: "Which note is different between {root} {pattern} and {root} {reference}?",
+        modeAtDegree: "Which mode starts on degree {degree} of {parent} major?",
       },
     },
     notFound: {

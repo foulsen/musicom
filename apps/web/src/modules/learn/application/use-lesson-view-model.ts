@@ -5,6 +5,7 @@ import { buildExplorerLink } from "@/modules/shared/application/explorer-deeplin
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import type { CheckpointQuestion } from "./checkpoint-generators";
+import { CHECKPOINT_MASTERY_THRESHOLD, checkpointPercent, isCheckpointMastered } from "./checkpoint-mastery";
 import type { ListenCue } from "./curriculum";
 import type { CheckpointScore } from "./use-learn-store";
 import { useLearnViewModel } from "./use-learn-view-model";
@@ -28,7 +29,8 @@ export function useLessonViewModel() {
   const route = useRoute();
   const router = useRouter();
 
-  const { track, completedStepCount, markStepDone, recordCheckpoint, visitLesson } = useLearnViewModel();
+  const { track, completedStepCount, bestCheckpointOf, markStepDone, recordCheckpoint, visitLesson } =
+    useLearnViewModel();
   const { playChord, playSequence } = useNoteAudio();
 
   const lessonId = computed(() => String(route.params.lessonId));
@@ -40,6 +42,8 @@ export function useLessonViewModel() {
   /** Verdadeiro após concluir o último passo — mostra o painel de conclusão em vez de sair direto. */
   const isFinished = ref(false);
   const lastCheckpointScore = ref<CheckpointScore | null>(null);
+  /** Incrementa a cada "Refazer checkpoint" — invalida `checkpointQuestions` e sorteia um conjunto novo. */
+  const checkpointAttempt = ref(0);
 
   watch(
     lessonId,
@@ -55,6 +59,7 @@ export function useLessonViewModel() {
       stepIndex.value = requestedStep ?? (current && done < current.steps.length ? done : 0);
       isFinished.value = false;
       lastCheckpointScore.value = null;
+      checkpointAttempt.value = 0;
       visitLesson(id);
     },
     { immediate: true },
@@ -88,11 +93,14 @@ export function useLessonViewModel() {
   });
 
   /**
-   * Geradas uma única vez por visita ao passo (não recomputa a cada render): o `computed`
-   * só reavalia quando `step`/`lesson` mudam, o que não acontece ao responder uma pergunta.
+   * Geradas uma única vez por tentativa (não recomputa a cada render): o `computed` só reavalia
+   * quando `step`/`lesson`/`checkpointAttempt` mudam, o que não acontece ao responder uma pergunta.
    */
   const checkpointQuestions = computed<CheckpointQuestion[]>(() => {
     if (!lesson.value || step.value?.kind !== "checkpoint") return [];
+
+    // dependência explícita: "Refazer checkpoint" sorteia tom e perguntas novos
+    void checkpointAttempt.value;
 
     return step.value.generate(lesson.value.context);
   });
@@ -158,6 +166,25 @@ export function useLessonViewModel() {
     goNext();
   }
 
+  /** Melhor tentativa da lição (a persistida) — base do "Revisar", não a tentativa que acabou de acabar. */
+  const bestScore = computed(() => (lesson.value ? bestCheckpointOf(lesson.value.id) : null));
+  const needsReview = computed(() => bestScore.value !== null && !isCheckpointMastered(bestScore.value));
+  const lastAttemptPercent = computed(() => (lastCheckpointScore.value ? checkpointPercent(lastCheckpointScore.value) : null));
+  const masteryTargetPercent = Math.round(CHECKPOINT_MASTERY_THRESHOLD * 100);
+
+  /** Gate suave: a lição já está concluída; refazer só volta ao checkpoint com perguntas novas, no mesmo lugar. */
+  function redoCheckpoint() {
+    if (!lesson.value) return;
+
+    const checkpointIndex = lesson.value.steps.findIndex((item) => item.kind === "checkpoint");
+    if (checkpointIndex < 0) return;
+
+    checkpointAttempt.value += 1;
+    lastCheckpointScore.value = null;
+    isFinished.value = false;
+    stepIndex.value = checkpointIndex;
+  }
+
   function backToTracks() {
     router.push("/learn");
   }
@@ -179,11 +206,15 @@ export function useLessonViewModel() {
     isPlaying,
     isFinished,
     lastCheckpointScore,
+    lastAttemptPercent,
+    needsReview,
+    masteryTargetPercent,
     nextLesson,
 
     listen,
     goNext,
     completeCheckpoint,
+    redoCheckpoint,
     goPrevious,
     backToTracks,
     goToNextLesson,

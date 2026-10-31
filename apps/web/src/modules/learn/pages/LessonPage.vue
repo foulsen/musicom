@@ -2,7 +2,7 @@
 import { nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { ArrowUpRight, ChevronLeft, CircleCheckBig, PartyPopper } from "@lucide/vue";
+import { ArrowUpRight, ChevronLeft, CircleCheckBig, PartyPopper, RotateCcw } from "@lucide/vue";
 
 import { EmptyState } from "@/modules/shared/components/empty-state";
 
@@ -25,10 +25,14 @@ const {
   isPlaying,
   isFinished,
   lastCheckpointScore,
+  lastAttemptPercent,
+  needsReview,
+  masteryTargetPercent,
   nextLesson,
   listen,
   goNext,
   completeCheckpoint,
+  redoCheckpoint,
   goPrevious,
   backToTracks,
   goToNextLesson,
@@ -84,9 +88,34 @@ function selectStep(index: number) {
           {{ t("learn.completion.title") }}
         </h2>
 
-        <p v-if="lastCheckpointScore" class="text-sm text-muted-foreground">
-          {{ t("learn.completion.checkpointScore", { correct: lastCheckpointScore.correct, total: lastCheckpointScore.total }) }}
-        </p>
+        <div v-if="lastCheckpointScore" class="space-y-1 text-sm text-muted-foreground">
+          <p>
+            {{
+              t("learn.completion.checkpointScore", {
+                correct: lastCheckpointScore.correct,
+                total: lastCheckpointScore.total,
+                percent: lastAttemptPercent,
+              })
+            }}
+          </p>
+          <p>{{ t("learn.completion.checkpointTarget", { target: masteryTargetPercent }) }}</p>
+          <p v-if="!needsReview" class="font-medium text-brand">{{ t("learn.completion.checkpointMastered") }}</p>
+        </div>
+
+        <div v-if="needsReview" class="flex max-w-prose flex-col items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+          <p class="text-sm text-foreground">
+            {{ t("learn.completion.reviewRecommended") }}
+          </p>
+
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            @click="redoCheckpoint"
+          >
+            <rotate-ccw class="size-4" aria-hidden="true" />
+            {{ t("learn.completion.redoCheckpoint") }}
+          </button>
+        </div>
 
         <div class="flex flex-col items-center gap-3 pt-2">
           <template v-if="nextLesson">

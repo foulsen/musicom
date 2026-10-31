@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 import { RouterLink } from "vue-router";
 
-import { CheckCircle2, Circle, Lock, PlayCircle } from "@lucide/vue";
+import { CheckCircle2, Circle, Lock, PlayCircle, RotateCcw } from "@lucide/vue";
 
 import type { LessonWithStatus } from "../../application/use-learn-view-model";
 
@@ -16,6 +16,7 @@ const STATUS_ICON = {
   locked: Lock,
   available: Circle,
   "in-progress": PlayCircle,
+  review: RotateCcw,
   completed: CheckCircle2,
 } as const;
 
@@ -23,6 +24,7 @@ const STATUS_CLASS = {
   locked: "border-border bg-card/20 text-muted-foreground opacity-60",
   available: "border-border bg-card/40 text-foreground hover:bg-accent/40",
   "in-progress": "border-brand-soft bg-brand-soft/40 text-foreground hover:bg-brand-soft/60",
+  review: "border-amber-500/50 bg-amber-500/10 text-foreground hover:bg-amber-500/20",
   completed: "border-brand bg-brand-soft text-brand-soft-foreground hover:opacity-90",
 } as const;
 </script>

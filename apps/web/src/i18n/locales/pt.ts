@@ -413,6 +413,7 @@ export const pt: MessageSchema = {
       locked: "Bloqueada",
       available: "Disponível",
       "in-progress": "Em andamento",
+      review: "Revisar",
       completed: "Concluída",
     },
     tracks: {
@@ -464,6 +465,12 @@ export const pt: MessageSchema = {
     checkpointIncorrect: "Quase — a resposta destacada era a correta.",
     checkpointWhy: "Por quê?",
     explanations: {
+      degreeOfNote: "Contando a partir de {root}: {notes} — {note} é o {degree}º grau.",
+      triadName: "O grau {degree} de {root} maior é {note}. Empilhando terças na escala — {notes} — a tríade é {chord}.",
+      diatonicChord: "O grau {degree} de {root} maior é {note}. Empilhando terças na escala — {notes} — você obtém {chord}.",
+      romanQuality: "O {roman} de {root} maior é {chord} ({notes}) — qualidade: {quality}.",
+      completeProgression: "O ii-V-I termina na tônica: depois de {sequence}, resolve-se no acorde do 1º grau de {root} maior, {chord}.",
+      modeAtDegree: "{parent} maior: {parentNotes}. Começando no grau {degree} ({tonic}) com as mesmas notas, você tem {tonic} {pattern}.",
       degreeName: "Contando a partir de {root}: {notes} — o {degree}º grau é {note}.",
       leadingTone: "Em {root} maior, o 7º grau ({note}) fica um semitom abaixo da tônica {root} e \"puxa\" para ela — por isso se chama sensível.",
       triadNotes: "O grau {degree} de {root} maior é {note}. A partir dele, pule uma nota da escala a cada passo (empilhe terças): {notes}.",
@@ -481,7 +488,11 @@ export const pt: MessageSchema = {
     checkpointShortcutHint: "Teclas numéricas para responder, Enter/Espaço para avançar.",
     completion: {
       title: "Lição concluída!",
-      checkpointScore: "Você acertou {correct} de {total} perguntas do checkpoint.",
+      checkpointScore: "Você acertou {correct} de {total} perguntas do checkpoint ({percent}%).",
+      checkpointTarget: "Meta de domínio: {target}% de acertos.",
+      checkpointMastered: "Meta atingida — você domina este conteúdo.",
+      reviewRecommended: "Recomendamos refazer o checkpoint antes de avançar. A próxima lição já está liberada, mas esta ficará marcada como \"Revisar\" até você atingir a meta.",
+      redoCheckpoint: "Refazer checkpoint",
       nextLessonUnlocked: "A seguir: {lesson}",
       goToNextLesson: "Começar próxima lição",
       backToTracks: "Voltar às trilhas",
@@ -491,22 +502,28 @@ export const pt: MessageSchema = {
       majorScale: {
         degreeName: "Qual nota é o grau {degree} de {root} maior?",
         leadingTone: "Em {root} maior, qual grau da escala é chamado de sensível?",
+        degreeOfNote: "Em {root} maior, qual é o grau da nota {note}?",
       },
       triads: {
         triadNotes: "Quais três notas formam a tríade do grau {degree} em {root} maior?",
         triadQuality: "Qual a qualidade da tríade do grau {degree} em {root} maior?",
+        triadName: "Qual a cifra da tríade do grau {degree} em {root} maior?",
       },
       diatonicField: {
         harmonicFunction: "Qual função harmônica o grau {degree} tem em {root} maior?",
         dominantDegree: "Qual grau carrega a função Dominante em {root} maior?",
+        diatonicChord: "Qual a cifra do acorde com sétima do grau {degree} em {root} maior?",
       },
       twoFiveOne: {
         chordName: "Qual acorde é o {roman} em {root} maior?",
         isProgression: "{sequence} é uma progressão ii-V-I em {root} maior?",
+        romanQuality: "Que tipo de acorde com sétima é o {roman} em {root} maior?",
+        completeProgression: "Qual acorde completa o ii-V-I em {root} maior? {sequence} – ?",
       },
       modes: {
         modeOfMajor: "{tonic} {pattern} é o {degree}º modo de qual escala maior?",
-        changingNote: "Qual nota é diferente entre {root} {pattern} e {root} Eólio?",
+        changingNote: "Qual nota é diferente entre {root} {pattern} e {root} {reference}?",
+        modeAtDegree: "Qual modo começa no {degree}º grau de {parent} maior?",
       },
     },
     notFound: {

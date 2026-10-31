@@ -1,15 +1,33 @@
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
 
+import { bestCheckpoint, isCheckpointMastered } from "./checkpoint-mastery";
 import { FUNDAMENTALS_TRACK, type Lesson } from "./curriculum";
 import { useLearnStore, type CheckpointScore } from "./use-learn-store";
 
-export type LessonStatus = "locked" | "available" | "in-progress" | "completed";
+/** `review`: lição concluída, mas a melhor tentativa do checkpoint ficou abaixo da meta (gate suave). */
+export type LessonStatus = "locked" | "available" | "in-progress" | "review" | "completed";
 
 export interface LessonWithStatus {
   lesson: Lesson;
   status: LessonStatus;
   checkpoint: CheckpointScore | null;
+}
+
+interface LessonStatusInput {
+  isComplete: boolean;
+  isLocked: boolean;
+  hasStarted: boolean;
+  /** Melhor tentativa registrada do checkpoint, se houver. */
+  checkpoint?: CheckpointScore | null;
+}
+
+/** Deriva o estado exibido na trilha; "Revisar" nunca bloqueia — só sinaliza que vale refazer o checkpoint. */
+export function deriveLessonStatus({ isComplete, isLocked, hasStarted, checkpoint }: LessonStatusInput): LessonStatus {
+  if (isComplete) return checkpoint && !isCheckpointMastered(checkpoint) ? "review" : "completed";
+  if (isLocked) return "locked";
+
+  return hasStarted ? "in-progress" : "available";
 }
 
 /** Estado e navegação da trilha de aprendizado (MVP: uma única trilha, `FUNDAMENTALS_TRACK`). */
@@ -28,12 +46,19 @@ export function useLearnViewModel() {
   }
 
   function lessonStatus(lesson: Lesson): LessonStatus {
-    if (isLessonComplete(lesson)) return "completed";
-
     const prerequisite = track.lessons.find((item) => item.id === lesson.prerequisiteId);
-    if (prerequisite && !isLessonComplete(prerequisite)) return "locked";
 
-    return completedStepCount(lesson.id) > 0 ? "in-progress" : "available";
+    return deriveLessonStatus({
+      isComplete: isLessonComplete(lesson),
+      isLocked: !!prerequisite && !isLessonComplete(prerequisite),
+      hasStarted: completedStepCount(lesson.id) > 0,
+      checkpoint: progress.value[lesson.id]?.checkpoint,
+    });
+  }
+
+  /** Melhor pontuação já registrada no checkpoint da lição. */
+  function bestCheckpointOf(lessonId: string): CheckpointScore | null {
+    return progress.value[lessonId]?.checkpoint ?? null;
   }
 
   const lessonsWithStatus = computed<LessonWithStatus[]>(() =>
@@ -81,7 +106,8 @@ export function useLearnViewModel() {
   function recordCheckpoint(lessonId: string, checkpoint: CheckpointScore) {
     const current = progress.value[lessonId] ?? { completedStepIndexes: [] };
 
-    progress.value[lessonId] = { ...current, checkpoint };
+    // `checkpoint` guarda a MELHOR tentativa, não a última (gate suave: refazer nunca piora o status).
+    progress.value[lessonId] = { ...current, checkpoint: bestCheckpoint(current.checkpoint, checkpoint) };
   }
 
   function visitLesson(lessonId: string) {
@@ -100,6 +126,7 @@ export function useLearnViewModel() {
     continueLesson,
 
     completedStepCount,
+    bestCheckpointOf,
     markStepDone,
     recordCheckpoint,
     visitLesson,
