@@ -300,6 +300,7 @@ export const pt: MessageSchema = {
       cellAriaLabelOpen: "Corda {string}, solta",
       cellFound: "encontrada",
       progressAnnounce: "{found} de {total} encontradas",
+      wrongNote: "Essa posição é {note}",
       pressStart: "Pressione Começar para iniciar",
     },
     noteId: {
@@ -307,7 +308,9 @@ export const pt: MessageSchema = {
       targetAriaLabel: "Destacada: corda {string}, casa {fret}",
       targetAriaLabelOpen: "Destacada: corda {string}, solta",
       correct: "Certo!",
-      incorrect: "Quase — a nota destacada era a correta.",
+      incorrect: "Quase — a nota era {note}.",
+      explanationOpen: "Corda {string} solta: {note}",
+      explanation: "Corda {string} solta + {count} casa: {path} | Corda {string} solta + {count} casas: {path}",
       score: "Placar: {correct}/{total}",
       bestStreak: "Melhor sequência: {streak}",
       resetScore: "Zerar placar",

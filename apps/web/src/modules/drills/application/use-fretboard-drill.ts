@@ -7,6 +7,7 @@ import {
   Note,
   STANDARD_GUITAR_TUNING,
   type FretPosition,
+  type SingleNote,
 } from "@music-workspace/music-theory";
 
 import { randomChoice } from "@/modules/shared/application/random";
@@ -16,6 +17,8 @@ import { useDrillsStore } from "./use-drills-store";
 
 const ALL_TARGET_NOTES: Note[] = CHROMATIC_SCALE.map((value) => Note.from(value));
 const NATURAL_TARGET_NOTES: Note[] = ALL_TARGET_NOTES.filter((note) => !note.value.includes("#"));
+
+const WRONG_NOTE_VISIBLE_MS = 1500;
 
 function keyFor(position: FretPosition): string {
   return `${position.string}-${position.fret}`;
@@ -35,6 +38,8 @@ export function useFretboardDrill() {
   const targetNote = ref<Note>(randomChoice(targetNotes.value));
   const foundKeys = ref<Set<string>>(new Set());
   const wrongKey = ref<string | null>(null);
+  /** Nota que a posição errada realmente é — dura mais que o destaque vermelho, para dar tempo de ler. */
+  const wrongNote = ref<SingleNote | null>(null);
   const isActive = ref(false);
   const isComplete = ref(false);
   const elapsedMs = ref(0);
@@ -42,6 +47,7 @@ export function useFretboardDrill() {
   let startedAt = 0;
   let timer: ReturnType<typeof setInterval> | undefined;
   let wrongKeyTimer: ReturnType<typeof setTimeout> | undefined;
+  let wrongNoteTimer: ReturnType<typeof setTimeout> | undefined;
 
   const totalTargets = computed(
     () => positions.flat().filter((position) => position.pitch.note.equals(targetNote.value)).length,
@@ -59,6 +65,7 @@ export function useFretboardDrill() {
     targetNote.value = randomChoice(targetNotes.value);
     foundKeys.value = new Set();
     wrongKey.value = null;
+    wrongNote.value = null;
     isActive.value = true;
     isComplete.value = false;
     elapsedMs.value = 0;
@@ -102,18 +109,25 @@ export function useFretboardDrill() {
       }
     } else {
       wrongKey.value = key;
+      wrongNote.value = position.pitch.note.value;
 
       // Some sozinho depois de um instante, em vez de ficar vermelho até o próximo clique.
       clearTimeout(wrongKeyTimer);
       wrongKeyTimer = setTimeout(() => {
         if (wrongKey.value === key) wrongKey.value = null;
       }, 600);
+
+      clearTimeout(wrongNoteTimer);
+      wrongNoteTimer = setTimeout(() => {
+        wrongNote.value = null;
+      }, WRONG_NOTE_VISIBLE_MS);
     }
   }
 
   onUnmounted(() => {
     stopTimer();
     clearTimeout(wrongKeyTimer);
+    clearTimeout(wrongNoteTimer);
   });
 
   return {
@@ -121,6 +135,7 @@ export function useFretboardDrill() {
     targetNote,
     foundKeys,
     wrongKey,
+    wrongNote,
     isActive,
     isComplete,
     elapsedMs,

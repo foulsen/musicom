@@ -43,6 +43,7 @@ const {
   targetNote,
   foundKeys,
   wrongKey,
+  wrongNote,
   isActive,
   isComplete,
   elapsedMs,
@@ -64,6 +65,7 @@ const {
   selectedNote,
   isAnswered: isNoteIdAnswered,
   isCorrect: isNoteIdCorrect,
+  explanation: noteIdExplanation,
   score: noteIdScore,
   streak: noteIdStreak,
   bestStreak: noteIdBestStreak,
@@ -71,6 +73,20 @@ const {
   answer: answerNoteId,
   resetScore: resetNoteIdScore,
 } = useNoteIdDrill();
+
+/** "Corda E solta + 3 casas: E → F → F# → G" — o caminho cromático da corda solta até a casa-alvo. */
+const noteIdExplanationText = computed(() => {
+  const { openNote, fret, path } = noteIdExplanation.value;
+  const joined = path.join(" → ");
+
+  return fret === 0
+    ? t("drills.noteId.explanationOpen", { string: openNote, note: joined })
+    : t("drills.noteId.explanation", { string: openNote, path: joined, count: fret }, fret);
+});
+
+const wrongNoteAnnounce = computed(() =>
+  wrongNote.value ? t("drills.fretboard.wrongNote", { note: wrongNote.value }) : "",
+);
 
 const noteIdScorePercent = computed(() =>
   noteIdScore.value.total === 0 ? null : Math.round((noteIdScore.value.correct / noteIdScore.value.total) * 100),
@@ -183,9 +199,16 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
       </div>
 
       <!-- Slot de largura reservada: o cronômetro não desloca o layout ao aparecer/sumir. -->
-      <p class="text-sm font-mono tabular-nums text-muted-foreground" :style="{ visibility: isActive ? 'visible' : 'hidden' }">
-        {{ formatMs(elapsedMs) }}
-      </p>
+      <div class="flex min-h-5 flex-wrap items-center gap-4">
+        <p class="text-sm font-mono tabular-nums text-muted-foreground" :style="{ visibility: isActive ? 'visible' : 'hidden' }">
+          {{ formatMs(elapsedMs) }}
+        </p>
+
+        <!-- Erro: diz qual nota a posição clicada realmente é (some sozinho). -->
+        <p role="status" aria-live="polite" class="text-sm font-medium text-destructive">
+          {{ wrongNoteAnnounce }}
+        </p>
+      </div>
 
       <p aria-live="polite" class="sr-only">
         {{ progressAnnounce }}
@@ -256,7 +279,10 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
       <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-4">
         <div v-if="isNoteIdAnswered" role="status" aria-live="polite" aria-atomic="true">
           <p class="text-sm font-medium" :class="isNoteIdCorrect ? 'text-brand' : 'text-destructive'">
-            {{ isNoteIdCorrect ? t("drills.noteId.correct") : t("drills.noteId.incorrect") }}
+            {{ isNoteIdCorrect ? t("drills.noteId.correct") : t("drills.noteId.incorrect", { note: noteIdExplanation.path.at(-1) }) }}
+          </p>
+          <p class="text-sm text-muted-foreground">
+            {{ noteIdExplanationText }}
           </p>
         </div>
 

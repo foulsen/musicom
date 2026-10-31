@@ -13,6 +13,7 @@ import {
 import { randomChoice } from "@/modules/shared/application/random";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
+import { notePath } from "./note-path";
 import { useDrillsStore } from "./use-drills-store";
 
 /** As 12 notas cromáticas, sempre na mesma ordem — ordem fixa ajuda a memorizar a posição dos botões. */
@@ -34,6 +35,11 @@ export function useNoteIdDrill() {
   const isAnswered = computed(() => selectedNote.value !== null);
   const isCorrect = computed(
     () => selectedNote.value !== null && target.value.pitch.note.equals(Note.from(selectedNote.value)),
+  );
+
+  /** De onde vem a nota da casa-alvo: corda solta + casas, passo a passo (para o feedback depois de responder). */
+  const explanation = computed(() =>
+    notePath(positions[target.value.string][0].pitch.note, target.value.fret),
   );
 
   function newRound() {
@@ -69,6 +75,7 @@ export function useNoteIdDrill() {
     selectedNote,
     isAnswered,
     isCorrect,
+    explanation,
     score: noteIdScore,
     streak: noteIdStreak,
     bestStreak: noteIdBestStreak,

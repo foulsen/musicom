@@ -298,6 +298,7 @@ export const en = {
       cellAriaLabelOpen: "String {string}, open",
       cellFound: "found",
       progressAnnounce: "{found} of {total} found",
+      wrongNote: "That position is {note}",
       pressStart: "Press Start to begin",
     },
     noteId: {
@@ -305,7 +306,9 @@ export const en = {
       targetAriaLabel: "Highlighted: string {string}, fret {fret}",
       targetAriaLabelOpen: "Highlighted: string {string}, open",
       correct: "Correct!",
-      incorrect: "Not quite — the highlighted note was correct.",
+      incorrect: "Not quite — the note was {note}.",
+      explanationOpen: "Open {string} string: {note}",
+      explanation: "Open {string} string + {count} fret: {path} | Open {string} string + {count} frets: {path}",
       score: "Score: {correct}/{total}",
       bestStreak: "Best streak: {streak}",
       resetScore: "Reset score",
