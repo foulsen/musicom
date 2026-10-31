@@ -372,6 +372,14 @@ export const en = {
       chordQuality: "What chord quality do you hear?",
       scale: "What scale do you hear?",
     },
+    weakPoints: {
+      title: "Your weak spots",
+      hint: "Upcoming questions give these items extra weight.",
+      empty: "Answer more questions of this type — once an item has {min} attempts, the ones you miss most show up here.",
+      accuracy: "{percent}% correct ({correct}/{total})",
+      confuses: "often confused with {item}",
+      listen: "Hear {item}",
+    },
   },
   modeExplorer: {
     title: "Mode Explorer",

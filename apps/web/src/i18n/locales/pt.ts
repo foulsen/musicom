@@ -374,6 +374,14 @@ export const pt: MessageSchema = {
       chordQuality: "Qual qualidade de acorde você ouviu?",
       scale: "Qual escala você ouviu?",
     },
+    weakPoints: {
+      title: "Seus pontos fracos",
+      hint: "As próximas perguntas dão mais peso a esses itens.",
+      empty: "Responda mais perguntas deste tipo — a partir de {min} tentativas por item, os que você mais erra aparecem aqui.",
+      accuracy: "{percent}% de acerto ({correct}/{total})",
+      confuses: "costuma confundir com {item}",
+      listen: "Ouvir {item}",
+    },
   },
   modeExplorer: {
     title: "Explorador de Modos",

@@ -4,10 +4,12 @@ import { useI18n } from "vue-i18n";
 
 import { Play, RotateCcw } from "@lucide/vue";
 
+import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import type { Difficulty, QuizKind } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
 const {
@@ -22,6 +24,7 @@ const {
   intervalPlaybackMode,
   isPlaying,
   hasPlayedFirst,
+  weakItems,
   replay,
   newQuestion,
   selectKind,
@@ -31,9 +34,11 @@ const {
   resetScore,
   playYourAnswer,
   playCorrectAnswer,
+  playItem,
 } = useEarTrainingViewModel();
 
 const { t } = useI18n();
+const { label } = useMusicTerms();
 
 const KINDS: QuizKind[] = ["interval", "chordQuality", "scale"];
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
@@ -225,6 +230,64 @@ useTypingGuardedKeydown(handleKeydown);
           {{ t("earTraining.next") }}
         </button>
       </div>
+    </section>
+
+    <section aria-labelledby="weak-points-title" class="space-y-3 rounded-xl border border-border bg-card/40 p-6">
+      <div class="space-y-1">
+        <h2 id="weak-points-title" class="text-sm font-medium text-foreground">
+          {{ t("earTraining.weakPoints.title") }}
+          <span class="font-normal text-muted-foreground">· {{ t(`earTraining.kinds.${kind}`) }}</span>
+        </h2>
+        <p v-if="weakItems.length > 0" class="text-xs text-muted-foreground">
+          {{ t("earTraining.weakPoints.hint") }}
+        </p>
+      </div>
+
+      <p v-if="weakItems.length === 0" class="text-sm text-muted-foreground">
+        {{ t("earTraining.weakPoints.empty", { min: MIN_WEAK_ATTEMPTS }) }}
+      </p>
+
+      <ul v-else class="space-y-2">
+        <li
+          v-for="item in weakItems"
+          :key="item.id"
+          class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border border-border px-4 py-3"
+        >
+          <div class="space-y-0.5">
+            <p class="text-sm font-medium capitalize text-foreground">
+              {{ label(item.label) }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{ t("earTraining.weakPoints.accuracy", { percent: item.accuracyPercent, correct: item.correct, total: item.total }) }}
+              <template v-if="item.confusion">
+                · {{ t("earTraining.weakPoints.confuses", { item: label(item.confusion.label) }) }}
+              </template>
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium capitalize text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              :aria-label="t('earTraining.weakPoints.listen', { item: label(item.label) })"
+              @click="playItem(item.id)"
+            >
+              <play class="size-3.5" />
+              {{ label(item.label) }}
+            </button>
+            <button
+              v-if="item.confusion"
+              type="button"
+              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium capitalize text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              :aria-label="t('earTraining.weakPoints.listen', { item: label(item.confusion.label) })"
+              @click="playItem(item.confusion.id)"
+            >
+              <play class="size-3.5" />
+              {{ label(item.confusion.label) }}
+            </button>
+          </div>
+        </li>
+      </ul>
     </section>
   </section>
 </template>
