@@ -105,10 +105,17 @@ useTypingGuardedKeydown(handleKeydown);
       {{ t("learn.checkpointShortcutHint") }}
     </p>
 
-    <div v-if="isAnswered" role="status" aria-live="polite" class="flex flex-wrap items-center justify-between gap-4">
-      <p class="text-sm font-medium" :class="isCorrect ? 'text-brand' : 'text-destructive'">
-        {{ isCorrect ? t("learn.checkpointCorrect") : t("learn.checkpointIncorrect") }}
-      </p>
+    <div v-if="isAnswered" class="flex flex-wrap items-end justify-between gap-4">
+      <div role="status" aria-live="polite" class="min-w-0 flex-1 basis-80 space-y-1">
+        <p class="text-sm font-medium" :class="isCorrect ? 'text-brand' : 'text-destructive'">
+          {{ isCorrect ? t("learn.checkpointCorrect") : t("learn.checkpointIncorrect") }}
+        </p>
+
+        <p class="text-sm text-muted-foreground">
+          <span class="font-medium text-foreground">{{ t("learn.checkpointWhy") }}</span>
+          {{ label(question.explanation) }}
+        </p>
+      </div>
 
       <button
         ref="nextButton"
