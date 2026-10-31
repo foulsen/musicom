@@ -10,6 +10,7 @@ export const localeSchema = z.enum(["en", "pt"]);
 export const instrumentSchema = z.enum(["piano", "guitar", "realistic-guitar"]);
 export const difficultySchema = z.enum(["easy", "medium", "hard"]);
 export const deckIdSchema = z.enum(["intervals", "intervalNames", "chordFormulas", "chordSpelling"]);
+export const noteIdLevelSchema = z.enum(["frets3", "frets5", "frets7", "frets12"]);
 export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
 export const themeSchema = z.enum(["light", "dark", "system"]);
 
@@ -41,6 +42,8 @@ export const preferencesSnapshotSchema = z.object({
     .object({
       activeDeckId: deckIdSchema,
       fretboardNaturalsOnly: z.boolean(),
+      noteIdLevel: noteIdLevelSchema,
+      noteIdNaturalsOnly: z.boolean(),
     })
     .partial()
     .optional(),

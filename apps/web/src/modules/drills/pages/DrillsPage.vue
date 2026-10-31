@@ -9,6 +9,7 @@ import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
 import { NOTE_OPTIONS, useNoteIdDrill } from "../application/use-note-id-drill";
 import type { DeckId } from "../application/flashcard-decks";
+import type { NoteIdLevelId } from "../application/note-id-levels";
 import { DrillFretboard } from "../components/drill-fretboard";
 import { Flashcard } from "../components/flashcard";
 import { NoteIdFretboard } from "../components/note-id-fretboard";
@@ -66,6 +67,12 @@ const {
   isAnswered: isNoteIdAnswered,
   isCorrect: isNoteIdCorrect,
   explanation: noteIdExplanation,
+  levels: noteIdLevels,
+  level: noteIdLevel,
+  setLevel: setNoteIdLevel,
+  naturalsOnly: noteIdNaturalsOnly,
+  setNaturalsOnly: setNoteIdNaturalsOnly,
+  stringSummary: noteIdStringSummary,
   score: noteIdScore,
   streak: noteIdStreak,
   bestStreak: noteIdBestStreak,
@@ -263,6 +270,37 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
         </div>
       </div>
 
+      <div class="flex flex-wrap items-center gap-3">
+        <chip-toggle-group
+          :model-value="noteIdLevel"
+          type="single"
+          wrap
+          :aria-label="t('drills.noteId.level')"
+          @update:model-value="(value) => value && setNoteIdLevel(value as NoteIdLevelId)"
+        >
+          <chip-toggle-item
+            v-for="item in noteIdLevels"
+            :key="item.id"
+            :value="item.id"
+            class="px-3 py-1 text-xs"
+          >
+            {{ t(`drills.noteId.levels.${item.id}`) }}
+          </chip-toggle-item>
+        </chip-toggle-group>
+
+        <button
+          type="button"
+          class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="noteIdNaturalsOnly
+            ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
+            : 'border-border bg-card/40 text-muted-foreground hover:text-foreground'"
+          :aria-pressed="noteIdNaturalsOnly"
+          @click="setNoteIdNaturalsOnly(!noteIdNaturalsOnly)"
+        >
+          {{ t("drills.fretboard.naturalsOnly") }}
+        </button>
+      </div>
+
       <p v-if="noteIdBestStreak > 0" class="text-xs text-muted-foreground">
         {{ t("drills.noteId.bestStreak", { streak: noteIdBestStreak }) }}
       </p>
@@ -295,6 +333,33 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
         >
           {{ t("drills.noteId.next") }}
         </button>
+      </div>
+
+      <!-- Resumo compacto por corda (posições do nível ativo): mostra onde está o ponto fraco. -->
+      <div class="space-y-1.5">
+        <p class="text-xs font-medium text-muted-foreground">
+          {{ t("drills.noteId.stringSummary") }}
+        </p>
+
+        <ul class="flex flex-wrap gap-2">
+          <li
+            v-for="entry in noteIdStringSummary"
+            :key="entry.string"
+            class="flex items-center gap-1.5 rounded-md border border-border bg-card/40 px-2 py-1 text-xs"
+          >
+            <span class="sr-only">
+              {{ entry.percent === null
+                ? t("drills.noteId.stringAccuracyEmpty", { string: entry.stringNumber, note: entry.openNote })
+                : t("drills.noteId.stringAccuracy", { string: entry.stringNumber, note: entry.openNote, percent: entry.percent, total: entry.total }, entry.total) }}
+            </span>
+            <span class="font-medium text-foreground" aria-hidden="true">{{ entry.openNote }}<sub class="text-[9px] text-muted-foreground">{{ entry.stringNumber }}</sub></span>
+            <span
+              class="font-mono tabular-nums"
+              :class="entry.percent === null ? 'text-muted-foreground' : (entry.percent >= 80 ? 'text-brand' : (entry.percent < 50 ? 'text-destructive' : 'text-foreground'))"
+              aria-hidden="true"
+            >{{ entry.percent === null ? "–" : `${entry.percent}%` }}</span>
+          </li>
+        </ul>
       </div>
     </section>
 

@@ -315,6 +315,16 @@ export const pt: MessageSchema = {
       bestStreak: "Melhor sequência: {streak}",
       resetScore: "Zerar placar",
       next: "Próxima",
+      level: "Nível",
+      levels: {
+        frets3: "Soltas + casas 0–3",
+        frets5: "Casas 0–5",
+        frets7: "Casas 0–7",
+        frets12: "Braço todo (0–12)",
+      },
+      stringSummary: "Acerto por corda",
+      stringAccuracy: "Corda {string} ({note}): {percent}% de acerto em {count} tentativa | Corda {string} ({note}): {percent}% de acerto em {count} tentativas",
+      stringAccuracyEmpty: "Corda {string} ({note}): sem respostas ainda",
     },
     flashcards: {
       deck: "Baralho",

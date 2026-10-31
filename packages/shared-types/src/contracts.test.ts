@@ -88,9 +88,35 @@ describe("drills snapshot", () => {
       noteIdScore: { correct: 10, total: 12 },
       noteIdStreak: 3,
       noteIdBestStreak: 8,
+      noteIdStats: { "0-3": { correct: 2, total: 3 } },
     };
 
     expect(drillsSnapshotSchema.parse(snapshot)).toEqual(snapshot);
+  });
+
+  it("defaults the per-position Note ID stats for snapshots saved before they existed", () => {
+    const legacy = {
+      cardStates: {},
+      fretboardBestMsByNote: {},
+      noteIdScore: { correct: 0, total: 0 },
+      noteIdStreak: 0,
+      noteIdBestStreak: 0,
+    };
+
+    expect(drillsSnapshotSchema.parse(legacy).noteIdStats).toEqual({});
+  });
+
+  it("rejects Note ID stats with a malformed position key or an invalid tally", () => {
+    const base = {
+      cardStates: {},
+      fretboardBestMsByNote: {},
+      noteIdScore: { correct: 0, total: 0 },
+      noteIdStreak: 0,
+      noteIdBestStreak: 0,
+    };
+
+    expect(drillsSnapshotSchema.safeParse({ ...base, noteIdStats: { "e-3": { correct: 1, total: 1 } } }).success).toBe(false);
+    expect(drillsSnapshotSchema.safeParse({ ...base, noteIdStats: { "0-3": { correct: -1, total: 1 } } }).success).toBe(false);
   });
 
   it("infers the note map as partial so a sparse client value assigns cleanly", () => {
@@ -169,6 +195,13 @@ describe("preferences snapshot", () => {
 
   it("accepts a theme preference", () => {
     expect(preferencesSnapshotSchema.safeParse({ theme: "light" }).success).toBe(true);
+  });
+
+  it("accepts the Note ID level and naturals toggle as drill preferences, and rejects an unknown level", () => {
+    expect(
+      preferencesSnapshotSchema.safeParse({ drills: { noteIdLevel: "frets7", noteIdNaturalsOnly: true } }).success,
+    ).toBe(true);
+    expect(preferencesSnapshotSchema.safeParse({ drills: { noteIdLevel: "frets99" } }).success).toBe(false);
   });
 
   it("rejects an unknown theme", () => {

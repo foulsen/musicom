@@ -79,6 +79,7 @@ const drills = defineAggregate<DrillsSnapshot>({
       noteIdScore: store.noteIdScore,
       noteIdStreak: store.noteIdStreak,
       noteIdBestStreak: store.noteIdBestStreak,
+      noteIdStats: store.noteIdStats,
     };
   },
   apply: (pinia, data) => {
@@ -88,6 +89,7 @@ const drills = defineAggregate<DrillsSnapshot>({
     store.noteIdScore = data.noteIdScore;
     store.noteIdStreak = data.noteIdStreak;
     store.noteIdBestStreak = data.noteIdBestStreak;
+    store.noteIdStats = data.noteIdStats;
   },
 });
 
@@ -143,6 +145,8 @@ const preferences = defineAggregate<PreferencesSnapshot>({
       drills: {
         activeDeckId: drillsStore.activeDeckId,
         fretboardNaturalsOnly: drillsStore.fretboardNaturalsOnly,
+        noteIdLevel: drillsStore.noteIdLevel,
+        noteIdNaturalsOnly: drillsStore.noteIdNaturalsOnly,
       },
     };
   },
@@ -167,6 +171,9 @@ const preferences = defineAggregate<PreferencesSnapshot>({
     if (data.drills?.activeDeckId) drillsStore.activeDeckId = data.drills.activeDeckId;
     if (data.drills?.fretboardNaturalsOnly !== undefined)
       drillsStore.fretboardNaturalsOnly = data.drills.fretboardNaturalsOnly;
+    if (data.drills?.noteIdLevel) drillsStore.noteIdLevel = data.drills.noteIdLevel;
+    if (data.drills?.noteIdNaturalsOnly !== undefined)
+      drillsStore.noteIdNaturalsOnly = data.drills.noteIdNaturalsOnly;
   },
 });
 

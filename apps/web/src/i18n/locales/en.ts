@@ -313,6 +313,16 @@ export const en = {
       bestStreak: "Best streak: {streak}",
       resetScore: "Reset score",
       next: "Next",
+      level: "Level",
+      levels: {
+        frets3: "Open + frets 0–3",
+        frets5: "Frets 0–5",
+        frets7: "Frets 0–7",
+        frets12: "Whole neck (0–12)",
+      },
+      stringSummary: "Accuracy by string",
+      stringAccuracy: "String {string} ({note}): {percent}% correct over {count} attempt | String {string} ({note}): {percent}% correct over {count} attempts",
+      stringAccuracyEmpty: "String {string} ({note}): no answers yet",
     },
     flashcards: {
       deck: "Deck",
