@@ -475,6 +475,42 @@ export const en = {
       },
     },
     lessons: {
+      notes: {
+        title: "Notes, Tones & Semitones",
+        summary: "The 12 notes of music, sharps and flats, and the smallest distance between two notes.",
+        steps: {
+          twelveNotes: {
+            title: "The 12 notes",
+            body: "All Western music uses just 12 different notes, repeating at higher and higher pitches. Seven of them are the natural notes — C, D, E, F, G, A, B (the white keys on a piano) — highlighted on the wheel; the other five sit in between them (the black keys). After the 12th note, everything starts again one octave higher. Click the notes to hear them.",
+          },
+          sharpsAndFlats: {
+            title: "Sharps and flats",
+            body: "The five notes in between take the name of a neighbour plus a symbol: a sharp (#) raises a note by a semitone and a flat (b) lowers it by a semitone. So C# (a semitone above C) and Db (a semitone below D) are the same key — two names for the same sound. Which name to use depends on the scale; for now, just know that both exist.",
+          },
+          toneAndSemitone: {
+            title: "Semitone and tone",
+            body: "The semitone (half step) is the smallest distance between two notes: from one key to its neighbour, like C to C#. A tone (whole step) is two semitones, like C to D. Notice: between E and F, and between B and C, there is no black key in the middle — those are only one semitone apart. Listen to a semitone and then a tone, and see the steps below.",
+          },
+        },
+      },
+      intervals: {
+        title: "Intervals",
+        summary: "The distance between two notes, with a name and a size in semitones — the building block of scales and chords.",
+        steps: {
+          twoWays: {
+            title: "Two ways to measure",
+            body: "An interval is the distance between two notes. You can measure it two ways: in semitones (the exact size) and by name, counting letters — from C to E that's three letters (C, D, E), so it's a third. The semitones tell you the quality: major or minor. Click the examples to hear the two notes in turn.",
+          },
+          secondsAndThirds: {
+            title: "Seconds and thirds",
+            body: "Seconds and thirds are the small intervals. A minor second is 1 semitone and a major second is 2. A minor third is 3 and a major third is 4. \"Minor\" is always one semitone less than \"major\". The third matters most: it's what makes a chord sound major (brighter) or minor (darker).",
+          },
+          fourthsAndFifths: {
+            title: "Fourths, fifths and the octave",
+            body: "A perfect fourth is 5 semitones; a perfect fifth is 7. \"Perfect\" marks the intervals that don't have a major or minor version — they sound firm and stable. The octave (12 semitones) is the same note, just higher: that's why notes repeat every 12 semitones.",
+          },
+        },
+      },
       majorScale: {
         title: "The Major Scale & Degrees",
         summary: "The scale everything else is built from — and the numbers musicians use to talk about it.",
@@ -511,6 +547,24 @@ export const en = {
           },
         },
       },
+      seventhChords: {
+        title: "Seventh Chords",
+        summary: "A triad with one more third on top: the four most-used seventh chords.",
+        steps: {
+          fourthNote: {
+            title: "A fourth note",
+            body: "Take a triad and stack one more third on top: you reach the seventh (the 7th note, counting from the root). In C major, C, E, G and B make Cmaj7. With four notes the chord gets richer and more sophisticated — which is why sevenths are everywhere in jazz and bossa nova. Listen to the triad, then to the seventh chord.",
+          },
+          fourTypes: {
+            title: "Four types",
+            body: "The triad underneath and the kind of seventh change the chord's character. The four main ones: maj7 (1 3 5 7), smooth and floating; 7 (1 3 5 b7), the dominant chord, tense and asking to resolve; m7 (1 b3 5 b7), mellow and melancholic; and m7b5 (1 b3 b5 b7), half-diminished, dark and unstable. Click each one to hear it.",
+          },
+          inTheKey: {
+            title: "In the chords of the key",
+            body: "In the harmonic field of a major key, each degree has its own kind of seventh: maj7 on degrees I and IV; m7 on ii, iii and vi; 7 (dominant) on V; and m7b5 on vii. See the seventh chords of C major.",
+          },
+        },
+      },
       diatonicField: {
         title: "The Diatonic Field",
         summary: "Every scale hides seven chords inside it — its harmonic field.",
@@ -536,6 +590,24 @@ export const en = {
           arriving: {
             title: "The feeling of arriving",
             body: "The ii prepares, the V builds tension and the I resolves: tension turns into rest. That path from tension to rest is the sound of \"arriving home\" — and it shows up in everything from jazz to pop. Listen to just the V and the I and feel the resolution.",
+          },
+        },
+      },
+      naturalMinor: {
+        title: "The Natural Minor & Its Relative",
+        summary: "The minor scale, and how it shares its notes with a major scale.",
+        steps: {
+          formula: {
+            title: "The natural minor formula",
+            body: "The natural minor scale also has seven notes, but a different pattern of tones and semitones: W – H – W – W – H – W – W. Here is A natural minor: A, B, C, D, E, F, G — only white keys. Listen: it sounds darker than the major scale.",
+          },
+          versusMajor: {
+            title: "What changes from major",
+            body: "Compare with the major scale on the same tonic: natural minor has the 3rd, 6th and 7th degrees one semitone lower (b3, b6, b7). It's mostly the b3, the minor third, that gives it its minor character. Listen to A major, then A minor.",
+          },
+          relative: {
+            title: "The relative minor",
+            body: "Every major scale has a relative minor: the minor scale that starts on its 6th degree. A natural minor uses exactly the notes of C major — A, B, C, D, E, F, G — just starting somewhere else. That's why C major and A minor are relatives: same notes, different tonics. Listen to both.",
           },
         },
       },
@@ -573,12 +645,41 @@ export const en = {
     interval: {
       play: "Play {from} and {to}: {name}",
     },
+    options: {
+      semitone: "A semitone (half step)",
+      tone: "A tone (whole step)",
+    },
+    chordFormulas: {
+      play: "Play {chord} ({quality}): formula {formula}, notes {notes}",
+    },
     checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Question {current} of {total}",
     checkpointCorrect: "Correct!",
     checkpointIncorrect: "Not quite — the highlighted answer was correct.",
     checkpointWhy: "Why?",
     explanations: {
+      noteAbove: "Neighbouring keys are 1 semitone apart. Going up {distance} from {note}: {path}. Answer: {answer}.",
+      noteBelow: "Neighbouring keys are 1 semitone apart. Going down {distance} from {note}: {path}. Answer: {answer}.",
+      semitonesBetween: "Counting key by key from {from} to {to}: {path}. That's {semitones}.",
+      halfStep: "There is no black key between {from} and {to}: they are neighbouring keys, just 1 semitone apart.",
+      wholeStep: "There is a black key in the middle between {from} and {to} ({between}): that's 2 semitones, which is 1 tone.",
+      enharmonic: "The black key between {lower} and {upper} has two names: {sharp} (a semitone above {lower}) and {flat} (a semitone below {upper}). They sound exactly the same.",
+      noteCount: "There are 12 notes — the 7 naturals and the 5 black keys (sharps and flats). After the 12th, the sequence starts again one octave higher.",
+      intervalBetween: "From {from} to {to}: {semitones} → {interval}.",
+      intervalSemitones: "Interval: {interval} → {semitones}. Example: from {from} to {to}.",
+      intervalSemitonesOctave: "Interval: {interval} → {semitones}. It's the same note ({from}), one octave higher.",
+      noteAboveInterval: "Going up {semitones} from {root} (interval: {interval}) you reach {note}.",
+      intervalName: "{semitones} → {interval}. Example: from {from} to {to}. To remember: 1 = minor second, 2 = major second, 3 = minor third, 4 = major third, 5 = perfect fourth, 7 = perfect fifth, 12 = octave.",
+      intervalNameOctave: "{semitones} → {interval}: it's the same note ({from}), one octave higher. To remember: 1 = minor second, 2 = major second, 3 = minor third, 4 = major third, 5 = perfect fourth, 7 = perfect fifth, 12 = octave.",
+      seventhNotes: "{chord} is the chord on {root} with the formula {formula}: {notes}.",
+      seventhQuality: "{chord} = {notes} (formula {formula}) → {quality}.",
+      seventhSymbol: "{quality}: formula {formula}. With that formula the notes are {notes} → chord symbol {chord}.",
+      seventhFormula: "{quality}: formula {formula}. Example: {chord} = {notes}.",
+      relativeMinor: "{root} major: {notes}. The relative minor starts on the 6th degree: {note} — so {note} minor.",
+      relativeMajor: "{root} natural minor: {notes}. The relative major starts on the 3rd degree: {note} — so {note} major uses these same notes.",
+      minorScaleNotes: "{root} natural minor: {notes}. Compared with {root} major, the 3rd, 6th and 7th degrees are a semitone lower.",
+      relativeDegree: "{root} major: {notes}. The 6th degree is {note}; the minor scale that starts on it uses the same notes.",
+      loweredDegrees: "{root} major: {major}. {root} natural minor: {minor}. Degrees {degrees} change: each one is a semitone lower.",
       degreeOfNote: "Counting up from {root}: {notes} — {note} is degree {degree}.",
       triadName: "Degree {degree} of {root} major is {note}. Stacking scale thirds — {notes} — gives the triad {chord}.",
       diatonicChord: "Degree {degree} of {root} major is {note}. Stacking scale thirds — {notes} — gives {chord}.",
@@ -613,6 +714,33 @@ export const en = {
       trackComplete: "You've completed every lesson in this track.",
     },
     checkpoints: {
+      notes: {
+        noteAbove: "Which note is {distance} above {note}?",
+        noteBelow: "Which note is {distance} below {note}?",
+        semitonesBetween: "How many semitones are there from {from} up to {to}?",
+        toneOrSemitone: "From {from} up to {to}, is the distance a tone or a semitone?",
+        enharmonic: "What is another name for the note {note}?",
+        noteCount: "How many different notes are there before the sequence repeats one octave higher?",
+      },
+      intervals: {
+        intervalBetween: "What is the interval between {from} and {to}?",
+        intervalSemitones: "How many semitones does this interval have: {interval}?",
+        noteAboveInterval: "Above {root}, which note forms this interval: {interval}?",
+        intervalName: "What is an interval of {semitones} called?",
+      },
+      seventhChords: {
+        seventhNotes: "Which notes make up the chord {chord}?",
+        seventhQuality: "What kind of seventh chord is {chord}?",
+        seventhSymbol: "What is the chord symbol on {root} with the quality {quality}?",
+        seventhFormula: "Which formula (in degrees) belongs to the quality {quality}?",
+      },
+      naturalMinor: {
+        relativeMinor: "What is the relative minor of {root} major?",
+        relativeMajor: "What is the relative major of {root} minor?",
+        minorScaleNotes: "Which are the notes of {root} natural minor?",
+        relativeDegree: "In {root} major, which degree does the relative minor start on?",
+        loweredDegrees: "Comparing {root} natural minor with {root} major, which degrees are a semitone lower?",
+      },
       majorScale: {
         degreeName: "Which note is scale degree {degree} of {root} major?",
         leadingTone: "In {root} major, which scale degree is called the leading tone?",

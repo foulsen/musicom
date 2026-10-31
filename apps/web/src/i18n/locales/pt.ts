@@ -477,6 +477,42 @@ export const pt: MessageSchema = {
       },
     },
     lessons: {
+      notes: {
+        title: "Notas, Tons e Semitons",
+        summary: "As 12 notas da música, sustenidos e bemóis, e a menor distância entre duas notas.",
+        steps: {
+          twelveNotes: {
+            title: "As 12 notas",
+            body: "Toda a música ocidental usa só 12 notas diferentes, que se repetem em alturas cada vez mais agudas. Sete delas são as notas naturais — C, D, E, F, G, A, B (as teclas brancas do piano) — destacadas na roda; as outras cinco ficam entre elas (as teclas pretas). Depois da 12ª nota, tudo recomeça uma oitava acima. Clique nas notas para ouvir.",
+          },
+          sharpsAndFlats: {
+            title: "Sustenidos e bemóis",
+            body: "As cinco notas do meio recebem o nome de uma vizinha mais um símbolo: o sustenido (#) sobe a nota um semitom e o bemol (b) a desce um semitom. Assim, C# (um semitom acima de C) e Db (um semitom abaixo de D) são a mesma tecla — dois nomes para o mesmo som. Qual nome usar depende da escala; por ora, basta saber que existem os dois.",
+          },
+          toneAndSemitone: {
+            title: "Semitom e tom",
+            body: "O semitom é a menor distância entre duas notas: de uma tecla à vizinha, como de C a C#. Um tom são dois semitons, como de C a D. Repare: entre E e F, e entre B e C, não há tecla preta no meio — ali a distância é de apenas um semitom. Ouça um semitom e depois um tom, e veja os passos abaixo.",
+          },
+        },
+      },
+      intervals: {
+        title: "Intervalos",
+        summary: "A distância entre duas notas, com nome e tamanho em semitons — a base de escalas e acordes.",
+        steps: {
+          twoWays: {
+            title: "Dois jeitos de medir",
+            body: "Intervalo é a distância entre duas notas. Dá para medi-lo de dois jeitos: em semitons (o tamanho exato) e pelo nome, contando as letras — de C a E são três letras (C, D, E), então é uma terça. Os semitons dizem a qualidade: maior ou menor. Clique nos exemplos para ouvir as duas notas em sequência.",
+          },
+          secondsAndThirds: {
+            title: "Segundas e terças",
+            body: "Segundas e terças são os intervalos pequenos. A segunda menor tem 1 semitom e a maior, 2. A terça menor tem 3 e a maior, 4. \"Menor\" é sempre um semitom a menos que \"maior\". A terça é a mais importante: é ela que deixa um acorde com som maior (mais claro) ou menor (mais sombrio).",
+          },
+          fourthsAndFifths: {
+            title: "Quartas, quintas e a oitava",
+            body: "A quarta justa tem 5 semitons; a quinta justa, 7. \"Justa\" marca os intervalos que não têm versão maior ou menor — eles soam firmes e estáveis. A oitava (12 semitons) é a mesma nota, só mais aguda: por isso as notas se repetem a cada 12 semitons.",
+          },
+        },
+      },
       majorScale: {
         title: "A Escala Maior & os Graus",
         summary: "A escala da qual tudo mais é construído — e os números que os músicos usam para falar sobre ela.",
@@ -513,6 +549,24 @@ export const pt: MessageSchema = {
           },
         },
       },
+      seventhChords: {
+        title: "Acordes de Sétima",
+        summary: "Uma tríade com mais uma terça no topo: os quatro acordes com sétima mais usados.",
+        steps: {
+          fourthNote: {
+            title: "Uma quarta nota",
+            body: "Pegue uma tríade e empilhe mais uma terça no topo: você chega à sétima (a 7ª nota, contando a partir da fundamental). Em C maior, C, E, G e B formam Cmaj7. Com quatro notas o acorde fica mais rico e sofisticado — por isso a sétima é onipresente no jazz, na bossa nova e na MPB. Ouça a tríade e depois o acorde com sétima.",
+          },
+          fourTypes: {
+            title: "Quatro tipos",
+            body: "A tríade de baixo e o tipo de sétima mudam o caráter do acorde. Os quatro principais: maj7 (1 3 5 7), suave e flutuante; 7 (1 3 5 b7), o acorde dominante, tenso e que pede resolução; m7 (1 b3 5 b7), macio e melancólico; e m7b5 (1 b3 b5 b7), meio-diminuto, sombrio e instável. Clique em cada um para ouvir.",
+          },
+          inTheKey: {
+            title: "Nos acordes do tom",
+            body: "No campo harmônico de um tom maior, cada grau tem o seu tipo de sétima: maj7 nos graus I e IV; m7 nos graus ii, iii e vi; 7 (dominante) no V; e m7b5 no vii. Veja os acordes com sétima de C maior.",
+          },
+        },
+      },
       diatonicField: {
         title: "O Campo Diatônico",
         summary: "Toda escala esconde sete acordes dentro dela — seu campo harmônico.",
@@ -538,6 +592,24 @@ export const pt: MessageSchema = {
           arriving: {
             title: "A sensação de chegar",
             body: "O ii prepara, o V cria tensão e o I resolve: a tensão vira repouso. Esse caminho da tensão ao repouso é o som de \"chegar em casa\" — e aparece em tudo, do jazz ao pop. Ouça só o V e o I e sinta a resolução.",
+          },
+        },
+      },
+      naturalMinor: {
+        title: "Menor Natural e Relativa",
+        summary: "A escala menor, e como ela divide as mesmas notas de uma escala maior.",
+        steps: {
+          formula: {
+            title: "A fórmula da menor natural",
+            body: "A escala menor natural também tem sete notas, mas outra fórmula de tons e semitons: T – ST – T – T – ST – T – T. Aqui está A menor natural: A, B, C, D, E, F, G — só teclas brancas. Ouça: o som é mais sombrio que o da escala maior.",
+          },
+          versusMajor: {
+            title: "O que muda em relação à maior",
+            body: "Compare com a escala maior de mesma tônica: a menor natural tem o 3º, o 6º e o 7º graus um semitom mais baixos (b3, b6, b7). É principalmente o b3, a terça menor, que dá o caráter menor. Ouça A maior e depois A menor.",
+          },
+          relative: {
+            title: "A relativa menor",
+            body: "Toda escala maior tem uma relativa menor: a escala menor que começa no 6º grau dela. A menor natural de A usa exatamente as notas de C maior — A, B, C, D, E, F, G — só que começando em outro ponto. Por isso C maior e A menor são relativas: mesmas notas, tônicas diferentes. Ouça as duas.",
           },
         },
       },
@@ -575,12 +647,41 @@ export const pt: MessageSchema = {
     interval: {
       play: "Tocar {from} e {to}: {name}",
     },
+    options: {
+      semitone: "Um semitom",
+      tone: "Um tom",
+    },
+    chordFormulas: {
+      play: "Tocar {chord} ({quality}): fórmula {formula}, notas {notes}",
+    },
     checkpointBadge: "Checkpoint {correct}/{total}",
     checkpointProgress: "Pergunta {current} de {total}",
     checkpointCorrect: "Certo!",
     checkpointIncorrect: "Quase — a resposta destacada era a correta.",
     checkpointWhy: "Por quê?",
     explanations: {
+      noteAbove: "Teclas vizinhas estão a 1 semitom. Subindo {distance} a partir de {note}: {path}. Resposta: {answer}.",
+      noteBelow: "Teclas vizinhas estão a 1 semitom. Descendo {distance} a partir de {note}: {path}. Resposta: {answer}.",
+      semitonesBetween: "Contando tecla a tecla de {from} até {to}: {path}. São {semitones}.",
+      halfStep: "Entre {from} e {to} não existe tecla preta: são teclas vizinhas, a apenas 1 semitom.",
+      wholeStep: "Entre {from} e {to} há uma tecla preta no meio ({between}): são 2 semitons, ou seja, 1 tom.",
+      enharmonic: "A tecla preta entre {lower} e {upper} tem dois nomes: {sharp} (um semitom acima de {lower}) e {flat} (um semitom abaixo de {upper}). Os dois soam exatamente iguais.",
+      noteCount: "São 12 notas — as 7 naturais e as 5 teclas pretas (sustenidos e bemóis). Depois da 12ª, a sequência recomeça uma oitava acima.",
+      intervalBetween: "De {from} a {to}: {semitones} → {interval}.",
+      intervalSemitones: "Intervalo: {interval} → {semitones}. Exemplo: de {from} a {to}.",
+      intervalSemitonesOctave: "Intervalo: {interval} → {semitones}. É a mesma nota ({from}), uma oitava mais aguda.",
+      noteAboveInterval: "Subindo {semitones} a partir de {root} (intervalo: {interval}) você chega em {note}.",
+      intervalName: "{semitones} → {interval}. Exemplo: de {from} a {to}. Para lembrar: 1 = segunda menor, 2 = segunda maior, 3 = terça menor, 4 = terça maior, 5 = quarta justa, 7 = quinta justa, 12 = oitava.",
+      intervalNameOctave: "{semitones} → {interval}: é a mesma nota ({from}), uma oitava mais aguda. Para lembrar: 1 = segunda menor, 2 = segunda maior, 3 = terça menor, 4 = terça maior, 5 = quarta justa, 7 = quinta justa, 12 = oitava.",
+      seventhNotes: "{chord} é o acorde sobre {root} com a fórmula {formula}: {notes}.",
+      seventhQuality: "{chord} = {notes} (fórmula {formula}) → {quality}.",
+      seventhSymbol: "{quality}: fórmula {formula}. Com essa fórmula as notas são {notes} → cifra {chord}.",
+      seventhFormula: "{quality}: fórmula {formula}. Exemplo: {chord} = {notes}.",
+      relativeMinor: "{root} maior: {notes}. A relativa menor começa no 6º grau: {note} — logo, {note} menor.",
+      relativeMajor: "{root} menor natural: {notes}. A relativa maior começa no 3º grau: {note} — logo, {note} maior usa essas mesmas notas.",
+      minorScaleNotes: "{root} menor natural: {notes}. Em relação a {root} maior, o 3º, o 6º e o 7º graus ficam um semitom mais baixos.",
+      relativeDegree: "{root} maior: {notes}. O 6º grau é {note}; a escala menor que começa nele usa as mesmas notas.",
+      loweredDegrees: "{root} maior: {major}. {root} menor natural: {minor}. Mudam os graus {degrees}: cada um fica um semitom mais baixo.",
       degreeOfNote: "Contando a partir de {root}: {notes} — {note} é o {degree}º grau.",
       triadName: "O grau {degree} de {root} maior é {note}. Empilhando terças na escala — {notes} — a tríade é {chord}.",
       diatonicChord: "O grau {degree} de {root} maior é {note}. Empilhando terças na escala — {notes} — você obtém {chord}.",
@@ -615,6 +716,33 @@ export const pt: MessageSchema = {
       trackComplete: "Você concluiu todas as lições desta trilha.",
     },
     checkpoints: {
+      notes: {
+        noteAbove: "Qual nota está {distance} acima de {note}?",
+        noteBelow: "Qual nota está {distance} abaixo de {note}?",
+        semitonesBetween: "Quantos semitons há de {from} até {to}, subindo?",
+        toneOrSemitone: "Entre {from} e {to} (subindo), a distância é um tom ou um semitom?",
+        enharmonic: "Qual é outro nome para a nota {note}?",
+        noteCount: "Quantas notas diferentes existem antes de a sequência se repetir uma oitava acima?",
+      },
+      intervals: {
+        intervalBetween: "Qual é o intervalo entre {from} e {to}?",
+        intervalSemitones: "Quantos semitons tem o intervalo de {interval}?",
+        noteAboveInterval: "Acima de {root}, qual nota forma o intervalo de {interval}?",
+        intervalName: "Como se chama um intervalo de {semitones}?",
+      },
+      seventhChords: {
+        seventhNotes: "Quais notas formam o acorde {chord}?",
+        seventhQuality: "Que tipo de acorde com sétima é {chord}?",
+        seventhSymbol: "Qual é a cifra do acorde sobre {root} com a qualidade {quality}?",
+        seventhFormula: "Qual é a fórmula (em graus) da qualidade {quality}?",
+      },
+      naturalMinor: {
+        relativeMinor: "Qual é a relativa menor de {root} maior?",
+        relativeMajor: "Qual é a relativa maior de {root} menor?",
+        minorScaleNotes: "Quais são as notas de {root} menor natural?",
+        relativeDegree: "Em {root} maior, a relativa menor começa em qual grau?",
+        loweredDegrees: "Comparando {root} menor natural com {root} maior, quais graus ficam um semitom mais baixos?",
+      },
       majorScale: {
         degreeName: "Qual nota é o grau {degree} de {root} maior?",
         leadingTone: "Em {root} maior, qual grau da escala é chamado de sensível?",

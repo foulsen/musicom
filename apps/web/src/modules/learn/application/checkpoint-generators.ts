@@ -21,34 +21,30 @@ import {
   intervalLabel,
   scaleLabel,
   semitonesLabel,
-  type LabelRef,
-  type TermLabel,
 } from "@/modules/shared/application/music-terms";
-import type { QuizOption } from "@/modules/shared/application/quiz";
 import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/application/random";
 import { findScalePattern } from "@/modules/shared/application/scale-patterns";
 
+import {
+  CHECKPOINT_TONICS,
+  explain,
+  toOption,
+  type CheckpointQuestion,
+  type QuestionGenerator,
+} from "./checkpoint-kit";
+import {
+  INTERVALS_GENERATORS,
+  NATURAL_MINOR_GENERATORS,
+  NOTES_GENERATORS,
+  SEVENTH_CHORDS_GENERATORS,
+} from "./checkpoint-generators-foundations";
 import type { LessonContext } from "./curriculum";
 
-export interface CheckpointQuestion {
-  id: string;
-  promptKey: string;
-  /** Parâmetros do prompt; nomes de escala etc. vão como `TermLabel` e são traduzidos na renderização. */
-  promptParams?: Record<string, string | number | TermLabel>;
-  options: QuizOption[];
-  correctId: string;
-  /** Raciocínio por trás da resposta, montado a partir dos dados do domínio — exibido após responder. */
-  explanation: LabelRef;
-}
+export { CHECKPOINT_TONICS };
+export type { CheckpointQuestion };
 
 /** Perguntas por checkpoint. */
 export const CHECKPOINT_QUESTION_COUNT = 5;
-
-/**
- * Tônicas (tons maiores) sorteadas a cada tentativa. O domínio nomeia notas só em sustenido, então
- * tons de bemol (Bb, Eb) renderizariam com dobrados sustenidos (A# maior) — ficam de fora.
- */
-export const CHECKPOINT_TONICS: SingleNote[] = ["C", "G", "D", "F", "A", "E"];
 
 /** Graus não-tônicos: perguntar sobre o 1º grau é trivial demais para um checkpoint. */
 const NON_TONIC_DEGREES = [2, 3, 4, 5, 6, 7];
@@ -65,16 +61,8 @@ function triadQualityName(quality: ChordQuality): string {
   return TRIAD_QUALITY_NAMES[quality.toString()] ?? quality.toString();
 }
 
-function toOption(id: string, label: TermLabel = id): QuizOption {
-  return { id, label };
-}
-
 function buildScale(ctx: LessonContext) {
   return createScale(Note.from(ctx.root), findScalePattern(ctx.pattern));
-}
-
-function explain(name: string, params: Record<string, string | number | TermLabel> = {}): LabelRef {
-  return { key: `learn.explanations.${name}`, params };
 }
 
 /** Notas em grafia correta ("D – F – A") de `indexes` (0-based) dentro da escala. */
@@ -634,13 +622,15 @@ function modeAtDegreeQuestion(ctx: LessonContext): CheckpointQuestion {
 
 // ── Montagem do checkpoint ───────────────────────────────────────────────────
 
-type QuestionGenerator = (ctx: LessonContext) => CheckpointQuestion;
-
 const CHECKPOINT_GENERATORS: Record<string, QuestionGenerator[]> = {
+  notes: NOTES_GENERATORS,
+  intervals: INTERVALS_GENERATORS,
   "major-scale": [degreeNameQuestion, leadingToneQuestion, degreeOfNoteQuestion],
   triads: [triadNotesQuestion, triadQualityQuestion, triadNameQuestion],
+  "seventh-chords": SEVENTH_CHORDS_GENERATORS,
   "diatonic-field": [harmonicFunctionQuestion, dominantDegreeQuestion, diatonicChordQuestion],
   "two-five-one": [chordNameQuestion, isProgressionQuestion, romanQualityQuestion, completeProgressionQuestion],
+  "natural-minor": NATURAL_MINOR_GENERATORS,
   modes: [
     (ctx) => modeOfMajorQuestion(ctx),
     (ctx) => changingNoteQuestion(ctx),

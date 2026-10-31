@@ -158,11 +158,27 @@ function selectStep(index: number) {
               @listen="listen"
             />
 
-            <inline-explorer v-if="step.viz?.length" :context="lesson.context" :viz="step.viz" :intervals="step.intervals" />
+            <inline-explorer
+              v-if="step.viz?.length"
+              :key="stepIndex"
+              :context="lesson.context"
+              :viz="step.viz"
+              :intervals="step.intervals"
+              :chord-patterns="step.chordPatterns"
+              :pattern-labels="step.patternLabels"
+              :field-mode="step.fieldMode"
+            />
           </template>
 
           <template v-else-if="step.kind === 'explore'">
-            <inline-explorer :context="lesson.context" :viz="step.viz" :highlight-degree="highlightDegree" />
+            <inline-explorer
+              :key="stepIndex"
+              :context="lesson.context"
+              :viz="step.viz"
+              :highlight-degree="highlightDegree"
+              :intervals="step.intervals"
+              :field-mode="step.fieldMode"
+            />
 
             <router-link
               v-if="explorerLink"

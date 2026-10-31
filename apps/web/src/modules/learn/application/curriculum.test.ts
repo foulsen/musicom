@@ -17,6 +17,20 @@ describe("curriculum structure", () => {
     expect(new Set(lessons.map((lesson) => lesson.id)).size).toBe(lessons.length);
   });
 
+  it("orders the track from the basics to modes", () => {
+    expect(lessons.map((lesson) => lesson.id)).toEqual([
+      "notes",
+      "intervals",
+      "major-scale",
+      "triads",
+      "seventh-chords",
+      "diatonic-field",
+      "two-five-one",
+      "natural-minor",
+      "modes",
+    ]);
+  });
+
   it("chains prerequisites linearly and without cycles", () => {
     lessons.forEach((lesson, index) => {
       if (index === 0) {

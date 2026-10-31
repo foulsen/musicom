@@ -13,6 +13,7 @@ import { ChordCard } from "@/modules/shared/components/chord-card";
 import { StepPattern } from "@/modules/shared/components/step-pattern";
 
 import type { InlineVizKind, LessonContext } from "../../application/curriculum";
+import { ChordFormulas } from "../chord-formulas";
 import { IntervalPair } from "../interval-pair";
 
 const props = withDefaults(
@@ -23,8 +24,14 @@ const props = withDefaults(
     highlightDegree?: number;
     /** Semitons dos intervalos da viz "interval", a partir da tônica do contexto. */
     intervals?: number[];
+    /** Nomes (no domínio) das qualidades listadas pela viz "chord-formulas", sobre a tônica do contexto. */
+    chordPatterns?: string[];
+    /** Rótulos do "step-pattern": graus (1 2 b3…) ou nomes das notas (C D E…). */
+    patternLabels?: "degrees" | "notes";
+    /** Começa o Harmonic Field em tríades ou em acordes com sétima. */
+    fieldMode?: "triads" | "sevenths";
   }>(),
-  { highlightDegree: undefined, intervals: () => [] },
+  { highlightDegree: undefined, intervals: () => [], chordPatterns: () => [], patternLabels: "degrees", fieldMode: "triads" },
 );
 
 const { play } = useNoteAudio();
@@ -34,11 +41,13 @@ const scale = computed(() => createScale(Note.from(props.context.root), findScal
 const notes = computed(() => scale.value.notes());
 const degrees = computed(() => scale.value.degrees());
 const patternSteps = computed(() => scalePatternSteps(findScalePattern(props.context.pattern)));
-const patternDegreeLabels = computed(() => degrees.value.map((item) => item.degree.toString()));
+const patternLabels = computed(() =>
+  degrees.value.map((item) => (props.patternLabels === "notes" ? item.spelled.toString() : item.degree.toString())),
+);
 const triads = computed(() => scale.value.triads());
 const sevenths = computed(() => scale.value.seventhChords());
 
-const harmonicFieldMode = ref<"triads" | "sevenths">("triads");
+const harmonicFieldMode = ref<"triads" | "sevenths">(props.fieldMode);
 const selectedIndex = ref((props.highlightDegree ?? 1) - 1);
 
 const spelledByPitchClass = computed(() => {
@@ -71,12 +80,15 @@ function selectChord(index: number) {
         @note-play="play" />
     </div>
 
-    <step-pattern v-if="viz.includes('step-pattern')" :steps="patternSteps" :degree-labels="patternDegreeLabels" legend
+    <step-pattern v-if="viz.includes('step-pattern')" :steps="patternSteps" :degree-labels="patternLabels" legend
       class="w-full" />
 
     <div v-if="viz.includes('interval') && intervals.length" class="flex w-full flex-col gap-2 sm:max-w-md">
       <interval-pair v-for="semitones in intervals" :key="semitones" :root="context.root" :semitones="semitones" />
     </div>
+
+    <chord-formulas v-if="viz.includes('chord-formulas') && chordPatterns.length" :root="context.root"
+      :patterns="chordPatterns" />
 
     <harmonic-field v-if="viz.includes('harmonic-field')" v-model:mode="harmonicFieldMode" :triads="triads"
       :sevenths="sevenths" :selected-index="selectedIndex" class="lg:w-64 lg:shrink-0" @select="selectChord" />

@@ -20,6 +20,9 @@ import { FUNDAMENTALS_TRACK } from "./curriculum";
 
 const ITERATIONS = 30;
 
+/** Lições que não giram em torno de um único tom por checkpoint: modos (tom-pai) e as que sorteiam uma nota por pergunta. */
+const PER_QUESTION_NOTE_LESSONS = ["modes", "notes", "intervals", "seventh-chords"];
+
 function lessonById(id: string) {
   const lesson = FUNDAMENTALS_TRACK.lessons.find((item) => item.id === id);
   if (!lesson) throw new Error(`lesson ${id} missing from curriculum`);
@@ -131,7 +134,7 @@ describe("generateCheckpoint", () => {
     }
   });
 
-  it.each(FUNDAMENTALS_TRACK.lessons.filter((lesson) => lesson.id !== "modes"))(
+  it.each(FUNDAMENTALS_TRACK.lessons.filter((lesson) => !PER_QUESTION_NOTE_LESSONS.includes(lesson.id)))(
     "uses one beginner-friendly major key for the whole set and varies it across attempts ($id)",
     (lesson) => {
       const seenTonics = new Set<string>();

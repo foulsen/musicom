@@ -99,6 +99,41 @@ describe("useLearnViewModel with legacy progress", () => {
     expect(model.trackProgressPercent.value).toBeGreaterThan(0);
   });
 
+  it("keeps every old lesson completed after the curriculum grew, and shows the new ones as open", () => {
+    const store = useLearnStore();
+    const done = { completedStepIndexes: [0, 1, 2], checkpoint: { correct: 5, total: 5 } };
+    ["major-scale", "triads", "diatonic-field", "two-five-one", "modes"].forEach((id) => {
+      store.progress[id] = { ...done };
+    });
+
+    const model = useLearnViewModel();
+    const status = (id: string) => model.lessonsWithStatus.value.find((item) => item.lesson.id === id)?.status;
+
+    ["major-scale", "triads", "diatonic-field", "two-five-one", "modes"].forEach((id) => expect(status(id)).toBe("completed"));
+    ["notes", "intervals", "seventh-chords", "natural-minor"].forEach((id) => expect(status(id)).toBe("available"));
+  });
+
+  it("unlocks the next lesson from the new chain once a lesson is completed", () => {
+    const store = useLearnStore();
+    store.progress["major-scale"] = { completedStepIndexes: [0, 1, 2], checkpoint: { correct: 5, total: 5 } };
+    store.progress.triads = { completedStepIndexes: [0, 1, 2], checkpoint: { correct: 5, total: 5 } };
+
+    const model = useLearnViewModel();
+    const status = (id: string) => model.lessonsWithStatus.value.find((item) => item.lesson.id === id)?.status;
+
+    expect(status("seventh-chords")).toBe("available");
+    expect(status("diatonic-field")).toBe("locked");
+  });
+
+  it("starts a brand new user at the first lesson, with the rest locked", () => {
+    const model = useLearnViewModel();
+    const statuses = model.lessonsWithStatus.value.map((item) => item.status);
+
+    expect(statuses[0]).toBe("available");
+    expect(statuses.slice(1).every((status) => status === "locked")).toBe(true);
+    expect(model.continueLesson.value?.id).toBe("notes");
+  });
+
   it("sends 'Continue' past the lessons already done, not back to a lesson inserted before them", () => {
     const store = useLearnStore();
     store.progress["major-scale"] = { completedStepIndexes: [0, 1, 2], checkpoint: { correct: 5, total: 5 } };
