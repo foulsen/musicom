@@ -10,9 +10,14 @@ export const lessonProgressSchema = z.object({
 });
 export type LessonProgress = z.infer<typeof lessonProgressSchema>;
 
+/** Local calendar day the learner studied, as `YYYY-MM-DD`. */
+export const studyDaySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
 export const learnSnapshotSchema = z.object({
   progress: z.record(z.string(), lessonProgressSchema),
   lastVisitedLessonId: z.string().nullable(),
+  /** Added after the first release: snapshots saved before it have no value and default to `[]`. Bounded recent study days (streak source). */
+  studyDays: z.array(studyDaySchema).max(400).default([]),
 });
 export type LearnSnapshot = z.infer<typeof learnSnapshotSchema>;
 

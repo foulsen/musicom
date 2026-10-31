@@ -13,6 +13,7 @@ import type { Pinia } from "pinia";
 import { i18n, LOCALE_STORAGE_KEY, SUPPORTED_LOCALES, type AppLocale } from "@/i18n";
 import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
+import { normalizeStudyDays } from "@/modules/learn/application/study-streak";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
 import { useThemeStore } from "@/modules/settings/application/use-theme-store";
 import { useAudioSettingsStore } from "@/modules/shared/application/use-audio-settings-store";
@@ -58,12 +59,18 @@ const learn = defineAggregate<LearnSnapshot>({
   schema: learnSnapshotSchema,
   read: (pinia) => {
     const store = useLearnStore(pinia);
-    return { progress: store.progress, lastVisitedLessonId: store.lastVisitedLessonId };
+    return {
+      progress: store.progress,
+      lastVisitedLessonId: store.lastVisitedLessonId,
+      studyDays: store.studyDays,
+    };
   },
   apply: (pinia, data) => {
     const store = useLearnStore(pinia);
     store.progress = data.progress;
     store.lastVisitedLessonId = data.lastVisitedLessonId;
+    // União, não substituição: dias estudados em outro dispositivo (ou offline) nunca são perdidos.
+    store.studyDays = normalizeStudyDays([...store.studyDays, ...data.studyDays]);
   },
 });
 

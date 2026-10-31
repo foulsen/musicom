@@ -25,6 +25,7 @@ async function signIn(): Promise<string> {
 const learnData: LearnSnapshot = {
   progress: { "lesson-1": { completedStepIndexes: [0, 1], checkpoint: { correct: 3, total: 4 } } },
   lastVisitedLessonId: "lesson-1",
+  studyDays: ["2026-10-31"],
 };
 
 describe("sync auth gating", () => {

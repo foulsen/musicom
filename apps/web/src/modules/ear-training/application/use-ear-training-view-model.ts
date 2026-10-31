@@ -3,6 +3,7 @@ import { storeToRefs } from "pinia";
 
 import { Pitch } from "@music-workspace/music-theory";
 
+import { useStudyActivity } from "@/modules/learn/application/use-study-activity";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import type { TermLabel } from "@/modules/shared/application/music-terms";
@@ -44,6 +45,7 @@ export function useEarTrainingViewModel() {
   const { scores, streak, bestStreak, difficulty, intervalPlaybackMode } = storeToRefs(store);
 
   const { playChord, playSequence } = useNoteAudio();
+  const { recordActivity } = useStudyActivity();
 
   const kind = ref<QuizKind>("interval");
   const question = ref(generateQuestion(kind.value, difficulty.value, { stats: store }));
@@ -159,6 +161,7 @@ export function useEarTrainingViewModel() {
     if (isAnswered.value) return;
 
     selectedOptionId.value = optionId;
+    recordActivity();
     score.value.total += 1;
     recordItemAnswer(store, kind.value, question.value.correctId, optionId);
 

@@ -65,14 +65,27 @@ describe("learn snapshot", () => {
         "lesson-2": { completedStepIndexes: [] },
       },
       lastVisitedLessonId: "lesson-1",
+      studyDays: ["2026-10-30", "2026-10-31"],
     };
 
     expect(learnSnapshotSchema.parse(snapshot)).toEqual(snapshot);
   });
 
+  it("defaults the study days for snapshots saved before they existed", () => {
+    const legacy = { progress: {}, lastVisitedLessonId: null };
+
+    expect(learnSnapshotSchema.parse(legacy).studyDays).toEqual([]);
+  });
+
+  it("rejects a study day that is not a YYYY-MM-DD date", () => {
+    const base = { progress: {}, lastVisitedLessonId: null };
+
+    expect(learnSnapshotSchema.safeParse({ ...base, studyDays: ["31/10/2026"] }).success).toBe(false);
+  });
+
   it("wraps in an envelope with updatedAt", () => {
     const result = learnEnvelopeSchema.safeParse({
-      data: { progress: {}, lastVisitedLessonId: null },
+      data: { progress: {}, lastVisitedLessonId: null, studyDays: [] },
       updatedAt: 1_700_000_000_000,
     });
 

@@ -11,6 +11,7 @@ import {
 } from "@music-workspace/music-theory";
 
 import { randomChoice } from "@/modules/shared/application/random";
+import { useStudyActivity } from "@/modules/learn/application/use-study-activity";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import { useDrillsStore } from "./use-drills-store";
@@ -28,6 +29,7 @@ export function useFretboardDrill() {
   const store = useDrillsStore();
   const { fretboardBestMsByNote, fretboardNaturalsOnly } = storeToRefs(store);
   const { play } = useNoteAudio();
+  const { recordActivity } = useStudyActivity();
 
   const fretboard = new Fretboard(STANDARD_GUITAR_TUNING, 12);
   const positions = fretboard.positions();
@@ -96,6 +98,8 @@ export function useFretboardDrill() {
 
   function guess(position: FretPosition) {
     if (!isActive.value) return;
+
+    recordActivity();
 
     const key = keyFor(position);
 

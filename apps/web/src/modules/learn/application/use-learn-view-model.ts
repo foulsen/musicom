@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { bestCheckpoint, isCheckpointMastered } from "./checkpoint-mastery";
 import { FUNDAMENTALS_TRACK, type Lesson } from "./curriculum";
 import { useLearnStore, type CheckpointScore } from "./use-learn-store";
+import { useStudyActivity } from "./use-study-activity";
 
 /** `review`: lição concluída, mas a melhor tentativa do checkpoint ficou abaixo da meta (gate suave). */
 export type LessonStatus = "locked" | "available" | "in-progress" | "review" | "completed";
@@ -34,6 +35,7 @@ export function deriveLessonStatus({ isComplete, isLocked, hasStarted, checkpoin
 export function useLearnViewModel() {
   const store = useLearnStore();
   const { progress, lastVisitedLessonId } = storeToRefs(store);
+  const { recordActivity } = useStudyActivity();
 
   const track = FUNDAMENTALS_TRACK;
 
@@ -91,6 +93,8 @@ export function useLearnViewModel() {
   });
 
   function markStepDone(lessonId: string, stepIndex: number) {
+    recordActivity();
+
     const current = progress.value[lessonId] ?? { completedStepIndexes: [] };
 
     if (!current.completedStepIndexes.includes(stepIndex)) {
@@ -104,6 +108,9 @@ export function useLearnViewModel() {
   }
 
   function recordCheckpoint(lessonId: string, checkpoint: CheckpointScore) {
+    // Conta mesmo quando a tentativa não supera a melhor (e portanto não altera `progress`).
+    recordActivity();
+
     const current = progress.value[lessonId] ?? { completedStepIndexes: [] };
 
     // `checkpoint` guarda a MELHOR tentativa, não a última (gate suave: refazer nunca piora o status).

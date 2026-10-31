@@ -15,6 +15,8 @@ export const useLearnStore = defineStore("learn", {
   state: () => ({
     progress: {} as Record<string, LessonProgress>,
     lastVisitedLessonId: null as string | null,
+    /** Dias locais (`YYYY-MM-DD`) em que o usuário respondeu algo, em ordem — base da sequência diária. */
+    studyDays: [] as string[],
   }),
   persist: true,
 });

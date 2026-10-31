@@ -10,6 +10,7 @@ import {
   type SingleNote,
 } from "@music-workspace/music-theory";
 
+import { useStudyActivity } from "@/modules/learn/application/use-study-activity";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import { NOTE_ID_LEVELS, noteIdPool, type NoteIdLevelId } from "./note-id-levels";
@@ -26,6 +27,7 @@ export function useNoteIdDrill() {
   const { noteIdScore, noteIdStreak, noteIdBestStreak, noteIdStats, noteIdLevel, noteIdNaturalsOnly } =
     storeToRefs(store);
   const { play } = useNoteAudio();
+  const { recordActivity } = useStudyActivity();
 
   const fretboard = new Fretboard(STANDARD_GUITAR_TUNING, 12);
   const positions = fretboard.positions();
@@ -78,6 +80,7 @@ export function useNoteIdDrill() {
     if (isAnswered.value) return;
 
     selectedNote.value = note;
+    recordActivity();
     noteIdScore.value.total += 1;
 
     const correct = target.value.pitch.note.equals(Note.from(note));

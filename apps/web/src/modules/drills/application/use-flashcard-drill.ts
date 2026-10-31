@@ -10,6 +10,8 @@ import {
   type LeitnerCardState,
   type LeitnerGrade,
 } from "./leitner";
+import { useStudyActivity } from "@/modules/learn/application/use-study-activity";
+
 import { useDrillsStore } from "./use-drills-store";
 
 /** Recalcula o placar "devidos" a cada tanto, para o badge não ficar parado enquanto o tempo passa. */
@@ -18,6 +20,7 @@ const DUE_COUNT_REFRESH_MS = 30_000;
 export function useFlashcardDrill() {
   const store = useDrillsStore();
   const { cardStates, activeDeckId } = storeToRefs(store);
+  const { recordActivity } = useStudyActivity();
 
   // Ids de versões antigas dos baralhos (ex.: grafia com raiz fixa) não apontam mais para cartão algum.
   for (const id of Object.keys(cardStates.value)) {
@@ -103,6 +106,8 @@ export function useFlashcardDrill() {
   function grade(result: LeitnerGrade) {
     const card = current.value;
     if (!card) return;
+
+    recordActivity();
 
     if (!isFreePractice.value) {
       const at = Date.now();
