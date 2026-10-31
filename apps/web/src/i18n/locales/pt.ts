@@ -136,7 +136,7 @@ export const pt: MessageSchema = {
     wholeHalfName: "tom e meio",
     other: "{n}st",
     stepAriaLabel: "{name}, do grau {from} ao grau {to}",
-    legend: "T = tom · ST = semitom · T½ = tom e meio",
+    legend: "T = [[tone:tom]] · ST = [[semitone:semitom]] · T½ = tom e meio",
   },
   terms: {
     scales: {
@@ -420,6 +420,92 @@ export const pt: MessageSchema = {
       description: "Ainda não há uma digitação predefinida para {chord}, mas você pode ver as notas acima e explorá-lo no braço.",
     },
   },
+  glossary: {
+    degree: {
+      term: "Grau",
+      definition: "O número de uma nota dentro da escala, contado a partir da tônica: 1º, 2º, 3º… O 5º grau de C maior é G; o 5º grau de D maior é A.",
+    },
+    tone: {
+      term: "Tom",
+      definition: "Um passo de dois semitons, como de C a D. Atenção: \"tom\" também é usado para a tonalidade, como em \"no tom de C\".",
+    },
+    semitone: {
+      term: "Semitom",
+      definition: "A menor distância entre duas notas: de uma tecla do piano à vizinha, ou de uma casa à seguinte no braço. C e C# estão a um semitom.",
+    },
+    interval: {
+      term: "Intervalo",
+      definition: "A distância entre duas notas, medida em semitons e nomeada contando as letras. De C a E é uma terça maior (4 semitons).",
+    },
+    tonic: {
+      term: "Tônica",
+      definition: "A nota de partida e de repouso de uma escala ou tom, que dá nome a ela. Em C maior, a tônica é C.",
+    },
+    octave: {
+      term: "Oitava",
+      definition: "A distância de 12 semitons: a mesma nota, só que mais aguda ou mais grave. De um C até o próximo C há uma oitava.",
+    },
+    key: {
+      term: "Tom (tonalidade)",
+      definition: "A escala e a tônica em que uma música se baseia. \"No tom de C maior\" quer dizer que as notas vêm da escala de C maior e que C é o ponto de repouso.",
+    },
+    enharmonic: {
+      term: "Enarmonia",
+      definition: "Notas com nomes diferentes que soam iguais, como C# e Db: é a mesma tecla do piano, escrita de dois jeitos.",
+    },
+    triad: {
+      term: "Tríade",
+      definition: "Acorde de três notas, formado empilhando duas terças: fundamental, terça e quinta. C – E – G é a tríade de C maior.",
+    },
+    seventhChord: {
+      term: "Acorde com sétima (tétrade)",
+      definition: "Acorde de quatro notas: uma tríade com mais uma terça no topo, a sétima. Cmaj7 (C – E – G – B) e G7 são exemplos.",
+    },
+    leadingTone: {
+      term: "Sensível",
+      definition: "O 7º grau da escala maior, a um semitom da tônica. Soa instável e \"puxa\" para ela: em C maior, o B pede para resolver em C.",
+    },
+    harmonicFunction: {
+      term: "Função harmônica",
+      definition: "O papel de um acorde dentro do tom: tônica (repouso), subdominante (afastamento) ou dominante (tensão que pede para voltar ao repouso).",
+    },
+    harmonicField: {
+      term: "Campo harmônico",
+      definition: "Os acordes formados ao empilhar terças sobre cada grau de uma escala; todos usam só as notas daquele tom. Em C maior: C, Dm, Em, F, G, Am e Bdim.",
+    },
+    mode: {
+      term: "Modo",
+      definition: "Uma escala maior tocada a partir de outro grau. As notas são as mesmas, mas o novo ponto de partida muda a cor do som: as notas de C maior começando no D formam o modo Dórico.",
+    },
+    relative: {
+      term: "Relativa",
+      definition: "Duas escalas, uma maior e uma menor, que usam exatamente as mesmas notas com tônicas diferentes. A relativa menor começa no 6º grau da maior: C maior e A menor.",
+    },
+    parentKey: {
+      term: "Tom-pai",
+      definition: "A escala maior de onde um modo é tirado. D Dórico usa as notas de C maior, então C maior é o seu tom-pai.",
+    },
+    chordSymbol: {
+      term: "Cifra",
+      definition: "O nome escrito de um acorde: a letra da fundamental seguida do tipo, como C, Dm7 ou G7. É a notação mais usada em violão e teclado.",
+    },
+    degreeNotation: {
+      term: "Notação de graus",
+      definition: "Jeito de descrever uma nota pelo seu grau na escala maior. O \"b\" abaixa o grau um semitom e o \"#\" o sobe: b3 é a terça menor, #4 é a quarta aumentada.",
+    },
+    shape: {
+      term: "Digitação",
+      definition: "Um jeito de posicionar os dedos no braço para tocar um acorde ou uma escala. O mesmo acorde tem várias digitações, em regiões diferentes do braço.",
+    },
+    tuning: {
+      term: "Afinação",
+      definition: "As notas em que as cordas soltas estão afinadas. No violão padrão são E, A, D, G, B, E, da corda mais grave à mais aguda.",
+    },
+  },
+  glossaryList: {
+    title: "Glossário",
+    hint: "Os termos que aparecem nas lições, em ordem alfabética.",
+  },
   learn: {
     title: "Trilhas de Aprendizado",
     subtitle: "Um caminho guiado pela teoria que você já tem à mão — uma lição curta de cada vez.",
@@ -484,15 +570,15 @@ export const pt: MessageSchema = {
         steps: {
           twelveNotes: {
             title: "As 12 notas",
-            body: "Toda a música ocidental usa só 12 notas diferentes, que se repetem em alturas cada vez mais agudas. Sete delas são as notas naturais — C, D, E, F, G, A, B (as teclas brancas do piano) — destacadas na roda; as outras cinco ficam entre elas (as teclas pretas). Depois da 12ª nota, tudo recomeça uma oitava acima. Clique nas notas para ouvir.",
+            body: "Toda a música ocidental usa só 12 notas diferentes, que se repetem em alturas cada vez mais agudas. Sete delas são as notas naturais — C, D, E, F, G, A, B (as teclas brancas do piano) — destacadas na roda; as outras cinco ficam entre elas (as teclas pretas). Depois da 12ª nota, tudo recomeça uma [[octave:oitava]] acima. Clique nas notas para ouvir.",
           },
           sharpsAndFlats: {
             title: "Sustenidos e bemóis",
-            body: "As cinco notas do meio recebem o nome de uma vizinha mais um símbolo: o sustenido (#) sobe a nota um semitom e o bemol (b) a desce um semitom. Assim, C# (um semitom acima de C) e Db (um semitom abaixo de D) são a mesma tecla — dois nomes para o mesmo som. Qual nome usar depende da escala; por ora, basta saber que existem os dois.",
+            body: "As cinco notas do meio recebem o nome de uma vizinha mais um símbolo: o sustenido (#) sobe a nota um [[semitone:semitom]] e o bemol (b) a desce um semitom. Assim, C# (um semitom acima de C) e Db (um semitom abaixo de D) são a mesma tecla — [[enharmonic:dois nomes para o mesmo som]]. Qual nome usar depende da escala; por ora, basta saber que existem os dois.",
           },
           toneAndSemitone: {
             title: "Semitom e tom",
-            body: "O semitom é a menor distância entre duas notas: de uma tecla à vizinha, como de C a C#. Um tom são dois semitons, como de C a D. Repare: entre E e F, e entre B e C, não há tecla preta no meio — ali a distância é de apenas um semitom. Ouça um semitom e depois um tom, e veja os passos abaixo.",
+            body: "O semitom é a menor distância entre duas notas: de uma tecla à vizinha, como de C a C#. Um [[tone:tom]] são dois semitons, como de C a D. Repare: entre E e F, e entre B e C, não há tecla preta no meio — ali a distância é de apenas um semitom. Ouça um semitom e depois um tom, e veja os passos abaixo.",
           },
         },
       },
@@ -502,7 +588,7 @@ export const pt: MessageSchema = {
         steps: {
           twoWays: {
             title: "Dois jeitos de medir",
-            body: "Intervalo é a distância entre duas notas. Dá para medi-lo de dois jeitos: em semitons (o tamanho exato) e pelo nome, contando as letras — de C a E são três letras (C, D, E), então é uma terça. Os semitons dizem a qualidade: maior ou menor. Clique nos exemplos para ouvir as duas notas em sequência.",
+            body: "[[interval:Intervalo]] é a distância entre duas notas. Dá para medi-lo de dois jeitos: em [[semitone:semitons]] (o tamanho exato) e pelo nome, contando as letras — de C a E são três letras (C, D, E), então é uma terça. Os semitons dizem a qualidade: maior ou menor. Clique nos exemplos para ouvir as duas notas em sequência.",
           },
           secondsAndThirds: {
             title: "Segundas e terças",
@@ -510,7 +596,7 @@ export const pt: MessageSchema = {
           },
           fourthsAndFifths: {
             title: "Quartas, quintas e a oitava",
-            body: "A quarta justa tem 5 semitons; a quinta justa, 7. \"Justa\" marca os intervalos que não têm versão maior ou menor — eles soam firmes e estáveis. A oitava (12 semitons) é a mesma nota, só mais aguda: por isso as notas se repetem a cada 12 semitons.",
+            body: "A quarta justa tem 5 semitons; a quinta justa, 7. \"Justa\" marca os intervalos que não têm versão maior ou menor — eles soam firmes e estáveis. A [[octave:oitava]] (12 semitons) é a mesma nota, só mais aguda: por isso as notas se repetem a cada 12 semitons.",
           },
         },
       },
@@ -520,15 +606,15 @@ export const pt: MessageSchema = {
         steps: {
           whatIsScale: {
             title: "O que é uma escala",
-            body: "Uma escala é um conjunto de notas em ordem, indo de uma nota de partida — a tônica — até ela voltar uma oitava acima. A escala maior tem sete notas diferentes. Toque a de C e ouça: é aquela escala que você provavelmente já conhece de ouvido.",
+            body: "Uma escala é um conjunto de notas em ordem, indo de uma nota de partida — a [[tonic:tônica]] — até ela voltar uma [[octave:oitava]] acima. A escala maior tem sete notas diferentes. Toque a de C e ouça: é aquela escala que você provavelmente já conhece de ouvido.",
           },
           formula: {
             title: "A fórmula de tons e semitons",
-            body: "O que faz uma escala soar maior é a distância entre as notas. Um semitom (ST) é o menor passo, de uma tecla à vizinha; um tom (T) são dois semitons. A escala maior sempre segue T – T – ST – T – T – T – ST, em qualquer tom. Ouça e veja os passos abaixo.",
+            body: "O que faz uma escala soar maior é a distância entre as notas. Um [[semitone:semitom]] (ST) é o menor passo, de uma tecla à vizinha; um [[tone:tom]] (T) são dois semitons. A escala maior sempre segue T – T – ST – T – T – T – ST, em qualquer [[key:tom]]. Ouça e veja os passos abaixo.",
           },
           degrees: {
             title: "Graus: as notas viram números",
-            body: "Cada nota ganha um número, o grau, contado a partir da tônica: 1º, 2º, 3º… até o 7º. O grau diz o papel da nota na escala, em qualquer tom: o 5º grau de C é G; o 5º grau de D é A. Por isso os músicos falam em graus.",
+            body: "Cada nota ganha um número, o [[degree:grau]], contado a partir da tônica: 1º, 2º, 3º… até o 7º. O grau diz o papel da nota na escala, em qualquer tom: o 5º grau de C é G; o 5º grau de D é A. Por isso os músicos falam em graus.",
           },
         },
       },
@@ -538,7 +624,7 @@ export const pt: MessageSchema = {
         steps: {
           stacking: {
             title: "Três notas empilhadas",
-            body: "Uma tríade é um acorde de três notas. Para montá-la, comece em uma nota da escala, pule uma e pegue a seguinte, pule outra e pegue a seguinte. Em C maior: C, E, G — o 1º, o 3º e o 5º graus. É como empilhar terças.",
+            body: "Uma [[triad:tríade]] é um acorde de três notas. Para montá-la, comece em uma nota da escala, pule uma e pegue a seguinte, pule outra e pegue a seguinte. Em C maior: C, E, G — o 1º, o 3º e o 5º [[degree:graus]]. É como empilhar terças.",
           },
           thirdAndFifth: {
             title: "Terça e quinta",
@@ -556,15 +642,15 @@ export const pt: MessageSchema = {
         steps: {
           fourthNote: {
             title: "Uma quarta nota",
-            body: "Pegue uma tríade e empilhe mais uma terça no topo: você chega à sétima (a 7ª nota, contando a partir da fundamental). Em C maior, C, E, G e B formam Cmaj7. Com quatro notas o acorde fica mais rico e sofisticado — por isso a sétima é onipresente no jazz, na bossa nova e na MPB. Ouça a tríade e depois o acorde com sétima.",
+            body: "Pegue uma tríade e empilhe mais uma terça no topo: você chega à sétima (a 7ª nota, contando a partir da fundamental). Em C maior, C, E, G e B formam [[chordSymbol:Cmaj7]]. Com quatro notas o acorde fica mais rico e sofisticado — por isso a sétima é onipresente no jazz, na bossa nova e na MPB. Ouça a tríade e depois o [[seventhChord:acorde com sétima]].",
           },
           fourTypes: {
             title: "Quatro tipos",
-            body: "A tríade de baixo e o tipo de sétima mudam o caráter do acorde. Os quatro principais: maj7 (1 3 5 7), suave e flutuante; 7 (1 3 5 b7), o acorde dominante, tenso e que pede resolução; m7 (1 b3 5 b7), macio e melancólico; e m7b5 (1 b3 b5 b7), meio-diminuto, sombrio e instável. Clique em cada um para ouvir.",
+            body: "A tríade de baixo e o tipo de sétima mudam o caráter do acorde. Os quatro principais: maj7 (1 3 5 7), suave e flutuante; 7 ([[degreeNotation:1 3 5 b7]]), o acorde dominante, tenso e que pede resolução; m7 (1 b3 5 b7), macio e melancólico; e m7b5 (1 b3 b5 b7), meio-diminuto, sombrio e instável. Clique em cada um para ouvir.",
           },
           inTheKey: {
             title: "Nos acordes do tom",
-            body: "No campo harmônico de um tom maior, cada grau tem o seu tipo de sétima: maj7 nos graus I e IV; m7 nos graus ii, iii e vi; 7 (dominante) no V; e m7b5 no vii. Veja os acordes com sétima de C maior.",
+            body: "No [[harmonicField:campo harmônico]] de um tom maior, cada grau tem o seu tipo de sétima: maj7 nos graus I e IV; m7 nos graus ii, iii e vi; 7 (dominante) no V; e m7b5 no vii. Veja os acordes com sétima de C maior.",
           },
         },
       },
@@ -574,11 +660,11 @@ export const pt: MessageSchema = {
         steps: {
           oneChordPerDegree: {
             title: "Um acorde por grau",
-            body: "Empilhe terças a partir de cada um dos sete graus de uma escala e você tem sete acordes. Esse conjunto é o campo harmônico: todos os acordes que usam só as notas daquele tom. Alterne entre tríades e acordes com sétima para ver os dois.",
+            body: "Empilhe terças a partir de cada um dos sete graus de uma escala e você tem sete acordes. Esse conjunto é o [[harmonicField:campo harmônico]]: todos os acordes que usam só as notas daquele tom. Alterne entre tríades e acordes com sétima para ver os dois.",
           },
           functions: {
             title: "Cada acorde tem uma função",
-            body: "Cada acorde do campo faz um papel. A Tônica (I, iii, vi) é a casa: repouso. A Subdominante (ii, IV) afasta da casa. A Dominante (V, vii°) cria tensão e pede para voltar. É esse vai e volta entre tensão e repouso que dá direção a uma progressão.",
+            body: "Cada acorde do campo faz um [[harmonicFunction:papel]]. A Tônica (I, iii, vi) é a casa: repouso. A Subdominante (ii, IV) afasta da casa. A Dominante (V, vii°) cria tensão e pede para voltar. É esse vai e volta entre tensão e repouso que dá direção a uma progressão.",
           },
         },
       },
@@ -588,7 +674,7 @@ export const pt: MessageSchema = {
         steps: {
           threeChords: {
             title: "Três acordes, três graus",
-            body: "O ii-V-I usa os acordes dos graus 2, 5 e 1 do tom. Em C maior: Dm7, G7 e Cmaj7. Os números romanos dizem o grau: minúsculo para acordes menores (ii), maiúsculo para os maiores e dominantes (V, I). Ouça os três em sequência.",
+            body: "O ii-V-I usa os acordes dos [[degree:graus]] 2, 5 e 1 do tom. Em C maior: Dm7, G7 e Cmaj7. Os números romanos dizem o grau: minúsculo para acordes menores (ii), maiúsculo para os maiores e dominantes (V, I). Ouça os três em sequência.",
           },
           arriving: {
             title: "A sensação de chegar",
@@ -602,15 +688,15 @@ export const pt: MessageSchema = {
         steps: {
           formula: {
             title: "A fórmula da menor natural",
-            body: "A escala menor natural também tem sete notas, mas outra fórmula de tons e semitons: T – ST – T – T – ST – T – T. Aqui está A menor natural: A, B, C, D, E, F, G — só teclas brancas. Ouça: o som é mais sombrio que o da escala maior.",
+            body: "A escala menor natural também tem sete notas, mas outra fórmula de [[tone:tons]] e [[semitone:semitons]]: T – ST – T – T – ST – T – T. Aqui está A menor natural: A, B, C, D, E, F, G — só teclas brancas. Ouça: o som é mais sombrio que o da escala maior.",
           },
           versusMajor: {
             title: "O que muda em relação à maior",
-            body: "Compare com a escala maior de mesma tônica: a menor natural tem o 3º, o 6º e o 7º graus um semitom mais baixos (b3, b6, b7). É principalmente o b3, a terça menor, que dá o caráter menor. Ouça A maior e depois A menor.",
+            body: "Compare com a escala maior de mesma [[tonic:tônica]]: a menor natural tem o 3º, o 6º e o 7º graus um semitom mais baixos ([[degreeNotation:b3, b6, b7]]). É principalmente o b3, a terça menor, que dá o caráter menor. Ouça A maior e depois A menor.",
           },
           relative: {
             title: "A relativa menor",
-            body: "Toda escala maior tem uma relativa menor: a escala menor que começa no 6º grau dela. A menor natural de A usa exatamente as notas de C maior — A, B, C, D, E, F, G — só que começando em outro ponto. Por isso C maior e A menor são relativas: mesmas notas, tônicas diferentes. Ouça as duas.",
+            body: "Toda escala maior tem uma [[relative:relativa menor]]: a escala menor que começa no 6º grau dela. A menor natural de A usa exatamente as notas de C maior — A, B, C, D, E, F, G — só que começando em outro ponto. Por isso C maior e A menor são relativas: mesmas notas, tônicas diferentes. Ouça as duas.",
           },
         },
       },
@@ -620,7 +706,7 @@ export const pt: MessageSchema = {
         steps: {
           otherStart: {
             title: "Mesmas notas, outro ponto de partida",
-            body: "Um modo é uma escala maior tocada a partir de outro grau. Estas são as notas de C maior, mas começando no D: D, E, F, G, A, B, C. As notas não mudaram, só o ponto de partida — e isso muda a cor da escala. É o modo Dórico.",
+            body: "Um [[mode:modo]] é uma escala maior tocada a partir de outro [[degree:grau]]. Estas são as notas de C maior, mas começando no D: D, E, F, G, A, B, C. As notas não mudaram, só o ponto de partida — e isso muda a cor da escala. É o modo Dórico.",
           },
           sevenModes: {
             title: "Sete graus, sete modos",

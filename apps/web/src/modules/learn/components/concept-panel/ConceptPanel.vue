@@ -3,6 +3,8 @@ import { useI18n } from "vue-i18n";
 
 import { Play } from "@lucide/vue";
 
+import { GlossaryText } from "@/modules/shared/components/glossary-text";
+
 withDefaults(
   defineProps<{
     titleKey: string;
@@ -27,7 +29,7 @@ const { t } = useI18n();
     </h2>
 
     <p class="text-base leading-relaxed text-foreground">
-      {{ t(bodyKey) }}
+      <glossary-text :text="t(bodyKey)" />
     </p>
 
     <button

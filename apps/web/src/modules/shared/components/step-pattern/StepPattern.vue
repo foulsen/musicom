@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { GlossaryText } from "@/modules/shared/components/glossary-text";
+
 interface Props {
   /** Tamanho de cada passo em semitons (ex.: Maior = [2, 2, 1, 2, 2, 2, 1]). */
   steps: number[];
@@ -123,7 +125,7 @@ const markerPositions = computed(() => {
     </ol>
 
     <p v-if="legend" class="mx-4 text-xs text-muted-foreground">
-      {{ t("stepPattern.legend") }}
+      <glossary-text :text="t('stepPattern.legend')" />
     </p>
   </div>
 </template>

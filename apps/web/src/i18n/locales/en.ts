@@ -134,7 +134,7 @@ export const en = {
     wholeHalfName: "whole step and a half",
     other: "{n}st",
     stepAriaLabel: "{name}, from degree {from} to degree {to}",
-    legend: "W = whole step · H = half step · W½ = whole step and a half",
+    legend: "W = [[tone:whole step]] · H = [[semitone:half step]] · W½ = whole step and a half",
   },
   terms: {
     scales: {
@@ -418,6 +418,92 @@ export const en = {
       description: "There's no predefined fingering for {chord} yet, but you can still see its notes above and explore it on the fretboard.",
     },
   },
+  glossary: {
+    degree: {
+      term: "Degree",
+      definition: "The number of a note within the scale, counted from the tonic: 1st, 2nd, 3rd… The 5th degree of C major is G; the 5th degree of D major is A.",
+    },
+    tone: {
+      term: "Tone (whole step)",
+      definition: "A step of two semitones, like C to D. Note: musicians also say \"key\" for the tonality, as in \"in the key of C\".",
+    },
+    semitone: {
+      term: "Semitone (half step)",
+      definition: "The smallest distance between two notes: from one piano key to its neighbour, or from one fret to the next. C and C# are a semitone apart.",
+    },
+    interval: {
+      term: "Interval",
+      definition: "The distance between two notes, measured in semitones and named by counting letters. From C to E is a major third (4 semitones).",
+    },
+    tonic: {
+      term: "Tonic",
+      definition: "The starting and resting note of a scale or key, which gives it its name. In C major, the tonic is C.",
+    },
+    octave: {
+      term: "Octave",
+      definition: "A distance of 12 semitones: the same note, just higher or lower. From one C to the next C is an octave.",
+    },
+    key: {
+      term: "Key",
+      definition: "The scale and tonic a piece of music is based on. \"In the key of C major\" means the notes come from the C major scale and C is the point of rest.",
+    },
+    enharmonic: {
+      term: "Enharmonic",
+      definition: "Notes with different names that sound the same, like C# and Db: the same piano key, written two ways.",
+    },
+    triad: {
+      term: "Triad",
+      definition: "A chord of three notes, built by stacking two thirds: root, third and fifth. C – E – G is the C major triad.",
+    },
+    seventhChord: {
+      term: "Seventh chord",
+      definition: "A four-note chord: a triad with one more third on top, the seventh. Cmaj7 (C – E – G – B) and G7 are examples.",
+    },
+    leadingTone: {
+      term: "Leading tone",
+      definition: "The 7th degree of the major scale, a semitone below the tonic. It sounds unstable and \"pulls\" toward it: in C major, B wants to resolve to C.",
+    },
+    harmonicFunction: {
+      term: "Harmonic function",
+      definition: "A chord's role within the key: tonic (rest), subdominant (moving away) or dominant (tension that asks to return to rest).",
+    },
+    harmonicField: {
+      term: "Harmonic field",
+      definition: "The chords made by stacking thirds on each degree of a scale; they all use only the notes of that key. In C major: C, Dm, Em, F, G, Am and Bdim.",
+    },
+    mode: {
+      term: "Mode",
+      definition: "A major scale played from a different degree. The notes are the same, but the new starting point changes the colour of the sound: the notes of C major starting on D form the Dorian mode.",
+    },
+    relative: {
+      term: "Relative",
+      definition: "A major and a minor scale that use exactly the same notes with different tonics. The relative minor starts on the 6th degree of the major: C major and A minor.",
+    },
+    parentKey: {
+      term: "Parent key",
+      definition: "The major scale a mode is taken from. D Dorian uses the notes of C major, so C major is its parent key.",
+    },
+    chordSymbol: {
+      term: "Chord symbol",
+      definition: "The written name of a chord: the root letter followed by the type, like C, Dm7 or G7. It is the most common notation for guitar and keyboard.",
+    },
+    degreeNotation: {
+      term: "Degree notation",
+      definition: "A way of describing a note by its degree in the major scale. A \"b\" lowers the degree by a semitone and a \"#\" raises it: b3 is the minor third, #4 is the augmented fourth.",
+    },
+    shape: {
+      term: "Shape (voicing)",
+      definition: "A way of placing your fingers on the fretboard to play a chord or scale. The same chord has several shapes, in different regions of the neck.",
+    },
+    tuning: {
+      term: "Tuning",
+      definition: "The notes the open strings are tuned to. On a standard guitar they are E, A, D, G, B, E, from the lowest string to the highest.",
+    },
+  },
+  glossaryList: {
+    title: "Glossary",
+    hint: "The terms used in the lessons, in alphabetical order.",
+  },
   learn: {
     title: "Learning Tracks",
     subtitle: "A guided path through the theory you already have at your fingertips — one short lesson at a time.",
@@ -482,15 +568,15 @@ export const en = {
         steps: {
           twelveNotes: {
             title: "The 12 notes",
-            body: "All Western music uses just 12 different notes, repeating at higher and higher pitches. Seven of them are the natural notes — C, D, E, F, G, A, B (the white keys on a piano) — highlighted on the wheel; the other five sit in between them (the black keys). After the 12th note, everything starts again one octave higher. Click the notes to hear them.",
+            body: "All Western music uses just 12 different notes, repeating at higher and higher pitches. Seven of them are the natural notes — C, D, E, F, G, A, B (the white keys on a piano) — highlighted on the wheel; the other five sit in between them (the black keys). After the 12th note, everything starts again one [[octave:octave]] higher. Click the notes to hear them.",
           },
           sharpsAndFlats: {
             title: "Sharps and flats",
-            body: "The five notes in between take the name of a neighbour plus a symbol: a sharp (#) raises a note by a semitone and a flat (b) lowers it by a semitone. So C# (a semitone above C) and Db (a semitone below D) are the same key — two names for the same sound. Which name to use depends on the scale; for now, just know that both exist.",
+            body: "The five notes in between take the name of a neighbour plus a symbol: a sharp (#) raises a note by a [[semitone:semitone]] and a flat (b) lowers it by a semitone. So C# (a semitone above C) and Db (a semitone below D) are the same key — [[enharmonic:two names for the same sound]]. Which name to use depends on the scale; for now, just know that both exist.",
           },
           toneAndSemitone: {
             title: "Semitone and tone",
-            body: "The semitone (half step) is the smallest distance between two notes: from one key to its neighbour, like C to C#. A tone (whole step) is two semitones, like C to D. Notice: between E and F, and between B and C, there is no black key in the middle — those are only one semitone apart. Listen to a semitone and then a tone, and see the steps below.",
+            body: "The semitone (half step) is the smallest distance between two notes: from one key to its neighbour, like C to C#. A [[tone:tone]] (whole step) is two semitones, like C to D. Notice: between E and F, and between B and C, there is no black key in the middle — those are only one semitone apart. Listen to a semitone and then a tone, and see the steps below.",
           },
         },
       },
@@ -500,7 +586,7 @@ export const en = {
         steps: {
           twoWays: {
             title: "Two ways to measure",
-            body: "An interval is the distance between two notes. You can measure it two ways: in semitones (the exact size) and by name, counting letters — from C to E that's three letters (C, D, E), so it's a third. The semitones tell you the quality: major or minor. Click the examples to hear the two notes in turn.",
+            body: "An [[interval:interval]] is the distance between two notes. You can measure it two ways: in [[semitone:semitones]] (the exact size) and by name, counting letters — from C to E that's three letters (C, D, E), so it's a third. The semitones tell you the quality: major or minor. Click the examples to hear the two notes in turn.",
           },
           secondsAndThirds: {
             title: "Seconds and thirds",
@@ -508,7 +594,7 @@ export const en = {
           },
           fourthsAndFifths: {
             title: "Fourths, fifths and the octave",
-            body: "A perfect fourth is 5 semitones; a perfect fifth is 7. \"Perfect\" marks the intervals that don't have a major or minor version — they sound firm and stable. The octave (12 semitones) is the same note, just higher: that's why notes repeat every 12 semitones.",
+            body: "A perfect fourth is 5 semitones; a perfect fifth is 7. \"Perfect\" marks the intervals that don't have a major or minor version — they sound firm and stable. The [[octave:octave]] (12 semitones) is the same note, just higher: that's why notes repeat every 12 semitones.",
           },
         },
       },
@@ -518,15 +604,15 @@ export const en = {
         steps: {
           whatIsScale: {
             title: "What is a scale",
-            body: "A scale is a set of notes in order, running from a starting note — the tonic — until it comes back one octave higher. The major scale has seven different notes. Play the one on C and listen: it's probably the scale you already know by ear.",
+            body: "A scale is a set of notes in order, running from a starting note — the [[tonic:tonic]] — until it comes back one [[octave:octave]] higher. The major scale has seven different notes. Play the one on C and listen: it's probably the scale you already know by ear.",
           },
           formula: {
             title: "The tone and semitone formula",
-            body: "What makes a scale sound major is the distance between its notes. A semitone (half step, H) is the smallest step, from one key to the next; a tone (whole step, W) is two semitones. The major scale always follows W – W – H – W – W – W – H, in any key. Listen, and see the steps below.",
+            body: "What makes a scale sound major is the distance between its notes. A [[semitone:semitone]] (half step, H) is the smallest step, from one key to the next; a [[tone:tone]] (whole step, W) is two semitones. The major scale always follows W – W – H – W – W – W – H, in any [[key:key]]. Listen, and see the steps below.",
           },
           degrees: {
             title: "Degrees: notes become numbers",
-            body: "Each note gets a number, its degree, counted from the tonic: 1st, 2nd, 3rd… up to the 7th. The degree tells you the note's role in the scale, in any key: the 5th degree of C is G; the 5th degree of D is A. That's why musicians talk in degrees.",
+            body: "Each note gets a number, its [[degree:degree]], counted from the tonic: 1st, 2nd, 3rd… up to the 7th. The degree tells you the note's role in the scale, in any key: the 5th degree of C is G; the 5th degree of D is A. That's why musicians talk in degrees.",
           },
         },
       },
@@ -536,7 +622,7 @@ export const en = {
         steps: {
           stacking: {
             title: "Three stacked notes",
-            body: "A triad is a chord with three notes. To build one, start on a note of the scale, skip one and take the next, skip another and take the next. In C major: C, E, G — the 1st, 3rd and 5th degrees. It's like stacking thirds.",
+            body: "A [[triad:triad]] is a chord with three notes. To build one, start on a note of the scale, skip one and take the next, skip another and take the next. In C major: C, E, G — the 1st, 3rd and 5th [[degree:degrees]]. It's like stacking thirds.",
           },
           thirdAndFifth: {
             title: "Third and fifth",
@@ -554,15 +640,15 @@ export const en = {
         steps: {
           fourthNote: {
             title: "A fourth note",
-            body: "Take a triad and stack one more third on top: you reach the seventh (the 7th note, counting from the root). In C major, C, E, G and B make Cmaj7. With four notes the chord gets richer and more sophisticated — which is why sevenths are everywhere in jazz and bossa nova. Listen to the triad, then to the seventh chord.",
+            body: "Take a triad and stack one more third on top: you reach the seventh (the 7th note, counting from the root). In C major, C, E, G and B make [[chordSymbol:Cmaj7]]. With four notes the chord gets richer and more sophisticated — which is why sevenths are everywhere in jazz and bossa nova. Listen to the triad, then to the [[seventhChord:seventh chord]].",
           },
           fourTypes: {
             title: "Four types",
-            body: "The triad underneath and the kind of seventh change the chord's character. The four main ones: maj7 (1 3 5 7), smooth and floating; 7 (1 3 5 b7), the dominant chord, tense and asking to resolve; m7 (1 b3 5 b7), mellow and melancholic; and m7b5 (1 b3 b5 b7), half-diminished, dark and unstable. Click each one to hear it.",
+            body: "The triad underneath and the kind of seventh change the chord's character. The four main ones: maj7 (1 3 5 7), smooth and floating; 7 ([[degreeNotation:1 3 5 b7]]), the dominant chord, tense and asking to resolve; m7 (1 b3 5 b7), mellow and melancholic; and m7b5 (1 b3 b5 b7), half-diminished, dark and unstable. Click each one to hear it.",
           },
           inTheKey: {
             title: "In the chords of the key",
-            body: "In the harmonic field of a major key, each degree has its own kind of seventh: maj7 on degrees I and IV; m7 on ii, iii and vi; 7 (dominant) on V; and m7b5 on vii. See the seventh chords of C major.",
+            body: "In the [[harmonicField:harmonic field]] of a major key, each degree has its own kind of seventh: maj7 on degrees I and IV; m7 on ii, iii and vi; 7 (dominant) on V; and m7b5 on vii. See the seventh chords of C major.",
           },
         },
       },
@@ -572,11 +658,11 @@ export const en = {
         steps: {
           oneChordPerDegree: {
             title: "One chord per degree",
-            body: "Stack thirds from each of the seven degrees of a scale and you get seven chords. That set is the harmonic field: every chord that uses only the notes of that key. Switch between triads and seventh chords to see both.",
+            body: "Stack thirds from each of the seven degrees of a scale and you get seven chords. That set is the [[harmonicField:harmonic field]]: every chord that uses only the notes of that key. Switch between triads and seventh chords to see both.",
           },
           functions: {
             title: "Every chord has a job",
-            body: "Each chord in the field has a job. The Tonic (I, iii, vi) is home: rest. The Subdominant (ii, IV) moves away from home. The Dominant (V, vii°) builds tension and asks to go back. That push and pull between tension and rest is what gives a progression direction.",
+            body: "Each chord in the field has a [[harmonicFunction:job]]. The Tonic (I, iii, vi) is home: rest. The Subdominant (ii, IV) moves away from home. The Dominant (V, vii°) builds tension and asks to go back. That push and pull between tension and rest is what gives a progression direction.",
           },
         },
       },
@@ -586,7 +672,7 @@ export const en = {
         steps: {
           threeChords: {
             title: "Three chords, three degrees",
-            body: "The ii-V-I uses the chords of degrees 2, 5 and 1 of the key. In C major: Dm7, G7 and Cmaj7. The roman numerals name the degree: lowercase for minor chords (ii), uppercase for major and dominant ones (V, I). Listen to the three in a row.",
+            body: "The ii-V-I uses the chords of [[degree:degrees]] 2, 5 and 1 of the key. In C major: Dm7, G7 and Cmaj7. The roman numerals name the degree: lowercase for minor chords (ii), uppercase for major and dominant ones (V, I). Listen to the three in a row.",
           },
           arriving: {
             title: "The feeling of arriving",
@@ -600,15 +686,15 @@ export const en = {
         steps: {
           formula: {
             title: "The natural minor formula",
-            body: "The natural minor scale also has seven notes, but a different pattern of tones and semitones: W – H – W – W – H – W – W. Here is A natural minor: A, B, C, D, E, F, G — only white keys. Listen: it sounds darker than the major scale.",
+            body: "The natural minor scale also has seven notes, but a different pattern of [[tone:tones]] and [[semitone:semitones]]: W – H – W – W – H – W – W. Here is A natural minor: A, B, C, D, E, F, G — only white keys. Listen: it sounds darker than the major scale.",
           },
           versusMajor: {
             title: "What changes from major",
-            body: "Compare with the major scale on the same tonic: natural minor has the 3rd, 6th and 7th degrees one semitone lower (b3, b6, b7). It's mostly the b3, the minor third, that gives it its minor character. Listen to A major, then A minor.",
+            body: "Compare with the major scale on the same [[tonic:tonic]]: natural minor has the 3rd, 6th and 7th degrees one semitone lower ([[degreeNotation:b3, b6, b7]]). It's mostly the b3, the minor third, that gives it its minor character. Listen to A major, then A minor.",
           },
           relative: {
             title: "The relative minor",
-            body: "Every major scale has a relative minor: the minor scale that starts on its 6th degree. A natural minor uses exactly the notes of C major — A, B, C, D, E, F, G — just starting somewhere else. That's why C major and A minor are relatives: same notes, different tonics. Listen to both.",
+            body: "Every major scale has a [[relative:relative minor]]: the minor scale that starts on its 6th degree. A natural minor uses exactly the notes of C major — A, B, C, D, E, F, G — just starting somewhere else. That's why C major and A minor are relatives: same notes, different tonics. Listen to both.",
           },
         },
       },
@@ -618,7 +704,7 @@ export const en = {
         steps: {
           otherStart: {
             title: "Same notes, different starting point",
-            body: "A mode is a major scale played from a different degree. These are the notes of C major, but starting on D: D, E, F, G, A, B, C. The notes haven't changed, only the starting point — and that changes the colour of the scale. It's the Dorian mode.",
+            body: "A [[mode:mode]] is a major scale played from a different [[degree:degree]]. These are the notes of C major, but starting on D: D, E, F, G, A, B, C. The notes haven't changed, only the starting point — and that changes the colour of the scale. It's the Dorian mode.",
           },
           sevenModes: {
             title: "Seven degrees, seven modes",
