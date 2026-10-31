@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GlossaryTerm } from "@/modules/shared/components/glossary-term";
 
 const props = defineProps<{
   tunings: Tuning[];
@@ -38,7 +39,9 @@ const selectedName = computed<string>({
   <section class="space-y-3">
     <header>
       <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {{ t("tuning.label") }}
+        <glossary-term id="tuning">
+          {{ t("tuning.label") }}
+        </glossary-term>
       </h2>
     </header>
 

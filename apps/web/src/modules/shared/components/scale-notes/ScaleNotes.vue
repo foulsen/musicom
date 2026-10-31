@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { Pitch, type Degree, type Note, type SpelledNote } from "@music-workspace/music-theory";
 
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
+import { GlossaryTerm } from "@/modules/shared/components/glossary-term";
 
 interface ScaleNote {
   note: Note;
@@ -35,6 +36,8 @@ function play(note: Note) {
     <header>
       <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {{ t("common.notes") }}
+        <span aria-hidden="true">·</span>
+        <glossary-term id="interval" />
       </h2>
     </header>
 

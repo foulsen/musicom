@@ -13,6 +13,7 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { chordPitches } from "@/modules/shared/application/chord-pitches";
 import { RootNoteSelector } from "@/modules/shared/components/root-note-selector";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
+import { GlossaryTerm } from "@/modules/shared/components/glossary-term";
 import { ChordCard } from "@/modules/shared/components/chord-card";
 import { FretboardDiagram } from "@/modules/shared/components/fretboard-diagram";
 import { FretRangeSelector } from "@/modules/shared/components/fret-range-selector";
@@ -105,7 +106,9 @@ function listenToChord() {
     <section class="space-y-3">
       <header class="flex items-center justify-between gap-4">
         <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          {{ t("common.shapes") }}
+          <glossary-term id="shape">
+            {{ t("common.shapes") }}
+          </glossary-term>
         </h2>
 
         <button

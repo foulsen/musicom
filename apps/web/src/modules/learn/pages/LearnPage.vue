@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { PlayCircle } from "@lucide/vue";
 
 import { useLearnViewModel } from "../application/use-learn-view-model";
+import { GlossaryList } from "../components/glossary-list";
 import { TodayPanel } from "../components/today-panel";
 import { TrackMap } from "../components/track-map";
 
@@ -55,5 +56,7 @@ function continueTrack() {
 
       <track-map :lessons="lessonsWithStatus" />
     </section>
+
+    <glossary-list />
   </section>
 </template>

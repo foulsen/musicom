@@ -9,6 +9,7 @@ import { SEVENTH_FAMILY, TRIADS_FAMILY, type Chord, type Pitch } from "@music-wo
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { chordPitches } from "@/modules/shared/application/chord-pitches";
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
+import { GlossaryTerm } from "@/modules/shared/components/glossary-term";
 
 const props = defineProps<{
   triads: Chord[];
@@ -57,7 +58,9 @@ const selectedChordExplorerQuery = computed(() => {
   <section class="space-y-3">
     <header class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {{ t("scaleExplorer.harmonicField") }}
+        <glossary-term id="harmonicField">
+          {{ t("scaleExplorer.harmonicField") }}
+        </glossary-term>
       </h2>
 
       <chip-toggle-group
