@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { PlayCircle } from "@lucide/vue";
 
 import { useLearnViewModel } from "../application/use-learn-view-model";
+import { TodayPanel } from "../components/today-panel";
 import { TrackMap } from "../components/track-map";
 
 const { track, lessonsWithStatus, trackProgressPercent, continueLesson } = useLearnViewModel();
@@ -27,6 +28,8 @@ function continueTrack() {
         {{ t("learn.subtitle") }}
       </p>
     </header>
+
+    <today-panel />
 
     <section class="space-y-3">
       <header class="flex flex-wrap items-center justify-between gap-4">
