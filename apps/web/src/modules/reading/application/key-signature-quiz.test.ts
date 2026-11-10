@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { isMeasureComplete } from "@music-workspace/music-theory";
-
 import { KEY_SIGNATURE_LEVEL_IDS } from "./reading-types";
 import {
   fifthsRange,
@@ -99,13 +97,12 @@ describe("key helpers", () => {
     expect(keyTonicName(-2, "major")).toBe("Bb");
   });
 
-  it("builds a one-measure passage carrying the key signature and a whole rest", () => {
+  it("builds a one-measure passage carrying the key signature and no events", () => {
     const passage = keySignaturePassage(-3);
 
     expect(passage.key.fifths).toBe(-3);
     expect(passage.clef.name).toBe("treble");
     expect(passage.measures).toHaveLength(1);
-    expect(passage.measures[0].events.map((event) => event.kind)).toEqual(["rest"]);
-    expect(isMeasureComplete(passage.measures[0], passage.time)).toBe(true);
+    expect(passage.measures[0].events).toEqual([]);
   });
 });

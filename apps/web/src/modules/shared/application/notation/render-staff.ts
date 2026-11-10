@@ -184,6 +184,13 @@ export function renderStaff(element: HTMLElement, spec: VexPassageSpec, options:
         }
       });
 
+      // Compasso sem notas (só clave e armadura): a pauta é desenhada sem voz nem formatação.
+      if (notes.length === 0) {
+        drawers.push(() => stave.draw());
+
+        return;
+      }
+
       const voice = new vf.Voice({ numBeats: Math.max(1, notes.length), beatValue: 4 }).setMode(vf.Voice.Mode.SOFT);
       voice.addTickables(notes);
 

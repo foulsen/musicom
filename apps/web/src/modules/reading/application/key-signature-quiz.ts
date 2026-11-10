@@ -1,4 +1,4 @@
-import { createPassage, Duration, KeySignature, rest, type KeyMode, type Passage } from "@music-workspace/music-theory";
+import { createPassage, KeySignature, type KeyMode, type Passage } from "@music-workspace/music-theory";
 
 import { itemWeight, pickWeighted } from "@/modules/shared/application/weighted-sampling";
 
@@ -36,12 +36,9 @@ export function keyTonicName(fifths: number, mode: KeyMode): string {
   return new KeySignature(fifths).tonic(mode).toString();
 }
 
-/**
- * Pauta de clave de sol com a armadura, para desenhar a pergunta ou a opção. O compasso leva uma pausa de
- * semibreve: o `renderStaff` não formata compasso sem nenhuma nota (a VexFlow quebra no `Formatter`).
- */
+/** Pauta de clave de sol com a armadura, para desenhar a pergunta ou a opção (compasso sem notas). */
 export function keySignaturePassage(fifths: number): Passage {
-  return createPassage({ fifths }, [[rest(Duration.of("whole"))]]);
+  return createPassage({ fifths }, [[]]);
 }
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
