@@ -15,6 +15,19 @@ let sharedContext: AudioContext | null = null;
 /** Buffer de ruído branco reaproveitado entre notas — caro para gerar a cada toque. */
 let sharedNoiseBuffer: AudioBuffer | null = null;
 
+/** Nota agendada numa linha do tempo: `offsetSeconds` relativo ao início da reprodução. */
+export interface TimedPitch {
+  pitch: Pitch;
+  offsetSeconds: number;
+  durationSeconds: number;
+}
+
+/** Clique de metrônomo agendado numa linha do tempo; `accent` marca o tempo forte. */
+export interface TimedClick {
+  offsetSeconds: number;
+  accent: boolean;
+}
+
 function ensureContext(): AudioContext {
   sharedContext ??= new AudioContext();
 
@@ -126,6 +139,51 @@ export function useNoteAudio() {
     }
   }
 
+  /**
+   * Agenda um clique de metrônomo em `time` (segundos do relógio do `AudioContext`):
+   * seno curto, mais agudo no tempo forte, com envelope de ataque rápido (2 ms) e queda
+   * em ~40 ms, ligado ao mesmo destino das notas.
+   */
+  function scheduleClick(ctx: AudioContext, time: number, accent: boolean) {
+    const peak = Math.max(masterVolume.value * 1.2, 0.0001);
+
+    const oscillator = ctx.createOscillator();
+    oscillator.type = "sine";
+    oscillator.frequency.value = accent ? 1500 : 1000;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.linearRampToValueAtTime(peak, time + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.04);
+
+    oscillator.connect(gain).connect(ctx.destination);
+    oscillator.start(time);
+    oscillator.stop(time + 0.06);
+  }
+
+  /**
+   * Toca notas e cliques numa linha do tempo comum. Devolve `startTime`: o instante do
+   * relógio do `AudioContext` correspondente ao offset 0 (útil para comparar toques do usuário).
+   */
+  function playTimeline(notes: TimedPitch[], clicks: TimedClick[] = []): { startTime: number } {
+    const ctx = ensureContext();
+    const startTime = ctx.currentTime + 0.1;
+
+    notes.forEach(({ pitch, offsetSeconds, durationSeconds }) =>
+      scheduleNote(ctx, pitch, startTime + offsetSeconds, durationSeconds),
+    );
+    clicks.forEach(({ offsetSeconds, accent }) => scheduleClick(ctx, startTime + offsetSeconds, accent));
+
+    return { startTime };
+  }
+
+  /** Tempo do relógio do `AudioContext` que o usuário está de fato ouvindo (desconta a latência de saída). */
+  function perceivedAudioTime(): number {
+    const ctx = ensureContext();
+
+    return ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0);
+  }
+
   function play(pitch: Pitch) {
     const ctx = ensureContext();
     scheduleNote(ctx, pitch, ctx.currentTime);
@@ -148,5 +206,5 @@ export function useNoteAudio() {
     pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * gap, duration));
   }
 
-  return { play, playChord, playSequence, masterVolume, instrument };
+  return { play, playChord, playSequence, playTimeline, perceivedAudioTime, masterVolume, instrument };
 }
