@@ -125,12 +125,17 @@ describe("useLearnViewModel with legacy progress", () => {
     expect(status("diatonic-field")).toBe("locked");
   });
 
-  it("starts a brand new user at the first lesson, with the rest locked", () => {
+  it("starts a brand new user at the first lesson of each track, with the rest of the fundamentals locked", () => {
     const model = useLearnViewModel();
-    const statuses = model.lessonsWithStatus.value.map((item) => item.status);
+    const fundamentals = model.tracks.value.find((view) => view.track.id === "fundamentals");
+    const reading = model.tracks.value.find((view) => view.track.id === "reading");
+    const fundamentalStatuses = fundamentals?.lessonsWithStatus.map((item) => item.status) ?? [];
 
-    expect(statuses[0]).toBe("available");
-    expect(statuses.slice(1).every((status) => status === "locked")).toBe(true);
+    expect(fundamentalStatuses[0]).toBe("available");
+    expect(fundamentalStatuses.slice(1).every((status) => status === "locked")).toBe(true);
+    // A primeira lição da trilha de leitura não tem pré-requisito, então também abre de início.
+    expect(reading?.lessonsWithStatus[0].lesson.id).toBe("reading-staff");
+    expect(reading?.lessonsWithStatus[0].status).toBe("available");
     expect(model.continueLesson.value?.id).toBe("notes");
   });
 

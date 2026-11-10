@@ -19,6 +19,9 @@ import { findScalePattern } from "@/modules/shared/application/scale-patterns";
 
 import { generateCheckpoint, type CheckpointQuestion } from "./checkpoint-generators";
 import type { PracticeTarget } from "./practice";
+import { READING_ADVANCED_LESSONS } from "./reading-advanced-lessons";
+import { READING_PITCH_LESSONS } from "./reading-pitch-lessons";
+import { READING_RHYTHM_LESSONS } from "./reading-rhythm-lessons";
 
 /** Contexto musical base de uma lição — tônica + escala/tom-pai sobre a qual ela é construída. */
 export interface LessonContext {
@@ -581,4 +584,27 @@ export const FUNDAMENTALS_TRACK: Track = {
   ],
 };
 
-export const TRACKS: Track[] = [FUNDAMENTALS_TRACK];
+/** Trilha de leitura de partitura, na ordem da cadeia de pré-requisitos (alturas e ritmo intercalados). */
+export const READING_TRACK: Track = {
+  id: "reading",
+  titleKey: "learn.tracks.reading.title",
+  lessons: [
+    READING_PITCH_LESSONS["reading-staff"],
+    READING_RHYTHM_LESSONS["reading-note-values"],
+    READING_PITCH_LESSONS["reading-ledger-lines"],
+    READING_RHYTHM_LESSONS["reading-time-signatures"],
+    READING_PITCH_LESSONS["reading-bass-clef"],
+    READING_PITCH_LESSONS["reading-accidentals"],
+    READING_RHYTHM_LESSONS["reading-dots-ties"],
+    READING_PITCH_LESSONS["reading-key-signatures"],
+    READING_RHYTHM_LESSONS["reading-syncopation"],
+    READING_RHYTHM_LESSONS["reading-compound-meter"],
+    READING_RHYTHM_LESSONS["reading-tuplets"],
+    READING_ADVANCED_LESSONS["reading-chords"],
+    READING_ADVANCED_LESSONS["reading-expression"],
+    READING_ADVANCED_LESSONS["reading-c-clefs"],
+    READING_ADVANCED_LESSONS["reading-sight-reading"],
+  ],
+};
+
+export const TRACKS: Track[] = [FUNDAMENTALS_TRACK, READING_TRACK];

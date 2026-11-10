@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { en } from "@/i18n/locales/en";
 import { pt } from "@/i18n/locales/pt";
 
-import { FUNDAMENTALS_TRACK, type ConceptStep } from "./curriculum";
+import { CHECKPOINT_QUESTION_COUNT, generateCheckpoint } from "./checkpoint-generators";
+import { FUNDAMENTALS_TRACK, READING_TRACK, TRACKS, type ConceptStep } from "./curriculum";
 
 const lessons = FUNDAMENTALS_TRACK.lessons;
 
@@ -77,5 +78,58 @@ describe.each([
     for (const step of conceptSteps(lesson)) keys.push(step.titleKey, step.bodyKey);
 
     for (const key of keys) expect(te(key), key).toBe(true);
+  });
+});
+
+describe("tracks", () => {
+  it("lists the fundamentals track, then the reading track", () => {
+    expect(TRACKS.map((track) => track.id)).toEqual(["fundamentals", "reading"]);
+  });
+
+  it("has unique lesson ids across all tracks", () => {
+    const ids = TRACKS.flatMap((track) => track.lessons.map((lesson) => lesson.id));
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe("reading track", () => {
+  const readingLessons = READING_TRACK.lessons;
+
+  it("orders the lessons along the reading prerequisite chain", () => {
+    expect(readingLessons.map((lesson) => lesson.id)).toEqual([
+      "reading-staff",
+      "reading-note-values",
+      "reading-ledger-lines",
+      "reading-time-signatures",
+      "reading-bass-clef",
+      "reading-accidentals",
+      "reading-dots-ties",
+      "reading-key-signatures",
+      "reading-syncopation",
+      "reading-compound-meter",
+      "reading-tuplets",
+      "reading-chords",
+      "reading-expression",
+      "reading-c-clefs",
+      "reading-sight-reading",
+    ]);
+  });
+
+  it("chains each prerequisite to the previous lesson of the track", () => {
+    readingLessons.forEach((lesson, index) => {
+      if (index === 0) {
+        expect(lesson.prerequisiteId).toBeUndefined();
+      } else {
+        expect(lesson.prerequisiteId).toBe(readingLessons[index - 1].id);
+      }
+    });
+  });
+
+  it.each(readingLessons)("$id ends with a checkpoint that yields five questions", (lesson) => {
+    const lastStep = lesson.steps[lesson.steps.length - 1];
+
+    expect(lastStep.kind).toBe("checkpoint");
+    expect(generateCheckpoint(lesson.id, lesson.context)).toHaveLength(CHECKPOINT_QUESTION_COUNT);
   });
 });

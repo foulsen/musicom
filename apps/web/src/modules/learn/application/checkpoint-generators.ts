@@ -40,6 +40,9 @@ import {
   SEVENTH_CHORDS_GENERATORS,
 } from "./checkpoint-generators-foundations";
 import type { LessonContext } from "./curriculum";
+import { READING_ADVANCED_GENERATORS } from "./reading-advanced-checkpoints";
+import { READING_PITCH_GENERATORS } from "./reading-pitch-checkpoints";
+import { READING_RHYTHM_GENERATORS } from "./reading-rhythm-checkpoints";
 
 export { CHECKPOINT_TONICS };
 export type { CheckpointQuestion };
@@ -639,6 +642,9 @@ const CHECKPOINT_GENERATORS: Record<string, QuestionGenerator[]> = {
     randomChangingNoteQuestion,
     modeAtDegreeQuestion,
   ],
+  ...READING_PITCH_GENERATORS,
+  ...READING_RHYTHM_GENERATORS,
+  ...READING_ADVANCED_GENERATORS,
 };
 
 /** Identidade do enunciado: dois perguntas com a mesma assinatura seriam "a mesma pergunta". */
