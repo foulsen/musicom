@@ -4,5 +4,6 @@ export * from "./auth";
 export * from "./profile";
 export * from "./learn";
 export * from "./drills";
+export * from "./reading";
 export * from "./ear-training";
 export * from "./preferences";

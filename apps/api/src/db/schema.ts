@@ -52,3 +52,4 @@ export const learnProgress = snapshotTable("learn_progress");
 export const drillsState = snapshotTable("drills_state");
 export const earTraining = snapshotTable("ear_training");
 export const preferences = snapshotTable("preferences");
+export const readingState = snapshotTable("reading_state");

@@ -3,10 +3,12 @@ import {
   earTrainingSnapshotSchema,
   learnSnapshotSchema,
   preferencesSnapshotSchema,
+  readingSnapshotSchema,
   type DrillsSnapshot,
   type EarTrainingSnapshot,
   type LearnSnapshot,
   type PreferencesSnapshot,
+  type ReadingSnapshot,
 } from "@music-workspace/shared-types";
 import type { Pinia } from "pinia";
 
@@ -15,6 +17,14 @@ import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
 import { normalizeStudyDays } from "@/modules/learn/application/study-streak";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
+import {
+  DICTATION_LEVEL_IDS,
+  KEY_SIGNATURE_LEVEL_IDS,
+  NOTE_READING_LEVEL_IDS,
+  RHYTHM_LEVEL_IDS,
+  type RhythmLevelId,
+} from "@/modules/reading/application/reading-types";
+import { useReadingStore } from "@/modules/reading/application/use-reading-store";
 import { useThemeStore } from "@/modules/settings/application/use-theme-store";
 import { useAudioSettingsStore } from "@/modules/shared/application/use-audio-settings-store";
 
@@ -184,4 +194,54 @@ const preferences = defineAggregate<PreferencesSnapshot>({
   },
 });
 
-export const AGGREGATES: Aggregate<unknown>[] = [learn, drills, earTraining, preferences];
+/** Devolve `value` se for um id de nível válido do exercício; senão, o padrão do store. */
+function validLevel<T extends string>(ids: readonly T[], value: string, fallback: T): T {
+  return ids.find((id) => id === value) ?? fallback;
+}
+
+const reading = defineAggregate<ReadingSnapshot>({
+  key: "reading",
+  slug: "reading",
+  schema: readingSnapshotSchema,
+  read: (pinia) => {
+    const store = useReadingStore(pinia);
+    return {
+      noteLevel: store.noteLevel,
+      noteStats: store.noteStats,
+      noteScore: store.noteScore,
+      noteStreak: store.noteStreak,
+      noteBestStreak: store.noteBestStreak,
+      rhythmLevel: store.rhythmLevel,
+      rhythmBpm: store.rhythmBpm,
+      rhythmBest: store.rhythmBest as Record<string, number>,
+      dictationLevel: store.dictationLevel,
+      dictationScore: store.dictationScore,
+      dictationStreak: store.dictationStreak,
+      keyLevel: store.keyLevel,
+      keyStats: store.keyStats,
+      keyScore: store.keyScore,
+    };
+  },
+  apply: (pinia, data) => {
+    const store = useReadingStore(pinia);
+    store.noteLevel = validLevel(NOTE_READING_LEVEL_IDS, data.noteLevel, "treble-staff");
+    store.noteStats = data.noteStats;
+    store.noteScore = data.noteScore;
+    store.noteStreak = data.noteStreak;
+    store.noteBestStreak = data.noteBestStreak;
+    store.rhythmLevel = validLevel(RHYTHM_LEVEL_IDS, data.rhythmLevel, "quarters");
+    store.rhythmBpm = data.rhythmBpm;
+    // Descarta melhores marcas de níveis que este cliente não conhece.
+    store.rhythmBest = Object.fromEntries(
+      Object.entries(data.rhythmBest).filter(([id]) => RHYTHM_LEVEL_IDS.some((level) => level === id)),
+    ) as Partial<Record<RhythmLevelId, number>>;
+    store.dictationLevel = validLevel(DICTATION_LEVEL_IDS, data.dictationLevel, "steps");
+    store.dictationScore = data.dictationScore;
+    store.dictationStreak = data.dictationStreak;
+    store.keyLevel = validLevel(KEY_SIGNATURE_LEVEL_IDS, data.keyLevel, "up-to-2");
+    store.keyStats = data.keyStats;
+    store.keyScore = data.keyScore;
+  },
+});
+
+export const AGGREGATES: Aggregate<unknown>[] = [learn, drills, earTraining, preferences, reading];

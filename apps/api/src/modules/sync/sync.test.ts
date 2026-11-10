@@ -80,6 +80,46 @@ describe("sync round-trip", () => {
   });
 });
 
+describe("reading aggregate", () => {
+  it("stores a snapshot, reads it back and defaults omitted fields", async () => {
+    const token = await signIn();
+
+    const put = await app.inject({
+      method: "PUT",
+      url: "/v1/sync/reading",
+      cookies: { [SESSION_COOKIE]: token },
+      payload: { data: { noteLevel: "bass-staff", rhythmBest: { quarters: 0.9 } }, updatedAt: 5 },
+    });
+    expect(put.statusCode).toBe(200);
+    expect(put.json().data).toMatchObject({
+      noteLevel: "bass-staff",
+      rhythmBest: { quarters: 0.9 },
+      rhythmBpm: 70,
+      keyScore: { correct: 0, total: 0 },
+    });
+
+    const get = await app.inject({
+      method: "GET",
+      url: "/v1/sync/reading",
+      cookies: { [SESSION_COOKIE]: token },
+    });
+    expect(get.json()).toEqual(put.json());
+  });
+
+  it("rejects an out-of-range tempo", async () => {
+    const token = await signIn();
+
+    const response = await app.inject({
+      method: "PUT",
+      url: "/v1/sync/reading",
+      cookies: { [SESSION_COOKIE]: token },
+      payload: { data: { rhythmBpm: 999 }, updatedAt: 1 },
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
+});
+
 describe("last-write-wins", () => {
   it("accepts a newer write and rejects a stale one with 409 + current state", async () => {
     const token = await signIn();

@@ -9,6 +9,8 @@ import {
   learnSnapshotSchema,
   loginInputSchema,
   preferencesSnapshotSchema,
+  readingEnvelopeSchema,
+  readingSnapshotSchema,
   registerInputSchema,
   updateProfileInputSchema,
   userProfileSchema,
@@ -90,6 +92,55 @@ describe("learn snapshot", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe("reading snapshot", () => {
+  it("round-trips a full snapshot", () => {
+    const snapshot = {
+      noteLevel: "grand-staff",
+      noteStats: { "treble:F#5": { correct: 2, total: 3 } },
+      noteScore: { correct: 5, total: 8 },
+      noteStreak: 2,
+      noteBestStreak: 6,
+      rhythmLevel: "dotted",
+      rhythmBpm: 90,
+      rhythmBest: { quarters: 1, dotted: 0.75 },
+      dictationLevel: "thirds",
+      dictationScore: { correct: 3, total: 4 },
+      dictationStreak: 1,
+      keyLevel: "up-to-4",
+      keyStats: { "-2:major": { correct: 1, total: 2 } },
+      keyScore: { correct: 1, total: 2 },
+    };
+
+    expect(readingSnapshotSchema.parse(snapshot)).toEqual(snapshot);
+    expect(readingEnvelopeSchema.safeParse({ data: snapshot, updatedAt: 1 }).success).toBe(true);
+  });
+
+  it("fills store defaults for a snapshot saved without the newer fields", () => {
+    expect(readingSnapshotSchema.parse({})).toEqual({
+      noteLevel: "treble-staff",
+      noteStats: {},
+      noteScore: { correct: 0, total: 0 },
+      noteStreak: 0,
+      noteBestStreak: 0,
+      rhythmLevel: "quarters",
+      rhythmBpm: 70,
+      rhythmBest: {},
+      dictationLevel: "steps",
+      dictationScore: { correct: 0, total: 0 },
+      dictationStreak: 0,
+      keyLevel: "up-to-2",
+      keyStats: {},
+      keyScore: { correct: 0, total: 0 },
+    });
+  });
+
+  it("rejects an out-of-range tempo, accuracy or tally", () => {
+    expect(readingSnapshotSchema.safeParse({ rhythmBpm: 300 }).success).toBe(false);
+    expect(readingSnapshotSchema.safeParse({ rhythmBest: { quarters: 1.5 } }).success).toBe(false);
+    expect(readingSnapshotSchema.safeParse({ noteScore: { correct: -1, total: 1 } }).success).toBe(false);
   });
 });
 

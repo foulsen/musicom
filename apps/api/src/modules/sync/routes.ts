@@ -3,11 +3,12 @@ import {
   earTrainingSnapshotSchema,
   learnSnapshotSchema,
   preferencesSnapshotSchema,
+  readingSnapshotSchema,
   syncEnvelopeSchema,
 } from "@music-workspace/shared-types";
 import type { FastifyInstance } from "fastify";
 
-import { drillsState, earTraining, learnProgress, preferences } from "../../db/schema";
+import { drillsState, earTraining, learnProgress, preferences, readingState } from "../../db/schema";
 import { authenticate } from "../auth/authenticate";
 import { readSnapshot, writeSnapshot } from "./service";
 
@@ -17,6 +18,7 @@ const AGGREGATES = [
   { path: "drills", table: drillsState, envelope: syncEnvelopeSchema(drillsSnapshotSchema) },
   { path: "ear-training", table: earTraining, envelope: syncEnvelopeSchema(earTrainingSnapshotSchema) },
   { path: "preferences", table: preferences, envelope: syncEnvelopeSchema(preferencesSnapshotSchema) },
+  { path: "reading", table: readingState, envelope: syncEnvelopeSchema(readingSnapshotSchema) },
 ];
 
 /**

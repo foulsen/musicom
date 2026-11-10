@@ -8,6 +8,7 @@ import { useAuthStore } from "@/modules/auth/application/use-auth-store";
 import { useDrillsStore } from "@/modules/drills/application/use-drills-store";
 import { useEarTrainingStore } from "@/modules/ear-training/application/use-ear-training-store";
 import { useLearnStore } from "@/modules/learn/application/use-learn-store";
+import { useReadingStore } from "@/modules/reading/application/use-reading-store";
 import { useThemeStore } from "@/modules/settings/application/use-theme-store";
 import { useAudioSettingsStore } from "@/modules/shared/application/use-audio-settings-store";
 import { useUserStore } from "@/modules/settings/application/use-user-store";
@@ -164,6 +165,7 @@ function attachPushers(pinia: Pinia): void {
     useLearnStore(pinia),
     useDrillsStore(pinia),
     useEarTrainingStore(pinia),
+    useReadingStore(pinia),
     useAudioSettingsStore(pinia),
     useThemeStore(pinia),
   ];
