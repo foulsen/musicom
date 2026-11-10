@@ -1,1 +1,31 @@
-export const readingRhythmEn = {};
+export const readingRhythmEn = {
+  levels: {
+    quarters: "Quarters and halves",
+    eighths: "Eighths",
+    dotted: "Dotted and tied",
+    sixteenths: "Sixteenths",
+    syncopation: "Syncopation",
+    compound: "Compound meter",
+    triplets: "Triplets",
+  },
+  staffLabel: "Rhythm to tap in {time}",
+  bpm: "Tempo",
+  bpmValue: "{bpm} BPM",
+  metronome: "Metronome",
+  start: "Start",
+  listen: "Listen",
+  next: "Next rhythm",
+  tap: "Tap",
+  tapHint: "Press Start, wait for the count-in, then tap each note of the rhythm on the beat.",
+  runningHint: "Tap each note in time. Rests stay silent.",
+  listeningHint: "Listen to the rhythm and follow the highlighted notes.",
+  tapCount: "{count} taps",
+  shortcutHint: "Space taps (or starts) · L listens · Enter for the next rhythm",
+  result: {
+    accuracy: "Accuracy: {percent}%",
+    summary: "{hits} of {total} notes hit · {extra} extra taps",
+    best: "Best at this level: {percent}%",
+    newBest: "New best!",
+    legend: "Green notes were hit, red notes were missed.",
+  },
+};
