@@ -1,1 +1,26 @@
-export const readingKeysEn = {};
+export const readingKeysEn = {
+  levels: {
+    "up-to-2": "Up to 2 sharps/flats",
+    "up-to-4": "Up to 4 sharps/flats",
+    all: "All keys",
+  },
+  promptName: {
+    major: "Which major key has this key signature?",
+    minor: "Which minor key has this key signature?",
+  },
+  promptSignature: "Which key signature belongs to {key}?",
+  major: "{tonic} major",
+  minor: "{tonic} minor",
+  sharps: "{count} sharp | {count} sharps",
+  flats: "{count} flat | {count} flats",
+  noAccidentals: "No sharps or flats",
+  feedback: "{signature} → {major} / {minor}",
+  staffLabel: "Key signature: {signature}",
+  questionStaffLabel: "Key signature to identify",
+  score: "{correct}/{total} correct",
+  resetScore: "Reset key signature score",
+  shortcutHint: "Shortcuts: 1-4 to answer, Enter or Space for the next question.",
+  correct: "Correct!",
+  incorrect: "Not quite.",
+  next: "Next",
+};
