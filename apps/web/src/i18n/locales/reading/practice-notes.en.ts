@@ -1,1 +1,37 @@
-export const readingNotesEn = {};
+export const readingNotesEn = {
+  levels: {
+    "treble-staff": "Treble staff",
+    "treble-ledger": "Treble ledger lines",
+    "bass-staff": "Bass staff",
+    "bass-ledger": "Bass ledger lines",
+    "grand-staff": "Both clefs",
+    accidentals: "Accidentals",
+    "key-signatures": "Key signatures",
+    "c-clefs": "C clefs",
+  },
+  clefs: {
+    treble: "Treble",
+    bass: "Bass",
+    alto: "Alto",
+    tenor: "Tenor",
+  },
+  prompt: "Which note is this?",
+  hint: "Name the note, without the octave. Press A–G to answer.",
+  hintAccidentals: "Name the note, without the octave. Pick ♭ ♮ ♯ (keys 1, 2, 3), then answer with A–G.",
+  hintKey: "The key signature applies: name the note as it sounds. Pick ♭ ♮ ♯ (keys 1, 2, 3), then answer with A–G.",
+  staffAria: "{clef} clef staff with one note to name",
+  letters: "Note name",
+  accidental: {
+    label: "Accidental",
+    flat: "Flat",
+    natural: "Natural",
+    sharp: "Sharp",
+  },
+  correct: "Correct! That is {note}.",
+  wrong: "Not quite. It is {note}.",
+  next: "Next note",
+  score: "Score",
+  accuracy: "{percent}% correct",
+  streak: "Streak {count}",
+  bestStreak: "Best streak: {count}",
+};
