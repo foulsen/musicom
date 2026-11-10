@@ -8,4 +8,5 @@ export const readingShellEn = {
     keys: "Key signatures",
   },
   level: "Level",
+  placeholder: "This exercise is coming soon.",
 };

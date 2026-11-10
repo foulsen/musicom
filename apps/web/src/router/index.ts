@@ -29,6 +29,11 @@ const routes = [
     meta: { titleKey: "drills.title" },
   },
   {
+    path: "/reading",
+    component: () => import("@/modules/reading/pages/ReadingPage.vue"),
+    meta: { titleKey: "reading.title" },
+  },
+  {
     path: "/learn",
     component: () => import("@/modules/learn/pages/LearnPage.vue"),
     meta: { titleKey: "learn.title" },

@@ -11,4 +11,5 @@ export const readingShellPt: DeepStringify<typeof readingShellEn> = {
     keys: "Armaduras",
   },
   level: "Nível",
+  placeholder: "Este exercício chega em breve.",
 };
