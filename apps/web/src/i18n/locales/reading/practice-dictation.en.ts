@@ -1,1 +1,21 @@
-export const readingDictationEn = {};
+export const readingDictationEn = {
+  levels: {
+    steps: "Steps",
+    thirds: "Thirds",
+    leaps: "Leaps",
+    minor: "Minor",
+  },
+  levelLabel: "Dictation level",
+  prompt: "Which staff did you hear?",
+  firstPlayHint: "Press Play to hear the phrase (a count-in comes first).",
+  play: "Play",
+  replay: "Replay",
+  optionLabel: "Option {number}",
+  optionsLabel: "Staff options",
+  correct: "Correct!",
+  incorrect: "Not quite — the highlighted staff is the phrase you heard.",
+  next: "Next",
+  score: "Score: {correct}/{total}",
+  resetScore: "Reset score",
+  shortcutHint: "1–3 to answer · R replays · Enter/Space for next",
+};
