@@ -8,6 +8,7 @@ import {
   TONIC,
   createScale,
   detectTwoFiveOne,
+  passageSignature,
   type Chord,
   type ChordQuality,
   type ScalePattern,
@@ -642,7 +643,9 @@ const CHECKPOINT_GENERATORS: Record<string, QuestionGenerator[]> = {
 
 /** Identidade do enunciado: dois perguntas com a mesma assinatura seriam "a mesma pergunta". */
 export function promptSignature(question: CheckpointQuestion): string {
-  return `${question.promptKey}|${JSON.stringify(question.promptParams ?? {})}`;
+  const base = `${question.promptKey}|${JSON.stringify(question.promptParams ?? {})}`;
+
+  return question.staff ? `${base}|${passageSignature(question.staff)}` : base;
 }
 
 /**

@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 import { Note, createScale, scalePatternSteps } from "@music-workspace/music-theory";
 
 import { findScalePattern } from "@/modules/shared/application/scale-patterns";
 import { resolveChordCard } from "@/modules/shared/application/chord-cards";
+import { usePassagePlayback } from "@/modules/shared/application/notation/use-passage-playback";
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { ScaleNotes } from "@/modules/shared/components/scale-notes";
 import { ChromaticWheel } from "@/modules/shared/components/chromatic-wheel";
 import { HarmonicField } from "@/modules/shared/components/harmonic-field";
 import { ChordCard } from "@/modules/shared/components/chord-card";
+import { StaffNotation } from "@/modules/shared/components/staff-notation";
 import { StepPattern } from "@/modules/shared/components/step-pattern";
 
-import type { InlineVizKind, LessonContext } from "../../application/curriculum";
+import type { InlineVizKind, LessonContext, StaffExample } from "../../application/curriculum";
 import { ChordFormulas } from "../chord-formulas";
 import { IntervalPair } from "../interval-pair";
 
@@ -30,11 +33,47 @@ const props = withDefaults(
     patternLabels?: "degrees" | "notes";
     /** Começa o Harmonic Field em tríades ou em acordes com sétima. */
     fieldMode?: "triads" | "sevenths";
+    /** Pautas desenhadas pela viz "staff". */
+    staves?: StaffExample[];
   }>(),
-  { highlightDegree: undefined, intervals: () => [], chordPatterns: () => [], patternLabels: "degrees", fieldMode: "triads" },
+  {
+    highlightDegree: undefined,
+    intervals: () => [],
+    chordPatterns: () => [],
+    patternLabels: "degrees",
+    fieldMode: "triads",
+    staves: () => [],
+  },
 );
 
+const { t } = useI18n();
 const { play } = useNoteAudio();
+const { isPlaying, activeEventKey, play: playPassage } = usePassagePlayback();
+
+// Só a pauta que está tocando recebe o destaque do evento ativo.
+const playingIndex = ref<number | null>(null);
+
+function playStaff(index: number) {
+  const example = props.staves[index];
+  if (!example?.playback) return;
+
+  const handle = playPassage(example.passage, {
+    bpm: example.playback.bpm,
+    click: example.playback.click,
+    countIn: !!example.playback.click,
+  });
+  if (handle) playingIndex.value = index;
+}
+
+function staffHighlights(index: number): Record<string, "active"> {
+  return index === playingIndex.value && isPlaying.value && activeEventKey.value
+    ? { [activeEventKey.value]: "active" }
+    : {};
+}
+
+function staffAriaLabel(example: StaffExample): string {
+  return example.captionKey ? t(example.captionKey) : t("glossary.staff.term");
+}
 
 const scale = computed(() => createScale(Note.from(props.context.root), findScalePattern(props.context.pattern)));
 
@@ -95,5 +134,22 @@ function selectChord(index: number) {
 
     <chord-card v-if="viz.includes('chord-card') && selectedChordCard" :name="selectedChordCard.name"
       :shapes="selectedChordCard.shapes" @note-play="play" />
+
+    <div v-if="viz.includes('staff') && staves.length" class="flex w-full flex-col gap-4">
+      <figure v-for="(example, index) in staves" :key="index" class="flex flex-col gap-2">
+        <staff-notation :passage="example.passage" :ariaLabel="staffAriaLabel(example)"
+          :highlights="staffHighlights(index)" />
+
+        <figcaption v-if="example.captionKey" class="text-sm text-muted-foreground">
+          {{ t(example.captionKey) }}
+        </figcaption>
+
+        <button v-if="example.playback" type="button" :disabled="isPlaying"
+          class="self-start rounded-md border border-border px-3 py-1 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+          @click="playStaff(index)">
+          {{ isPlaying && playingIndex === index ? t("learn.staff.playing") : t("learn.staff.play") }}
+        </button>
+      </figure>
+    </div>
   </div>
 </template>

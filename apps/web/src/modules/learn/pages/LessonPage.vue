@@ -195,6 +195,7 @@ function selectStep(index: number) {
               :chord-patterns="step.chordPatterns"
               :pattern-labels="step.patternLabels"
               :field-mode="step.fieldMode"
+              :staves="step.staves"
             />
           </template>
 

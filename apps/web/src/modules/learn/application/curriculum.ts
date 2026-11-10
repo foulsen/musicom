@@ -9,6 +9,7 @@ import {
   Note,
   Pitch,
   type ChordPattern,
+  type Passage,
   type ScalePattern,
   type SingleNote,
 } from "@music-workspace/music-theory";
@@ -39,7 +40,16 @@ export type InlineVizKind =
   | "chord-card"
   | "step-pattern"
   | "interval"
-  | "chord-formulas";
+  | "chord-formulas"
+  | "staff";
+
+/** Exemplo de pauta mostrado pela viz "staff"; com `playback`, ganha um botão de tocar. */
+export interface StaffExample {
+  passage: Passage;
+  /** Legenda (chave i18n) exibida sob a pauta. */
+  captionKey?: string;
+  playback?: { bpm: number; click?: boolean };
+}
 
 /**
  * Passo de conceito — cada lição tem de 1 a 3, curtos, cada um com título, texto, "ouça" e
@@ -59,6 +69,8 @@ export interface ConceptStep {
   patternLabels?: "degrees" | "notes";
   /** Começa o campo harmônico em tríades (padrão) ou em acordes com sétima. */
   fieldMode?: "triads" | "sevenths";
+  /** Pautas desenhadas pela viz "staff". */
+  staves?: StaffExample[];
 }
 
 export interface ExploreStep {

@@ -4,13 +4,16 @@ import { buildDrillsTabLink, buildFlashcardsLink } from "@/modules/drills/applic
 import type { DeckId } from "@/modules/drills/application/flashcard-decks";
 import { buildEarTrainingLink } from "@/modules/ear-training/application/ear-training-link";
 import type { Difficulty, QuizKind } from "@/modules/ear-training/application/question-generators";
+import { buildReadingLink } from "@/modules/reading/application/reading-link";
+import type { ReadingExercise } from "@/modules/reading/application/reading-types";
 
 /** Prática sugerida ao fim de uma lição — cada variante aponta para um exercício já existente no app. */
 export type PracticeTarget =
   | { kind: "ear-training"; quiz: QuizKind; difficulty?: Difficulty }
   | { kind: "flashcards"; deck: DeckId }
   | { kind: "note-id" }
-  | { kind: "fretboard" };
+  | { kind: "fretboard" }
+  | { kind: "reading"; exercise: ReadingExercise; level?: string };
 
 /** Máximo de atalhos de prática mostrados no painel de conclusão. */
 export const MAX_PRACTICE_LINKS = 3;
@@ -26,6 +29,8 @@ export function practiceLink(target: PracticeTarget): RouteLocationRaw {
       return buildDrillsTabLink("noteId");
     case "fretboard":
       return buildDrillsTabLink("fretboard");
+    case "reading":
+      return buildReadingLink(target.exercise, target.level);
   }
 }
 
@@ -43,5 +48,7 @@ export function practiceLabel(target: PracticeTarget): { key: string; deckKey?: 
       return { key: "learn.practice.noteId" };
     case "fretboard":
       return { key: "learn.practice.fretboard" };
+    case "reading":
+      return { key: `learn.practice.reading.${target.exercise}` };
   }
 }

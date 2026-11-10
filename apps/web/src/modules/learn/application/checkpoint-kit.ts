@@ -1,4 +1,4 @@
-import type { SingleNote } from "@music-workspace/music-theory";
+import type { Passage, SingleNote } from "@music-workspace/music-theory";
 
 import type { LabelRef, TermLabel } from "@/modules/shared/application/music-terms";
 import type { QuizOption } from "@/modules/shared/application/quiz";
@@ -14,6 +14,8 @@ export interface CheckpointQuestion {
   correctId: string;
   /** Raciocínio por trás da resposta, montado a partir dos dados do domínio — exibido após responder. */
   explanation: LabelRef;
+  /** Pauta desenhada acima das opções (perguntas de leitura de partitura). */
+  staff?: Passage;
 }
 
 /**

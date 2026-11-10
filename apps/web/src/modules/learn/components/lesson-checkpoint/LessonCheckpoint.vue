@@ -4,7 +4,10 @@ import { useI18n } from "vue-i18n";
 
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
+import { StaffNotation } from "@/modules/shared/components/staff-notation";
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
+
+import type { Passage } from "@music-workspace/music-theory";
 
 import type { CheckpointQuestion } from "../../application/checkpoint-generators";
 
@@ -18,6 +21,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { label } = useMusicTerms();
+
+/** A fórmula de compasso só aparece quando a pauta traz eventos (pautas vazias mostram só clave e armadura). */
+function hasEvents(passage: Passage): boolean {
+  return passage.measures.some((measure) => measure.events.length > 0);
+}
 
 const index = ref(0);
 const selectedOptionId = ref<string | null>(null);
@@ -93,6 +101,13 @@ useTypingGuardedKeydown(handleKeydown);
     <p class="text-base font-medium text-foreground">
       {{ label({ key: question.promptKey, params: question.promptParams }) }}
     </p>
+
+    <staff-notation
+      v-if="question.staff"
+      :passage="question.staff"
+      :ariaLabel="label({ key: question.promptKey, params: question.promptParams })"
+      :show-time-signature="hasEvents(question.staff)"
+    />
 
     <answer-options
       :options="question.options"
