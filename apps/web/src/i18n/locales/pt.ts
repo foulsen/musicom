@@ -1,4 +1,12 @@
 import type { MessageSchema } from "./en";
+import { readingPitchLessonsPt } from "./reading/lessons-pitch.pt";
+import { readingRhythmLessonsPt } from "./reading/lessons-rhythm.pt";
+import { readingAdvancedLessonsPt } from "./reading/lessons-advanced.pt";
+import { readingNotesPt } from "./reading/practice-notes.pt";
+import { readingRhythmPt } from "./reading/practice-rhythm.pt";
+import { readingDictationPt } from "./reading/practice-dictation.pt";
+import { readingKeysPt } from "./reading/practice-keys.pt";
+import { readingShellPt } from "./reading/practice-shell.pt";
 
 export const pt: MessageSchema = {
   nav: {
@@ -8,6 +16,7 @@ export const pt: MessageSchema = {
     earTraining: "Treino de Ouvido",
     drills: "Treinos",
     learn: "Trilhas",
+    reading: "Leitura",
     openSidebar: "Abrir navegação",
     closeSidebar: "Fechar navegação",
     collapseSidebar: "Recolher barra lateral",
@@ -501,10 +510,73 @@ export const pt: MessageSchema = {
       term: "Afinação",
       definition: "As notas em que as cordas soltas estão afinadas. No violão padrão são E, A, D, G, B, E, da corda mais grave à mais aguda.",
     },
+    staff: {
+      term: "Pauta",
+      definition: "O conjunto de cinco linhas horizontais (e quatro espaços) em que as notas são escritas; quanto mais alta a nota na pauta, mais agudo o som.",
+    },
+    clef: {
+      term: "Clave",
+      definition: "O símbolo no início da pauta que indica a altura de cada linha e espaço: clave de sol, clave de fá, e assim por diante.",
+    },
+    ledgerLine: {
+      term: "Linha suplementar",
+      definition: "Uma pequena linha extra desenhada acima ou abaixo da pauta para escrever notas agudas ou graves demais para caber nas cinco linhas.",
+    },
+    accidental: {
+      term: "Acidente",
+      definition: "Um sinal colocado antes de uma nota que a sobe, a desce ou cancela uma alteração anterior: sustenido, bemol ou bequadro.",
+    },
+    keySignature: {
+      term: "Armadura de clave",
+      definition: "Os sustenidos ou bemóis escritos logo após a clave, que valem para todas as notas daquela letra ao longo da peça.",
+    },
+    measure: {
+      term: "Compasso",
+      definition: "Um trecho da música com um número fixo de tempos, separado do seguinte por uma barra vertical.",
+    },
+    timeSignature: {
+      term: "Fórmula de compasso",
+      definition: "Os dois números no início da peça: o de cima diz quantos tempos há em cada compasso e o de baixo diz qual figura vale um tempo.",
+    },
+    beat: {
+      term: "Tempo (pulso)",
+      definition: "A pulsação regular que você marca ao ouvir música; os compassos são formados pelo agrupamento de tempos.",
+    },
+    noteValue: {
+      term: "Figura de valor",
+      definition: "A duração de uma nota em relação às demais: semibreve, mínima, semínima, colcheia, semicolcheia e assim por diante, cada uma com metade da duração da anterior.",
+    },
+    tie: {
+      term: "Ligadura de valor",
+      definition: "Uma linha curva que une duas notas de mesma altura para que soem como uma única nota mais longa.",
+    },
+    tuplet: {
+      term: "Quiáltera",
+      definition: "Um grupo de notas encaixado no tempo normalmente ocupado por outra quantidade de notas, como a tercina (três notas no tempo de duas).",
+    },
+    syncopation: {
+      term: "Síncope",
+      definition: "Um ritmo que acentua tempos fracos ou contratempos, deslocando o acento de onde a pulsação o colocaria naturalmente.",
+    },
+    dynamics: {
+      term: "Dinâmica",
+      definition: "As indicações de quão forte ou suave tocar, como p (piano, suave) e f (forte).",
+    },
+    articulation: {
+      term: "Articulação",
+      definition: "O modo como uma nota é atacada e solta, como curta e separada (staccato) ou suave e ligada (legato).",
+    },
   },
   glossaryList: {
     title: "Glossário",
     hint: "Os termos que aparecem nas lições, em ordem alfabética.",
+  },
+  reading: {
+    ...readingShellPt,
+    notes: readingNotesPt,
+    rhythm: readingRhythmPt,
+    dictation: readingDictationPt,
+    keys: readingKeysPt,
   },
   learn: {
     title: "Trilhas de Aprendizado",
@@ -561,6 +633,9 @@ export const pt: MessageSchema = {
     tracks: {
       fundamentals: {
         title: "Fundamentos",
+      },
+      reading: {
+        title: "Leitura de partitura",
       },
     },
     lessons: {
@@ -718,6 +793,9 @@ export const pt: MessageSchema = {
           },
         },
       },
+      ...readingPitchLessonsPt.lessons,
+      ...readingRhythmLessonsPt.lessons,
+      ...readingAdvancedLessonsPt.lessons,
     },
     listen: "Ouvir",
     openInExplorer: "Abrir no explorador completo",
@@ -786,6 +864,9 @@ export const pt: MessageSchema = {
       isProgressionNo: "Não: um ii-V-I em {root} maior seria {expected} (graus 2, 5 e 1, nessa ordem). {sequence} usa os graus {degrees}.",
       modeOfMajor: "{tonic} é o {degree}º grau de {parent} maior ({parentNotes}), logo {tonic} {pattern} usa as notas de {parent} maior.",
       changingNote: "{root} {pattern}: {notesA}. {root} {reference}: {notesB}. A única diferença é o {degree}º grau: {noteA} em vez de {noteB}.",
+      ...readingPitchLessonsPt.explanations,
+      ...readingRhythmLessonsPt.explanations,
+      ...readingAdvancedLessonsPt.explanations,
     },
     checkpointNext: "Próxima pergunta",
     checkpointFinish: "Concluir lição",
@@ -812,6 +893,12 @@ export const pt: MessageSchema = {
       flashcards: "Flashcards: {deck}",
       noteId: "Identificar notas no braço",
       fretboard: "Encontrar notas no braço",
+      reading: {
+        notes: "Ler notas na pauta",
+        rhythm: "Ler ritmos",
+        dictation: "Ditado melódico",
+        keys: "Armaduras de clave",
+      },
     },
     checkpoints: {
       notes: {
@@ -867,6 +954,13 @@ export const pt: MessageSchema = {
         changingNote: "Qual nota é diferente entre {root} {pattern} e {root} {reference}?",
         modeAtDegree: "Qual modo começa no {degree}º grau de {parent} maior?",
       },
+      ...readingPitchLessonsPt.checkpoints,
+      ...readingRhythmLessonsPt.checkpoints,
+      ...readingAdvancedLessonsPt.checkpoints,
+    },
+    staff: {
+      play: "Tocar",
+      playing: "Tocando…",
     },
     notFound: {
       title: "Lição não encontrada",

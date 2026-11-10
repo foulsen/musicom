@@ -26,6 +26,20 @@ export const GLOSSARY_TERM_IDS = [
   "degreeNotation",
   "shape",
   "tuning",
+  "staff",
+  "clef",
+  "ledgerLine",
+  "accidental",
+  "keySignature",
+  "measure",
+  "timeSignature",
+  "beat",
+  "noteValue",
+  "tie",
+  "tuplet",
+  "syncopation",
+  "dynamics",
+  "articulation",
 ] as const;
 
 export type GlossaryTermId = (typeof GLOSSARY_TERM_IDS)[number];

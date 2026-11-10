@@ -1,3 +1,13 @@
+import type { DeepStringify } from "./deep-stringify";
+import { readingPitchLessonsEn } from "./reading/lessons-pitch.en";
+import { readingRhythmLessonsEn } from "./reading/lessons-rhythm.en";
+import { readingAdvancedLessonsEn } from "./reading/lessons-advanced.en";
+import { readingNotesEn } from "./reading/practice-notes.en";
+import { readingRhythmEn } from "./reading/practice-rhythm.en";
+import { readingDictationEn } from "./reading/practice-dictation.en";
+import { readingKeysEn } from "./reading/practice-keys.en";
+import { readingShellEn } from "./reading/practice-shell.en";
+
 export const en = {
   nav: {
     scaleExplorer: "Scale Explorer",
@@ -6,6 +16,7 @@ export const en = {
     earTraining: "Ear Training",
     drills: "Drills",
     learn: "Learn",
+    reading: "Reading",
     openSidebar: "Open navigation",
     closeSidebar: "Close navigation",
     collapseSidebar: "Collapse sidebar",
@@ -499,10 +510,73 @@ export const en = {
       term: "Tuning",
       definition: "The notes the open strings are tuned to. On a standard guitar they are E, A, D, G, B, E, from the lowest string to the highest.",
     },
+    staff: {
+      term: "Staff",
+      definition: "The set of five horizontal lines (and four spaces) on which notes are written; the higher a note sits, the higher it sounds.",
+    },
+    clef: {
+      term: "Clef",
+      definition: "The symbol at the start of the staff that says which pitch each line and space stands for: treble (G) clef, bass (F) clef, and so on.",
+    },
+    ledgerLine: {
+      term: "Ledger line",
+      definition: "A short extra line drawn above or below the staff to write notes that are too high or too low to fit on its five lines.",
+    },
+    accidental: {
+      term: "Accidental",
+      definition: "A sign placed before a note that raises it, lowers it or cancels a previous change: sharp, flat or natural.",
+    },
+    keySignature: {
+      term: "Key signature",
+      definition: "The sharps or flats written right after the clef, which apply to every note of that letter throughout the piece.",
+    },
+    measure: {
+      term: "Measure (bar)",
+      definition: "A section of music holding a fixed number of beats, separated from the next by a vertical bar line.",
+    },
+    timeSignature: {
+      term: "Time signature",
+      definition: "The pair of numbers at the start of a piece: the top one says how many beats are in each measure and the bottom one says which note value counts as a beat.",
+    },
+    beat: {
+      term: "Beat",
+      definition: "The steady pulse you tap along with when listening to music; measures are built by grouping beats.",
+    },
+    noteValue: {
+      term: "Note value",
+      definition: "The duration of a note relative to the others: whole, half, quarter, eighth, sixteenth and so on, each half as long as the one before.",
+    },
+    tie: {
+      term: "Tie",
+      definition: "A curved line joining two notes of the same pitch so they sound as a single, longer note.",
+    },
+    tuplet: {
+      term: "Tuplet",
+      definition: "A group of notes squeezed into the time normally taken by a different number of notes, like a triplet (three notes in the time of two).",
+    },
+    syncopation: {
+      term: "Syncopation",
+      definition: "A rhythm that stresses weak beats or off-beats, displacing the accent from where the pulse would naturally put it.",
+    },
+    dynamics: {
+      term: "Dynamics",
+      definition: "The markings that tell how loud or soft to play, such as p (piano, soft) and f (forte, loud).",
+    },
+    articulation: {
+      term: "Articulation",
+      definition: "The way a note is attacked and released, such as short and detached (staccato) or smooth and connected (legato).",
+    },
   },
   glossaryList: {
     title: "Glossary",
     hint: "The terms used in the lessons, in alphabetical order.",
+  },
+  reading: {
+    ...readingShellEn,
+    notes: readingNotesEn,
+    rhythm: readingRhythmEn,
+    dictation: readingDictationEn,
+    keys: readingKeysEn,
   },
   learn: {
     title: "Learning Tracks",
@@ -559,6 +633,9 @@ export const en = {
     tracks: {
       fundamentals: {
         title: "Fundamentals",
+      },
+      reading: {
+        title: "Sheet music reading",
       },
     },
     lessons: {
@@ -716,6 +793,9 @@ export const en = {
           },
         },
       },
+      ...readingPitchLessonsEn.lessons,
+      ...readingRhythmLessonsEn.lessons,
+      ...readingAdvancedLessonsEn.lessons,
     },
     listen: "Listen",
     openInExplorer: "Open in full explorer",
@@ -784,6 +864,9 @@ export const en = {
       isProgressionNo: "No: a ii-V-I in {root} major would be {expected} (degrees 2, 5 and 1, in that order). {sequence} uses degrees {degrees}.",
       modeOfMajor: "{tonic} is degree {degree} of {parent} major ({parentNotes}), so {tonic} {pattern} uses the notes of {parent} major.",
       changingNote: "{root} {pattern}: {notesA}. {root} {reference}: {notesB}. The only difference is degree {degree}: {noteA} instead of {noteB}.",
+      ...readingPitchLessonsEn.explanations,
+      ...readingRhythmLessonsEn.explanations,
+      ...readingAdvancedLessonsEn.explanations,
     },
     checkpointNext: "Next question",
     checkpointFinish: "Finish lesson",
@@ -810,6 +893,12 @@ export const en = {
       flashcards: "Flashcards: {deck}",
       noteId: "Identify notes on the fretboard",
       fretboard: "Find notes on the fretboard",
+      reading: {
+        notes: "Read notes on the staff",
+        rhythm: "Read rhythms",
+        dictation: "Melodic dictation",
+        keys: "Key signatures",
+      },
     },
     checkpoints: {
       notes: {
@@ -865,6 +954,13 @@ export const en = {
         changingNote: "Which note is different between {root} {pattern} and {root} {reference}?",
         modeAtDegree: "Which mode starts on degree {degree} of {parent} major?",
       },
+      ...readingPitchLessonsEn.checkpoints,
+      ...readingRhythmLessonsEn.checkpoints,
+      ...readingAdvancedLessonsEn.checkpoints,
+    },
+    staff: {
+      play: "Play",
+      playing: "Playing…",
     },
     notFound: {
       title: "Lesson not found",
@@ -875,7 +971,5 @@ export const en = {
     },
   },
 };
-
-type DeepStringify<T> = T extends string ? string : { [K in keyof T]: DeepStringify<T[K]> };
 
 export type MessageSchema = DeepStringify<typeof en>;
