@@ -5,6 +5,8 @@ export * from "./notes/chromatic-scale";
 export * from "./notes/note";
 export * from "./notes/pitch";
 export * from "./notes/spelled-note";
+export * from "./notes/spelled-pitch";
+export * from "./notation";
 export * from "./scales/scale-pattern";
 export * from "./scales/scale-patterns";
 export * from "./scales/create-scale";
