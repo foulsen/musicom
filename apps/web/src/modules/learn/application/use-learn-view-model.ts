@@ -2,7 +2,7 @@ import { computed } from "vue";
 import { storeToRefs } from "pinia";
 
 import { bestCheckpoint, isCheckpointMastered } from "./checkpoint-mastery";
-import { FUNDAMENTALS_TRACK, type Lesson } from "./curriculum";
+import { TRACKS, type Lesson, type Track } from "./curriculum";
 import { useLearnStore, type CheckpointScore, type LessonProgress } from "./use-learn-store";
 import { useStudyActivity } from "./use-study-activity";
 
@@ -73,27 +73,68 @@ export function isLessonLocked(
   return !lessons.slice(index).some((item) => completedStepsOf(item, progress[item.id]) > 0);
 }
 
-/** Estado e navegação da trilha de aprendizado (MVP: uma única trilha, `FUNDAMENTALS_TRACK`). */
+/** Uma trilha na página: lições com status, progresso e a lição de "Continuar". */
+export interface TrackView {
+  track: Track;
+  lessonsWithStatus: LessonWithStatus[];
+  progressPercent: number;
+  continueLesson: Lesson | null;
+}
+
+/** Localiza uma lição em qualquer trilha, devolvendo também a trilha dona e o índice dentro dela. */
+export function findLessonLocation(
+  tracks: Track[],
+  lessonId: string,
+): { track: Track; lesson: Lesson; index: number } | null {
+  for (const track of tracks) {
+    const index = track.lessons.findIndex((lesson) => lesson.id === lessonId);
+    if (index >= 0) return { track, lesson: track.lessons[index], index };
+  }
+
+  return null;
+}
+
+/**
+ * Lição para o botão "Continuar": a última visitada (se estiver em `items` e ainda aberta), senão a
+ * primeira disponível/em progresso depois da última concluída — assim quem já fez lições antigas não
+ * é levado de volta a uma lição nova inserida no começo da trilha.
+ */
+export function pickContinueLesson(items: LessonWithStatus[], lastVisitedLessonId: string | null): Lesson | null {
+  const isOpen = (item: LessonWithStatus) => item.status === "in-progress" || item.status === "available";
+
+  // Visitada mas concluída ou bloqueada (ex.: aberta por URL antes do pré-requisito) não vale como "continuar".
+  const last = lastVisitedLessonId ? items.find((item) => item.lesson.id === lastVisitedLessonId) : undefined;
+  if (last && isOpen(last)) return last.lesson;
+
+  const lastCompletedIndex = items.reduce(
+    (found, item, index) => (item.status === "completed" || item.status === "review" ? index : found),
+    -1,
+  );
+
+  const next = items.slice(lastCompletedIndex + 1).find(isOpen) ?? items.find(isOpen);
+
+  return next?.lesson ?? null;
+}
+
+/** Estado e navegação das trilhas de aprendizado (`TRACKS`, na ordem em que aparecem na página). */
 export function useLearnViewModel() {
   const store = useLearnStore();
   const { progress, lastVisitedLessonId } = storeToRefs(store);
   const { recordActivity } = useStudyActivity();
 
-  const track = FUNDAMENTALS_TRACK;
+  function findLesson(lessonId: string) {
+    return findLessonLocation(TRACKS, lessonId);
+  }
 
   function completedStepCount(lessonId: string): number {
-    const lesson = track.lessons.find((item) => item.id === lessonId);
+    const lesson = findLesson(lessonId)?.lesson;
 
     return lesson ? completedStepsOf(lesson, progress.value[lessonId]) : 0;
   }
 
-  function isLessonComplete(lesson: Lesson): boolean {
-    return isLessonCompleted(lesson, progress.value[lesson.id]);
-  }
-
-  function lessonStatus(lesson: Lesson): LessonStatus {
+  function lessonStatus(track: Track, lesson: Lesson): LessonStatus {
     return deriveLessonStatus({
-      isComplete: isLessonComplete(lesson),
+      isComplete: isLessonCompleted(lesson, progress.value[lesson.id]),
       isLocked: isLessonLocked(track.lessons, lesson, progress.value),
       hasStarted: completedStepCount(lesson.id) > 0,
       checkpoint: progress.value[lesson.id]?.checkpoint,
@@ -105,43 +146,37 @@ export function useLearnViewModel() {
     return progress.value[lessonId]?.checkpoint ?? null;
   }
 
-  const lessonsWithStatus = computed<LessonWithStatus[]>(() =>
-    track.lessons.map((lesson) => ({
-      lesson,
-      status: lessonStatus(lesson),
-      checkpoint: progress.value[lesson.id]?.checkpoint ?? null,
-    })),
+  const tracks = computed<TrackView[]>(() =>
+    TRACKS.map((track) => {
+      const items = track.lessons.map((lesson) => ({
+        lesson,
+        status: lessonStatus(track, lesson),
+        checkpoint: progress.value[lesson.id]?.checkpoint ?? null,
+      }));
+
+      // % de passos concluídos na trilha inteira (soma de todas as lições).
+      const totalSteps = track.lessons.reduce((sum, lesson) => sum + lesson.steps.length, 0);
+      const doneSteps = track.lessons.reduce((sum, lesson) => sum + completedStepCount(lesson.id), 0);
+
+      return {
+        track,
+        lessonsWithStatus: items,
+        progressPercent: totalSteps === 0 ? 0 : Math.round((doneSteps / totalSteps) * 100),
+        continueLesson: pickContinueLesson(items, lastVisitedLessonId.value),
+      };
+    }),
   );
 
-  /** % de passos concluídos na trilha inteira (soma de todas as lições). */
-  const trackProgressPercent = computed(() => {
-    const totalSteps = track.lessons.reduce((sum, lesson) => sum + lesson.steps.length, 0);
-    const doneSteps = track.lessons.reduce((sum, lesson) => sum + completedStepCount(lesson.id), 0);
+  const lessonsWithStatus = computed<LessonWithStatus[]>(() => tracks.value.flatMap((view) => view.lessonsWithStatus));
 
-    return totalSteps === 0 ? 0 : Math.round((doneSteps / totalSteps) * 100);
-  });
-
-  /**
-   * Lição para o botão "Continuar": a última visitada (se incompleta), senão a primeira
-   * disponível/em progresso depois da última concluída — assim quem já fez lições antigas não é
-   * levado de volta a uma lição nova inserida no começo da trilha.
-   */
+  /** "Continuar" global: prefere a trilha da última lição visitada; senão, a primeira trilha com algo aberto. */
   const continueLesson = computed<Lesson | null>(() => {
     const lastId = lastVisitedLessonId.value;
-    const last = lastId ? track.lessons.find((lesson) => lesson.id === lastId) : undefined;
-    // Visitada mas bloqueada (ex.: aberta por URL antes do pré-requisito) não vale como "continuar".
-    if (last && !isLessonComplete(last) && lessonStatus(last) !== "locked") return last;
+    const preferred = lastId
+      ? tracks.value.find((view) => view.track.lessons.some((lesson) => lesson.id === lastId))
+      : undefined;
 
-    const items = lessonsWithStatus.value;
-    const lastCompletedIndex = items.reduce(
-      (found, item, index) => (item.status === "completed" || item.status === "review" ? index : found),
-      -1,
-    );
-    const isOpen = (item: LessonWithStatus) => item.status === "in-progress" || item.status === "available";
-
-    const next = items.slice(lastCompletedIndex + 1).find(isOpen) ?? items.find(isOpen);
-
-    return next?.lesson ?? null;
+    return preferred?.continueLesson ?? tracks.value.find((view) => view.continueLesson)?.continueLesson ?? null;
   });
 
   function markStepDone(lessonId: string, stepIndex: number) {
@@ -179,11 +214,11 @@ export function useLearnViewModel() {
   }
 
   return {
-    track,
+    tracks,
     lessonsWithStatus,
-    trackProgressPercent,
     continueLesson,
 
+    findLesson,
     completedStepCount,
     bestCheckpointOf,
     markStepDone,

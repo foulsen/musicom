@@ -29,14 +29,17 @@ export function useLessonViewModel() {
   const route = useRoute();
   const router = useRouter();
 
-  const { track, completedStepCount, bestCheckpointOf, markStepDone, recordCheckpoint, visitLesson } =
+  const { findLesson, completedStepCount, bestCheckpointOf, markStepDone, recordCheckpoint, visitLesson } =
     useLearnViewModel();
   const { playChord, playSequence } = useNoteAudio();
 
   const lessonId = computed(() => String(route.params.lessonId));
-  const lesson = computed(() => track.lessons.find((item) => item.id === lessonId.value) ?? null);
-  const lessonIndex = computed(() => track.lessons.findIndex((item) => item.id === lessonId.value));
-  const nextLesson = computed(() => track.lessons[lessonIndex.value + 1] ?? null);
+  const location = computed(() => findLesson(lessonId.value));
+  const lesson = computed(() => location.value?.lesson ?? null);
+  // A próxima lição nunca cruza trilhas: vem da trilha da própria lição.
+  const nextLesson = computed(() =>
+    location.value ? (location.value.track.lessons[location.value.index + 1] ?? null) : null,
+  );
 
   const stepIndex = ref(0);
   /** Verdadeiro após concluir o último passo — mostra o painel de conclusão em vez de sair direto. */
@@ -48,7 +51,7 @@ export function useLessonViewModel() {
   watch(
     lessonId,
     (id) => {
-      const current = track.lessons.find((item) => item.id === id);
+      const current = findLesson(id)?.lesson;
       const done = current ? completedStepCount(id) : 0;
 
       // `?step=<n>` (banner "Voltar à lição" dos exploradores) volta ao passo de origem. Senão,

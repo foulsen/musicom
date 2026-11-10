@@ -86,7 +86,7 @@ describe("useLearnViewModel soft gate", () => {
     lessonId: string,
     score: { correct: number; total: number },
   ) {
-    const lesson = model.track.lessons.find((item) => item.id === lessonId)!;
+    const lesson = model.findLesson(lessonId)!.lesson;
     lesson.steps.forEach((_, index) => model.markStepDone(lessonId, index));
     model.recordCheckpoint(lessonId, score);
   }

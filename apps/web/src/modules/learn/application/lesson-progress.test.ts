@@ -94,9 +94,9 @@ describe("useLearnViewModel with legacy progress", () => {
     expect(status("major-scale")).toBe("completed");
     expect(status("triads")).toBe("completed");
     expect(model.completedStepCount("major-scale")).toBe(
-      model.track.lessons.find((item) => item.id === "major-scale")!.steps.length,
+      model.findLesson("major-scale")!.lesson.steps.length,
     );
-    expect(model.trackProgressPercent.value).toBeGreaterThan(0);
+    expect(model.tracks.value[0].progressPercent).toBeGreaterThan(0);
   });
 
   it("keeps every old lesson completed after the curriculum grew, and shows the new ones as open", () => {
