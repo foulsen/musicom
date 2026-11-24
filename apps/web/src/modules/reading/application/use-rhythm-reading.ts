@@ -118,10 +118,10 @@ export function useRhythmReading() {
   }
 
   /** Conta e metrônomo tocam, mas as notas não: quem lê é que precisa produzir o ritmo. */
-  function start() {
+  async function start() {
     if (isBusy.value) return;
 
-    const played = playback.play(silenced(passage.value), {
+    const played = await playback.play(silenced(passage.value), {
       bpm: rhythmBpm.value,
       countIn: true,
       click: metronome.value,
@@ -135,14 +135,14 @@ export function useRhythmReading() {
     phase.value = "running";
 
     clearTimeout(scoringTimeout);
-    scoringTimeout = setTimeout(score, (played.timeline.totalSeconds + SCORING_GRACE_SECONDS) * 1000);
+    scoringTimeout = setTimeout(score, (played.leadSeconds + played.timeline.totalSeconds + SCORING_GRACE_SECONDS) * 1000);
   }
 
   /** Toca o ritmo escrito como modelo, com contagem e metrônomo. */
-  function listen() {
+  async function listen() {
     if (isBusy.value) return;
 
-    const played = playback.play(passage.value, {
+    const played = await playback.play(passage.value, {
       bpm: rhythmBpm.value,
       countIn: true,
       click: true,

@@ -53,11 +53,11 @@ const { isPlaying, activeEventKey, play: playPassage } = usePassagePlayback();
 // Só a pauta que está tocando recebe o destaque do evento ativo.
 const playingIndex = ref<number | null>(null);
 
-function playStaff(index: number) {
+async function playStaff(index: number) {
   const example = props.staves[index];
   if (!example?.playback) return;
 
-  const handle = playPassage(example.passage, {
+  const handle = await playPassage(example.passage, {
     bpm: example.playback.bpm,
     click: example.playback.click,
     countIn: !!example.playback.click,

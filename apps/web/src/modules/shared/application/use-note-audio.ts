@@ -38,6 +38,90 @@ function ensureContext(): AudioContext {
   return sharedContext;
 }
 
+/** Tempo máximo esperando o `resume()` antes de agendar mesmo assim (evita travar a reprodução). */
+const RESUME_TIMEOUT_MS = 1000;
+
+/**
+ * Garante o contexto rodando antes de agendar uma linha do tempo. Com o contexto suspenso
+ * (primeiro gesto, aba em segundo plano, dispositivo de saída dormindo), `currentTime` fica
+ * defasado e os primeiros eventos — contagem e metrônomo — caíam no passado e saíam mudos.
+ */
+async function ensureRunningContext(): Promise<{ ctx: AudioContext; warmup: number }> {
+  const ctx = ensureContext();
+  let warmup = 0;
+
+  if (ctx.state !== "running") {
+    await Promise.race([
+      ctx.resume().catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, RESUME_TIMEOUT_MS)),
+    ]);
+    warmup = OUTPUT_WARMUP_SECONDS;
+  }
+  if (startKeepAlive(ctx)) warmup = OUTPUT_WARMUP_SECONDS;
+
+  return { ctx, warmup };
+}
+
+/** Tempo para a saída de áudio "acordar" antes do primeiro evento agendado. */
+const OUTPUT_WARMUP_SECONDS = 1;
+
+/** Nível do tom de manutenção (-40 dBFS). */
+const KEEP_ALIVE_LEVEL = 0.01;
+
+/** Rampa de entrada/saída do tom de manutenção, para não estalar. */
+const KEEP_ALIVE_RAMP_SECONDS = 0.05;
+
+/** Quanto o tom continua depois do fim da última reprodução agendada. */
+const KEEP_ALIVE_IDLE_MS = 30_000;
+
+let keepAlive: { oscillator: OscillatorNode; level: GainNode } | null = null;
+let keepAliveTimeout: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Tom contínuo inaudível (20 Hz a -40 dBFS) para a saída de áudio não entrar em espera.
+ * Caixas USB, fones Bluetooth e HDMI desligam com silêncio e só religam com som sustentado
+ * acima de um limiar: cliques curtos do metrônomo sem notas (o "Começar" da leitura rítmica)
+ * se perdiam inteiros. Precisa passar do limiar (~-50 dBFS) e não pode ser DC, que drivers
+ * filtram; 20 Hz fica abaixo do que caixas pequenas reproduzem.
+ *
+ * Só fica ligado durante a prática: desliga `KEEP_ALIVE_IDLE_MS` depois do fim da última
+ * reprodução, para a aba não parecer sempre tocando (o que impede o Windows de dormir e
+ * gasta bateria). Devolve `true` quando acabou de ligar (a saída pode estar acordando).
+ */
+function startKeepAlive(ctx: AudioContext): boolean {
+  if (keepAlive) return false;
+
+  const oscillator = ctx.createOscillator();
+  oscillator.frequency.value = 20;
+  const level = ctx.createGain();
+  level.gain.setValueAtTime(0, ctx.currentTime);
+  level.gain.linearRampToValueAtTime(KEEP_ALIVE_LEVEL, ctx.currentTime + KEEP_ALIVE_RAMP_SECONDS);
+  oscillator.connect(level).connect(ctx.destination);
+  oscillator.start();
+
+  keepAlive = { oscillator, level };
+  return true;
+}
+
+/** Agenda o desligamento do tom para `KEEP_ALIVE_IDLE_MS` depois de `untilSeconds` (relógio do contexto). */
+function holdKeepAlive(ctx: AudioContext, untilSeconds: number) {
+  clearTimeout(keepAliveTimeout);
+  const remainingMs = Math.max(0, untilSeconds - ctx.currentTime) * 1000;
+  keepAliveTimeout = setTimeout(() => stopKeepAlive(ctx), remainingMs + KEEP_ALIVE_IDLE_MS);
+}
+
+function stopKeepAlive(ctx: AudioContext) {
+  if (!keepAlive) return;
+
+  const { oscillator, level } = keepAlive;
+  const now = ctx.currentTime;
+  level.gain.setValueAtTime(KEEP_ALIVE_LEVEL, now);
+  level.gain.linearRampToValueAtTime(0, now + KEEP_ALIVE_RAMP_SECONDS);
+  oscillator.stop(now + KEEP_ALIVE_RAMP_SECONDS);
+  oscillator.onended = () => level.disconnect();
+  keepAlive = null;
+}
+
 function ensureNoiseBuffer(ctx: AudioContext): AudioBuffer {
   if (!sharedNoiseBuffer) {
     const seconds = 0.3;
@@ -165,16 +249,27 @@ export function useNoteAudio() {
    * Toca notas e cliques numa linha do tempo comum. Devolve `startTime`: o instante do
    * relógio do `AudioContext` correspondente ao offset 0 (útil para comparar toques do usuário).
    */
-  function playTimeline(notes: TimedPitch[], clicks: TimedClick[] = []): { startTime: number } {
-    const ctx = ensureContext();
-    const startTime = ctx.currentTime + 0.1;
+  async function playTimeline(
+    notes: TimedPitch[],
+    clicks: TimedClick[] = [],
+  ): Promise<{ startTime: number; leadSeconds: number }> {
+    const { ctx, warmup } = await ensureRunningContext();
+    const leadSeconds = 0.1 + warmup;
+    const startTime = ctx.currentTime + leadSeconds;
 
     notes.forEach(({ pitch, offsetSeconds, durationSeconds }) =>
       scheduleNote(ctx, pitch, startTime + offsetSeconds, durationSeconds),
     );
     clicks.forEach(({ offsetSeconds, accent }) => scheduleClick(ctx, startTime + offsetSeconds, accent));
 
-    return { startTime };
+    const endOffset = Math.max(
+      0,
+      ...notes.map(({ offsetSeconds, durationSeconds }) => offsetSeconds + durationSeconds),
+      ...clicks.map(({ offsetSeconds }) => offsetSeconds),
+    );
+    holdKeepAlive(ctx, startTime + endOffset);
+
+    return { startTime, leadSeconds };
   }
 
   /** Tempo do relógio do `AudioContext` que o usuário está de fato ouvindo (desconta a latência de saída). */

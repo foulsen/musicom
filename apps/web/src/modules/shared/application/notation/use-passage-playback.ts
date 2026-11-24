@@ -12,6 +12,8 @@ import {
 export interface PlaybackHandle {
   /** Tempo do `AudioContext` em que o tick 0 (depois da contagem) toca. */
   tickZeroTime: number;
+  /** Atraso entre a chamada e o offset 0 (inclui o aquecimento da saída de áudio). */
+  leadSeconds: number;
   timeline: PassageTimeline;
 }
 
@@ -28,15 +30,16 @@ export function usePassagePlayback() {
     timeouts = [];
   }
 
-  function play(passage: Passage, options: PassagePlaybackOptions): PlaybackHandle | null {
+  async function play(passage: Passage, options: PassagePlaybackOptions): Promise<PlaybackHandle | null> {
     if (isPlaying.value) return null;
 
-    const timeline = buildPassageTimeline(passage, options);
-    const { startTime } = playTimeline(timeline.notes, timeline.clicks);
-
+    // Marca antes do `await` para bloquear um segundo clique enquanto o áudio retoma.
     isPlaying.value = true;
+    const timeline = buildPassageTimeline(passage, options);
+    const { startTime, leadSeconds } = await playTimeline(timeline.notes, timeline.clicks);
+
     timeline.attacks.forEach((attack, index) => {
-      const delayMs = (timeline.countInSeconds + timeline.attackSeconds[index]) * 1000;
+      const delayMs = (leadSeconds + timeline.countInSeconds + timeline.attackSeconds[index]) * 1000;
       timeouts.push(
         setTimeout(() => {
           activeEventKey.value = eventKey(attack.measureIndex, attack.eventIndex);
@@ -48,10 +51,10 @@ export function usePassagePlayback() {
         isPlaying.value = false;
         activeEventKey.value = null;
         timeouts = [];
-      }, timeline.totalSeconds * 1000),
+      }, (leadSeconds + timeline.totalSeconds) * 1000),
     );
 
-    return { tickZeroTime: startTime + timeline.countInSeconds, timeline };
+    return { tickZeroTime: startTime + timeline.countInSeconds, leadSeconds, timeline };
   }
 
   if (getCurrentScope()) onScopeDispose(clearTimeouts);
