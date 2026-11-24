@@ -7,6 +7,7 @@ import { Metronome, Play, SkipForward, Volume2 } from "@lucide/vue";
 import { RHYTHM_LEVEL_IDS, type RhythmLevelId } from "../../application/reading-types";
 import { useRhythmReading } from "../../application/use-rhythm-reading";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { LatencyCalibration } from "@/modules/shared/components/latency-calibration";
 import { StaffNotation } from "@/modules/shared/components/staff-notation";
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
@@ -193,6 +194,11 @@ useTypingGuardedKeydown(handleKeydown);
       <p class="text-center text-xs text-muted-foreground">
         {{ t("reading.rhythm.shortcutHint") }}
       </p>
+
+      <details class="mx-auto w-full max-w-sm rounded-lg border border-border px-4 py-2 text-left">
+        <summary class="cursor-pointer text-xs font-medium text-muted-foreground">{{ t("latency.title") }}</summary>
+        <latency-calibration class="mt-3" :show-title="false" />
+      </details>
     </section>
   </div>
 </template>

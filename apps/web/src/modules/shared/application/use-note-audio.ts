@@ -3,6 +3,7 @@ import { storeToRefs } from "pinia";
 import type { Pitch } from "@music-workspace/music-theory";
 
 import { INSTRUMENT_PRESETS } from "./instrument-presets";
+import { useAudioLatencyStore } from "./use-audio-latency-store";
 import { useAudioSettingsStore } from "./use-audio-settings-store";
 
 /**
@@ -141,6 +142,7 @@ function ensureNoiseBuffer(ctx: AudioContext): AudioBuffer {
 export function useNoteAudio() {
   const settings = useAudioSettingsStore();
   const { masterVolume, instrument } = storeToRefs(settings);
+  const latency = useAudioLatencyStore();
 
   /**
    * Agenda uma nota isolada em `startTime` (segundos do relógio do `AudioContext`),
@@ -273,10 +275,13 @@ export function useNoteAudio() {
   }
 
   /** Tempo do relógio do `AudioContext` que o usuário está de fato ouvindo (desconta a latência de saída). */
-  function perceivedAudioTime(): number {
+  function perceivedAudioTime(options: { includeCalibration?: boolean } = {}): number {
     const ctx = ensureContext();
+    const reported = ctx.outputLatency || ctx.baseLatency || 0;
+    // A calibração mede o atraso que sobra além do informado; ela própria lê sem ele.
+    const calibrated = options.includeCalibration === false ? 0 : latency.extraLatencyMs / 1000;
 
-    return ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0);
+    return ctx.currentTime - reported - calibrated;
   }
 
   function play(pitch: Pitch) {

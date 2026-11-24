@@ -25,6 +25,7 @@ import { INSTRUMENT_IDS, type InstrumentId } from "@/modules/shared/application/
 import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import { useSyncStore } from "@/modules/shared/application/sync";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
+import { LatencyCalibration } from "@/modules/shared/components/latency-calibration";
 
 import { AuthSection } from "@/modules/auth/components/auth-section";
 
@@ -137,6 +138,8 @@ watch(locale, (value) => localStorage.setItem(LOCALE_STORAGE_KEY, value));
               class="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-brand"
             />
           </div>
+
+          <latency-calibration />
         </div>
 
         <separator class="my-4" />
