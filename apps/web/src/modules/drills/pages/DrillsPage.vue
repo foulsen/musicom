@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
-import { RotateCcw } from "@lucide/vue";
+import { Maximize, Minimize, RotateCcw } from "@lucide/vue";
 
 import { useFlashcardDrill } from "../application/use-flashcard-drill";
 import { useFretboardDrill } from "../application/use-fretboard-drill";
@@ -99,6 +99,33 @@ const noteIdScorePercent = computed(() =>
 );
 
 const noteIdNextButton = useTemplateRef<HTMLButtonElement>("noteIdNextButton");
+
+/**
+ * Tela cheia do palco do Note ID: esconde a barra do navegador/sistema no celular
+ * para responder sem rolar. Só existe onde a Fullscreen API existe (não no iPhone).
+ */
+const noteIdStage = useTemplateRef<HTMLElement>("noteIdStage");
+const canFullscreen = typeof document !== "undefined" && document.fullscreenEnabled === true;
+const isNoteIdFullscreen = ref(false);
+
+function syncFullscreen() {
+  isNoteIdFullscreen.value = document.fullscreenElement !== null && document.fullscreenElement === noteIdStage.value;
+}
+
+async function toggleNoteIdFullscreen() {
+  if (document.fullscreenElement) {
+    await document.exitFullscreen().catch(() => {});
+    return;
+  }
+
+  await noteIdStage.value?.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+  // Braço do violão cabe melhor deitado; nem todo navegador permite travar.
+  const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+  await orientation.lock?.("landscape").catch(() => {});
+}
+
+onMounted(() => document.addEventListener("fullscreenchange", syncFullscreen));
+onBeforeUnmount(() => document.removeEventListener("fullscreenchange", syncFullscreen));
 
 // Move o foco para "Next" assim que a resposta é revelada (os botões de nota deixam
 // de ser o alvo natural) — mesmo padrão de foco do Ear Training (WCAG 4.1.3).
@@ -316,6 +343,27 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
         {{ t("drills.noteId.bestStreak", { streak: noteIdBestStreak }) }}
       </p>
 
+      <div
+        ref="noteIdStage"
+        class="note-id-stage flex flex-col gap-3 bg-background"
+        :class="isNoteIdFullscreen && 'h-dvh justify-center overflow-y-auto p-3'"
+      >
+        <div v-if="canFullscreen" class="flex items-center justify-end gap-3">
+          <p v-if="isNoteIdFullscreen" class="text-sm text-muted-foreground">
+            {{ t("drills.noteId.score", { correct: noteIdScore.correct, total: noteIdScore.total }) }}
+            <span v-if="noteIdStreak > 1">· 🔥{{ noteIdStreak }}</span>
+          </p>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-md border border-border bg-card/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :aria-pressed="isNoteIdFullscreen"
+            @click="toggleNoteIdFullscreen"
+          >
+            <component :is="isNoteIdFullscreen ? Minimize : Maximize" class="size-3.5" />
+            {{ isNoteIdFullscreen ? t("drills.noteId.exitFullscreen") : t("drills.noteId.enterFullscreen") }}
+          </button>
+        </div>
+
       <note-id-fretboard :positions="noteIdPositions" :target="noteIdTarget" />
 
       <note-option-grid
@@ -344,6 +392,7 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
         >
           {{ t("drills.noteId.next") }}
         </button>
+      </div>
       </div>
 
       <!-- Resumo compacto por corda (posições do nível ativo): mostra onde está o ponto fraco. -->

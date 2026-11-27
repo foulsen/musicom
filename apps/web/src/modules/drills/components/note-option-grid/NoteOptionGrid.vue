@@ -45,7 +45,7 @@ function handleClick(note: SingleNote) {
       :key="note"
       type="button"
       :aria-disabled="selected !== null"
-      class="rounded-lg border py-3 text-center text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      class="rounded-lg border py-3 text-center [@media(max-height:500px)]:py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
       :class="stateClass(note)"
       @click="handleClick(note)"
     >

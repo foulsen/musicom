@@ -337,6 +337,8 @@ export const en = {
       score: "Score: {correct}/{total}",
       bestStreak: "Best streak: {streak}",
       resetScore: "Reset score",
+      enterFullscreen: "Full screen",
+      exitFullscreen: "Exit full screen",
       next: "Next",
       level: "Level",
       levels: {

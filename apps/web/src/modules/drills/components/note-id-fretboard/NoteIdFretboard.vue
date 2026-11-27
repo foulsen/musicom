@@ -121,7 +121,7 @@ const targetAriaLabel = computed(() => {
 </script>
 
 <template>
-  <div class="relative w-full overflow-x-auto">
+  <div class="note-id-fretboard relative w-full overflow-x-auto">
     <svg
       :viewBox="`0 0 ${width} ${height + HEADER_ROW + 24}`"
       :style="{ width: `${width}px` }"
@@ -214,6 +214,22 @@ const targetAriaLabel = computed(() => {
 </template>
 
 <style scoped>
+/*
+ * Telas baixas (celular deitado) e tela cheia: o braço encolhe para caber na
+ * altura junto com os botões de nota, em vez de forçar rolagem vertical.
+ */
+@media (max-height: 500px) {
+  .note-id-fretboard svg {
+    width: 100% !important;
+    max-height: 52dvh;
+  }
+}
+
+:fullscreen .note-id-fretboard svg {
+  width: 100% !important;
+  max-height: 55dvh;
+}
+
 @keyframes note-id-pulse {
   0%, 100% {
     transform: scale(1);

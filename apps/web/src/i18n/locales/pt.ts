@@ -337,6 +337,8 @@ export const pt: MessageSchema = {
       score: "Placar: {correct}/{total}",
       bestStreak: "Melhor sequência: {streak}",
       resetScore: "Zerar placar",
+      enterFullscreen: "Tela cheia",
+      exitFullscreen: "Sair da tela cheia",
       next: "Próxima",
       level: "Nível",
       levels: {
