@@ -346,7 +346,7 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
       <div
         ref="noteIdStage"
         class="note-id-stage flex flex-col gap-3 bg-background"
-        :class="isNoteIdFullscreen && 'h-dvh justify-center overflow-y-auto p-3'"
+        :class="isNoteIdFullscreen && 'h-dvh overflow-hidden p-3'"
       >
         <div v-if="canFullscreen" class="flex items-center justify-end gap-3">
           <p v-if="isNoteIdFullscreen" class="text-sm text-muted-foreground">
@@ -364,7 +364,11 @@ const deckContext = computed(() => t(`drills.flashcards.deckContexts.${activeDec
           </button>
         </div>
 
-      <note-id-fretboard :positions="noteIdPositions" :target="noteIdTarget" />
+      <note-id-fretboard
+        :positions="noteIdPositions"
+        :target="noteIdTarget"
+        :class="isNoteIdFullscreen && 'min-h-0 flex-1'"
+      />
 
       <note-option-grid
         :options="NOTE_OPTIONS"

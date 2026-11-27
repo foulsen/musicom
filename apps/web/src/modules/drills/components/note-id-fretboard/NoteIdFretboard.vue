@@ -225,9 +225,11 @@ const targetAriaLabel = computed(() => {
   }
 }
 
+/* Em tela cheia o braço ocupa toda a altura que sobra (o pai dá flex-1). */
 :fullscreen .note-id-fretboard svg {
   width: 100% !important;
-  max-height: 55dvh;
+  height: 100%;
+  max-height: none;
 }
 
 @keyframes note-id-pulse {
