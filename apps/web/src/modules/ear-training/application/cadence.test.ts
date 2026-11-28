@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { Pitch } from "@music-workspace/music-theory";
 
-import { cadenceChords, cadenceTimeline, timelineDurationMs } from "./cadence";
+import { cadenceChords, cadenceTimeline, melodyTimeline, timelineDurationMs } from "./cadence";
 
 describe("cadence", () => {
   const tonic = Pitch.from("C", 4);
@@ -52,5 +52,29 @@ describe("cadence", () => {
     expect(explicit.map((n) => [n.offsetSeconds, n.durationSeconds])).toEqual(
       implicit.map((n) => [n.offsetSeconds, n.durationSeconds]),
     );
+  });
+
+  it("melodyTimeline plays only the notes, spaced like the targets after the cadence", () => {
+    const notes = [tonic, tonic.transpose(2), tonic.transpose(4)];
+    const melody = melodyTimeline(notes);
+    const afterCadence = cadenceTimeline(tonic, notes).slice(-notes.length);
+
+    expect(melody.map((note) => note.pitch)).toEqual(notes);
+    expect(melody[0].offsetSeconds).toBe(0);
+    melody.forEach((note, index) => {
+      expect(note.offsetSeconds - melody[0].offsetSeconds).toBeCloseTo(
+        afterCadence[index].offsetSeconds - afterCadence[0].offsetSeconds,
+      );
+      expect(note.durationSeconds).toBeCloseTo(afterCadence[index].durationSeconds);
+    });
+  });
+
+  it("melodyTimeline scales by the tempo factor", () => {
+    const notes = [tonic, tonic.transpose(2)];
+    const normal = melodyTimeline(notes);
+    const fast = melodyTimeline(notes, 2);
+
+    expect(fast[1].offsetSeconds).toBeCloseTo(normal[1].offsetSeconds / 2);
+    expect(fast[1].durationSeconds).toBeCloseTo(normal[1].durationSeconds / 2);
   });
 });

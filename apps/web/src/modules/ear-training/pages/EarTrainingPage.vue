@@ -2,10 +2,11 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { Play, RotateCcw } from "@lucide/vue";
+import { Music, Play, RotateCcw } from "@lucide/vue";
 
 import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
+import { degreeIdForDigit } from "../application/dictation";
 import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
 import {
   MIN_CUSTOM_ITEMS,
@@ -15,6 +16,7 @@ import {
   type QuizKind,
   type ScaleDirection,
 } from "../application/question-generators";
+import { DictationPad } from "../components/dictation-pad";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { useMusicTerms, type TermLabel } from "@/modules/shared/application/music-terms";
@@ -24,6 +26,7 @@ const {
   kind,
   question,
   selectedOptionId,
+  dictationInput,
   isAnswered,
   isCorrect,
   score,
@@ -42,6 +45,7 @@ const {
   customItemIds,
   allItems,
   replay,
+  replayMelody,
   newQuestion,
   selectKind,
   selectDifficulty,
@@ -54,6 +58,9 @@ const {
   selectChordVoicing,
   toggleVarySound,
   answer,
+  enterDegree,
+  deleteDegree,
+  clearDictation,
   resetScore,
   playYourAnswer,
   playCorrectAnswer,
@@ -74,6 +81,9 @@ function caseClass(termLabel: TermLabel): string {
 /** Com o mínimo selecionado, os chips marcados não podem ser removidos (senão faltariam itens para as opções). */
 const atMinimumCustomItems = computed(() => customItemIds.value.length <= MIN_CUSTOM_ITEMS);
 
+/** Ditado: sem alternativas, sem "Personalizar" e com o próprio teclado de graus. */
+const isDictation = computed(() => kind.value === "dictation");
+
 const scorePercent = computed(() =>
   score.value.total === 0 ? null : Math.round((score.value.correct / score.value.total) * 100),
 );
@@ -88,9 +98,22 @@ watch(isAnswered, (answered) => {
   nextTick(() => nextButton.value?.focus());
 });
 
-/** Atalhos de teclado: 1-4 escolhem a opção, R repete o áudio, Enter/Espaço avança. */
+/** Atalhos de teclado: 1-4 escolhem a opção (1-7 digitam graus no ditado), R repete o áudio, Enter/Espaço avança. */
 function handleKeydown(event: KeyboardEvent) {
-  if (event.key >= "1" && event.key <= "4") {
+  if (isDictation.value) {
+    const degreeId = degreeIdForDigit(event.key);
+
+    if (degreeId) {
+      enterDegree(degreeId);
+      return;
+    }
+
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      deleteDegree();
+      return;
+    }
+  } else if (event.key >= "1" && event.key <= "4") {
     const option = question.value.options[Number(event.key) - 1];
     if (option && !isAnswered.value) answer(option.id);
     return;
@@ -182,6 +205,7 @@ useTypingGuardedKeydown(handleKeydown);
         </chip-toggle-group>
 
         <button
+          v-if="!isDictation"
           type="button"
           class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :class="customActive
@@ -332,12 +356,39 @@ useTypingGuardedKeydown(handleKeydown);
           {{ t("earTraining.cadenceHint") }}
         </p>
 
-        <p v-if="hasPlayedFirst && !isAnswered" class="text-xs text-muted-foreground">
+        <p v-if="isDictation" class="text-xs text-muted-foreground">
+          {{ t("earTraining.dictation.hint") }}
+        </p>
+
+        <button
+          v-if="isDictation"
+          type="button"
+          class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :title="t('earTraining.dictation.melodyOnlyHint')"
+          @click="replayMelody"
+        >
+          <music class="size-3.5" />
+          {{ t("earTraining.dictation.melodyOnly") }}
+        </button>
+
+        <p v-if="hasPlayedFirst && !isAnswered && !isDictation" class="text-xs text-muted-foreground">
           {{ t("earTraining.clickPlayHint") }}
         </p>
       </div>
 
+      <dictation-pad
+        v-if="question.dictation"
+        :expected="question.dictation.degreeIds"
+        :entered="dictationInput"
+        :vocabulary="question.dictation.vocabulary"
+        :answered="isAnswered"
+        @enter="enterDegree"
+        @backspace="deleteDegree"
+        @clear="clearDictation"
+      />
+
       <answer-options
+        v-else
         :options="question.options"
         :correct-id="question.correctId"
         :selected-id="selectedOptionId"
@@ -345,16 +396,25 @@ useTypingGuardedKeydown(handleKeydown);
       />
 
       <p class="text-center text-xs text-muted-foreground">
-        {{ t("earTraining.shortcutHint") }}
+        {{ isDictation ? t("earTraining.dictation.shortcutHint") : t("earTraining.shortcutHint") }}
       </p>
 
       <div class="flex min-h-[52px] flex-wrap items-center justify-between gap-4">
         <div v-if="isAnswered" role="status" aria-live="polite" aria-atomic="true" class="flex flex-wrap items-center gap-3">
           <p class="text-sm font-medium" :class="isCorrect ? 'text-brand' : 'text-destructive'">
-            {{ isCorrect ? t("earTraining.correct") : t("earTraining.incorrect") }}
+            {{ isCorrect ? t("earTraining.correct") : isDictation ? t("earTraining.dictation.incorrect") : t("earTraining.incorrect") }}
           </p>
 
-          <template v-if="!isCorrect">
+          <button
+            v-if="isDictation"
+            type="button"
+            class="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            @click="playCorrectAnswer"
+          >
+            {{ t("earTraining.dictation.hearCorrect") }}
+          </button>
+
+          <template v-else-if="!isCorrect">
             <button
               type="button"
               class="rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -444,7 +504,7 @@ useTypingGuardedKeydown(handleKeydown);
               {{ label(item.confusion.label) }}
             </button>
             <button
-              v-if="item.confusion"
+              v-if="item.confusion && !isDictation"
               type="button"
               class="rounded-md bg-brand-soft px-2 py-1 text-xs font-medium text-brand-soft-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               @click="drillWeakItem(item.id)"

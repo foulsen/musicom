@@ -20,6 +20,12 @@ describe("weakestEarItems", () => {
     expect(weakestEarItems(state, 1)).toHaveLength(1);
   });
 
+  it("includes dictation degrees", () => {
+    const state = { itemStats: { dictation: { "5": { correct: 0, total: 4 } } } };
+
+    expect(weakestEarItems(state).map(({ kind, id }) => `${kind}:${id}`)).toEqual(["dictation:5"]);
+  });
+
   it("breaks ties by the larger number of attempts", () => {
     const state = {
       itemStats: {

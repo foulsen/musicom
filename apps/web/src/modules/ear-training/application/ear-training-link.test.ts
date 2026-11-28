@@ -10,6 +10,10 @@ describe("parseEarTrainingQuery", () => {
     });
   });
 
+  it("accepts the dictation quiz kind", () => {
+    expect(parseEarTrainingQuery({ quiz: "dictation", difficulty: "hard" })).toEqual({ kind: "dictation", difficulty: "hard" });
+  });
+
   it("accepts each field on its own", () => {
     expect(parseEarTrainingQuery({ quiz: "scale" })).toEqual({ kind: "scale" });
     expect(parseEarTrainingQuery({ difficulty: "hard" })).toEqual({ difficulty: "hard" });

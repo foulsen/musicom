@@ -10,9 +10,11 @@ import {
   generateQuestion,
   invertPitches,
   itemIdsForDifficulty,
+  labelForItem,
   orderScalePitches,
   poolFor,
   pickItemAndDistractors,
+  pitchesForItem,
   pitchesForOption,
   resolveChordInversion,
   resolveIntervalDescending,
@@ -208,6 +210,47 @@ describe("scale degree questions", () => {
   });
 });
 
+describe("dictation questions", () => {
+  it.each(["easy", "medium", "hard"] as const)("builds a typed-answer question without options (%s)", (difficulty) => {
+    for (let i = 0; i < 20; i++) {
+      const question = generateQuestion("dictation", difficulty);
+      const dictation = question.dictation!;
+
+      expect(question.kind).toBe("dictation");
+      expect(question.playback).toBe("dictation");
+      expect(question.options).toEqual([]);
+      expect(question.correctId).toBe(dictation.degreeIds.join("-"));
+      expect(question.pitches).toEqual(dictation.notes);
+      expect(question.tonic).toBeDefined();
+      expect(dictation.vocabulary).toEqual(itemIdsForDifficulty("dictation", difficulty));
+    }
+  });
+
+  it("ignores custom item sets", () => {
+    const question = generateQuestion("dictation", "easy", { customItemIds: ["1", "6", "8", "11"] });
+
+    expect(question.dictation!.degreeIds.every((id) => ["0", "2", "4", "5", "7"].includes(id))).toBe(true);
+  });
+
+  it("uses the injected random source", () => {
+    const first = generateQuestion("dictation", "hard", { random: () => 0.3 });
+    const second = generateQuestion("dictation", "hard", { random: () => 0.3 });
+
+    expect(second.correctId).toBe(first.correctId);
+    expect(second.tonic!.midi()).toBe(first.tonic!.midi());
+  });
+
+  it("labels degrees like the scale-degree quiz and plays a single degree from the tonic", () => {
+    expect(labelForItem("dictation", "0")).toBe("1");
+    expect(labelForItem("dictation", "7")).toBe("5");
+    expect(allItemsForKind("dictation").map((item) => item.id)).toEqual(["0", "2", "4", "5", "7", "9", "11"]);
+
+    const tonic = Pitch.from("C", 4);
+
+    expect(pitchesForItem("dictation", "7", tonic)!.map((pitch) => pitch.midi())).toEqual([67]);
+  });
+});
+
 describe("progression questions", () => {
   it.each(["easy", "medium", "hard"] as const)("returns 4 distinct options with the correct id present (%s)", (difficulty) => {
     for (let i = 0; i < 30; i++) {
@@ -337,6 +380,7 @@ describe("custom item set", () => {
     [5, 3],
     [6, 3],
   ];
+  // Ditado fica de fora: não tem alternativas nem conjunto personalizado (ver "dictation questions").
   const ALL_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree", "progression"];
 
   it("uses the difficulty pool when there are no custom ids", () => {

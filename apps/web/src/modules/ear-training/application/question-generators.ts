@@ -33,6 +33,7 @@ import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/applicat
 import type { QuizOption } from "@/modules/shared/application/quiz";
 
 import { itemWeight, pickWeighted, topConfusionId, type ItemStatsState } from "./item-stats";
+import { DICTATION_DEGREE_IDS, dictationAnswerId, dictationVocabulary, generateDictation } from "./dictation";
 import { PROGRESSION_ENTRIES, progressionChords, progressionItem } from "./progression";
 import type { QuestionSound } from "./question-sound";
 
@@ -165,7 +166,7 @@ export function scaleDegreeLabel(semitones: number): TermLabel {
 /** Oitavas da tônica no quiz de progressões (o baixo de cada acorde fica uma oitava abaixo). */
 const PROGRESSION_TONIC_OCTAVES = [3, 4];
 
-export type QuizKind = "interval" | "chordQuality" | "scale" | "scaleDegree" | "progression";
+export type QuizKind = "interval" | "chordQuality" | "scale" | "scaleDegree" | "progression" | "dictation";
 
 /** Voicing dos acordes do quiz de qualidade: sempre fundamental ou com inversão sorteada por questão. */
 export type ChordVoicing = "root" | "inversions";
@@ -204,12 +205,17 @@ export interface Question {
   options: QuizOption[];
   /** Sempre ascendentes a partir da fundamental (ou só a nota-alvo, no quiz de graus). */
   pitches: Pitch[];
-  playback: "chord" | "sequence" | "cadence" | "progression";
+  playback: "chord" | "sequence" | "cadence" | "progression" | "dictation";
   /** Intervalo melódico tocado de cima para baixo (aplicado só na hora de tocar). */
   descending?: boolean;
   /** Qualidade de acorde: inversão tocada (0 = fundamental). `pitches` continua em posição fundamental, com a raiz em `pitches[0]`. */
   inversion?: number;
-  /** Tônica da tonalidade (graus e progressões): base da cadência/progressão e de "ouvir sua resposta". */
+  /**
+   * Ditado melódico: graus esperados e notas da melodia. Sem `options` (a resposta é digitada, não escolhida);
+   * `correctId` é a resposta composta (`dictationAnswerId`) e `pitches` repete as notas.
+   */
+  dictation?: { degreeIds: string[]; notes: Pitch[]; vocabulary: string[] };
+  /** Tônica da tonalidade (graus, progressões e ditado): base da cadência/progressão e de "ouvir sua resposta". */
   tonic?: Pitch;
   /** Timbre e andamento sorteados ("Variar som"); ausente = som padrão do usuário. */
   sound?: QuestionSound;
@@ -378,6 +384,21 @@ function generateProgressionQuestion(difficulty: Difficulty, generate: GenerateO
   };
 }
 
+/** Ditado melódico: sem alternativas, então ignora `customItemIds` e as estatísticas (a dificuldade define melodia e teclado). */
+function generateDictationQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
+  const { tonic, notes, degreeIds, vocabulary } = generateDictation(difficulty, generate.random);
+
+  return {
+    kind: "dictation",
+    correctId: dictationAnswerId(degreeIds),
+    options: [],
+    pitches: notes,
+    playback: "dictation",
+    dictation: { degreeIds, notes, vocabulary },
+    tonic,
+  };
+}
+
 export type ScaleDirection = "ascending" | "descending" | "both";
 
 /**
@@ -402,6 +423,7 @@ export function generateQuestion(
   if (kind === "scale") return generateScaleQuestion(difficulty, options);
   if (kind === "scaleDegree") return generateScaleDegreeQuestion(difficulty, options);
   if (kind === "progression") return generateProgressionQuestion(difficulty, options);
+  if (kind === "dictation") return generateDictationQuestion(difficulty, options);
 
   return generateIntervalQuestion(difficulty, options);
 }
@@ -410,7 +432,7 @@ export function generateQuestion(
 export function labelForItem(kind: QuizKind, id: string): TermLabel {
   if (kind === "interval") return intervalLabel(Number(id));
   if (kind === "chordQuality") return chordQualityLabel(id);
-  if (kind === "scaleDegree") return scaleDegreeLabel(Number(id));
+  if (kind === "scaleDegree" || kind === "dictation") return scaleDegreeLabel(Number(id));
   if (kind === "progression") return progressionItem(id)?.label ?? id;
 
   return scaleLabel(id);
@@ -422,6 +444,7 @@ function entryIdsForKind(kind: QuizKind): string[] {
   if (kind === "scaleDegree") return SCALE_DEGREE_ENTRIES.map(([semitones]) => semitones.toString());
   if (kind === "chordQuality") return CHORD_QUALITY_ENTRIES.map(([pattern]) => pattern.name);
   if (kind === "progression") return PROGRESSION_ENTRIES.map(([item]) => item.id);
+  if (kind === "dictation") return [...DICTATION_DEGREE_IDS];
 
   return SCALE_ENTRIES.map(([pattern]) => pattern.name);
 }
@@ -437,6 +460,7 @@ export function itemIdsForDifficulty(kind: QuizKind, difficulty: Difficulty): st
   if (kind === "scaleDegree") return poolForDifficulty(SCALE_DEGREE_ENTRIES, difficulty).map(String);
   if (kind === "chordQuality") return poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty).map((item) => item.name);
   if (kind === "progression") return poolForDifficulty(PROGRESSION_ENTRIES, difficulty).map((item) => item.id);
+  if (kind === "dictation") return dictationVocabulary(difficulty);
 
   return poolForDifficulty(SCALE_ENTRIES, difficulty).map((item) => item.name);
 }
@@ -447,8 +471,8 @@ export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[]
     return [root, root.transpose(Number(id))];
   }
 
-  // `root` é a tônica: a resposta é só a nota-alvo (a cadência vem do playback).
-  if (kind === "scaleDegree") {
+  // `root` é a tônica: a resposta é só a nota-alvo (a cadência vem do playback). No ditado, o item é um grau da melodia.
+  if (kind === "scaleDegree" || kind === "dictation") {
     return [root.transpose(Number(id))];
   }
 

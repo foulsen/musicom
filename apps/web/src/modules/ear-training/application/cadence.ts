@@ -37,13 +37,22 @@ export function cadenceTimeline(tonic: Pitch, targets: readonly Pitch[], tempo =
   );
 
   const targetStart = CADENCE_VOICINGS.length * CHORD_STEP_SECONDS + TARGET_GAP_SECONDS;
-  const notes = targets.map((pitch, index) => ({
+
+  return [...chords, ...targetNotes(targets, targetStart, tempo)];
+}
+
+/** Notas-alvo em sequência a partir de `startSeconds` (no andamento normal), cada uma TARGET_DURATION_SECONDS depois da anterior. */
+function targetNotes(targets: readonly Pitch[], startSeconds: number, tempo: number): TimedPitch[] {
+  return targets.map((pitch, index) => ({
     pitch,
-    offsetSeconds: (targetStart + index * TARGET_DURATION_SECONDS) / tempo,
+    offsetSeconds: (startSeconds + index * TARGET_DURATION_SECONDS) / tempo,
     durationSeconds: TARGET_DURATION_SECONDS / tempo,
   }));
+}
 
-  return [...chords, ...notes];
+/** Só a melodia, sem a cadência — mesmo espaçamento de `cadenceTimeline`, para reouvir depois de o tom já estar claro. */
+export function melodyTimeline(notes: readonly Pitch[], tempo = 1): TimedPitch[] {
+  return targetNotes(notes, 0, tempo);
 }
 
 /** Fim da linha do tempo, em ms — para o estado "tocando" do botão Play. */

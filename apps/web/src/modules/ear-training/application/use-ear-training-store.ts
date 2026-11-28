@@ -23,6 +23,7 @@ export const useEarTrainingStore = defineStore("ear-training", {
       scale: emptyScore(),
       scaleDegree: emptyScore(),
       progression: emptyScore(),
+      dictation: emptyScore(),
     } as Record<QuizKind, QuizScore>,
     /** Acertos por item (`itemStats[tipo][id]`) — base do sampling adaptativo e dos pontos fracos. */
     itemStats: {} as ItemStatsByKind,

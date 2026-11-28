@@ -4,7 +4,7 @@ import { scoreSchema } from "./primitives";
 import { syncEnvelopeSchema } from "./sync/envelope";
 
 /** Quiz kinds from `question-generators` (`ear-training` module). */
-export const quizKindSchema = z.enum(["interval", "chordQuality", "scale", "scaleDegree", "progression"]);
+export const quizKindSchema = z.enum(["interval", "chordQuality", "scale", "scaleDegree", "progression", "dictation"]);
 export type QuizKind = z.infer<typeof quizKindSchema>;
 
 /** Stable domain id of a quiz item (semitones as string, or the chord/scale pattern name). */

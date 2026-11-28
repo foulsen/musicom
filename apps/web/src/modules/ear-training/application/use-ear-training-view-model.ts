@@ -10,7 +10,8 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 import type { TermLabel } from "@/modules/shared/application/music-terms";
 
 import { customSetForWeakItem } from "./custom-set";
-import { cadenceTimeline, timelineDurationMs } from "./cadence";
+import { cadenceTimeline, melodyTimeline, timelineDurationMs } from "./cadence";
+import { dictationAnswerId, gradeDictation } from "./dictation";
 import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
 import { progressionTimeline } from "./progression";
@@ -102,7 +103,10 @@ export function useEarTrainingViewModel() {
   }
 
   const question = ref(freshQuestion());
+  /** Escolha da questão: o id da opção, ou (ditado) a resposta composta digitada. */
   const selectedOptionId = ref<string | null>(null);
+  /** Ditado: graus digitados até agora (ids em semitons), em ordem. */
+  const dictationInput = ref<string[]>([]);
 
   /** Liga durante o playback (estimado) para animar o botão Play; nunca tocou = estado inicial silencioso. */
   const isPlaying = ref(false);
@@ -129,6 +133,8 @@ export function useEarTrainingViewModel() {
     /** Id do item tocado — a progressão é montada pelo id, não pelas pitches. */
     itemId?: string;
     sound?: QuestionSound;
+    /** Ditado: toca só a melodia, sem a cadência (útil quando o tom já está claro). */
+    melodyOnly?: boolean;
   }
 
   function playPitches(rawPitches: Pitch[], asChord: boolean, playedKind: QuizKind = kind.value, context: PlayContext = {}) {
@@ -143,8 +149,13 @@ export function useEarTrainingViewModel() {
 
     let durationMs: number;
 
-    if (playedKind === "scaleDegree" && context.tonic) {
-      // Graus: cadência I–IV–V–I fixa o tom antes da nota-alvo.
+    if (playedKind === "dictation" && context.melodyOnly) {
+      // Ditado, só a melodia: mesmo espaçamento da cadência+melodia, sem o contexto harmônico.
+      const timeline = melodyTimeline(rawPitches, tempo);
+      void playTimeline(timeline, [], soundOptions);
+      durationMs = timelineDurationMs(timeline) + 200;
+    } else if ((playedKind === "scaleDegree" || playedKind === "dictation") && context.tonic) {
+      // Graus e ditado: cadência I–IV–V–I fixa o tom antes da(s) nota(s)-alvo.
       const timeline = cadenceTimeline(context.tonic, rawPitches, tempo);
       void playTimeline(timeline, [], soundOptions);
       durationMs = timelineDurationMs(timeline) + 200;
@@ -202,6 +213,11 @@ export function useEarTrainingViewModel() {
     playPitches(question.value.pitches, asChordPlayback(), question.value.kind, questionContext());
   }
 
+  /** Ditado: reouve só a melodia (sem cadência), no som da questão. */
+  function replayMelody() {
+    playPitches(question.value.pitches, false, question.value.kind, { ...questionContext(), melodyOnly: true });
+  }
+
   /** Reouve a opção escolhida ou a correta, para comparar após errar (não altera o placar). */
   function playOption(optionId: string) {
     // Mesma inversão e raiz da questão (limitada ao tamanho do acorde da opção por `invertPitches`).
@@ -216,6 +232,12 @@ export function useEarTrainingViewModel() {
   }
 
   function playCorrectAnswer() {
+    // Ditado: a "resposta correta" é a melodia inteira; o tom já foi dado pela cadência da questão.
+    if (question.value.dictation) {
+      replayMelody();
+      return;
+    }
+
     playOption(question.value.correctId);
   }
 
@@ -251,6 +273,11 @@ export function useEarTrainingViewModel() {
     if (playingTimeout) clearTimeout(playingTimeout);
   });
 
+  function resetAnswer() {
+    selectedOptionId.value = null;
+    dictationInput.value = [];
+  }
+
   // Deep-link das lições (`?quiz=<tipo>&difficulty=<nível>`): aplica na montagem — sem tocar o áudio,
   // já que ninguém interagiu ainda — e limpa a query, como os exploradores fazem.
   const route = useRoute();
@@ -263,7 +290,7 @@ export function useEarTrainingViewModel() {
     if (config.difficulty) difficulty.value = config.difficulty;
     if (config.kind || config.difficulty) {
       question.value = freshQuestion();
-      selectedOptionId.value = null;
+      resetAnswer();
     }
 
     if ("quiz" in route.query || "difficulty" in route.query) {
@@ -274,7 +301,7 @@ export function useEarTrainingViewModel() {
 
   function newQuestion() {
     question.value = freshQuestion();
-    selectedOptionId.value = null;
+    resetAnswer();
     replay();
   }
 
@@ -396,6 +423,55 @@ export function useEarTrainingViewModel() {
     }
   }
 
+  /**
+   * Ditado: acrescenta um grau da melodia. Ignora respostas já dadas, melodia completa e graus fora do
+   * teclado da questão. Ao completar, corrige sozinho — não há botão "enviar".
+   */
+  function enterDegree(degreeId: string) {
+    const dictation = question.value.dictation;
+    if (!dictation || isAnswered.value || dictationInput.value.length >= dictation.degreeIds.length) return;
+    if (!dictation.vocabulary.includes(degreeId)) return;
+
+    dictationInput.value = [...dictationInput.value, degreeId];
+
+    if (dictationInput.value.length === dictation.degreeIds.length) submitDictation(dictation.degreeIds);
+  }
+
+  function deleteDegree() {
+    if (isAnswered.value) return;
+
+    dictationInput.value = dictationInput.value.slice(0, -1);
+  }
+
+  function clearDictation() {
+    if (isAnswered.value) return;
+
+    dictationInput.value = [];
+  }
+
+  /**
+   * Correção do ditado: placar e sequência contam a questão inteira (certa só se todas as notas batem);
+   * o histórico por item registra cada posição (grau certo × grau digitado), para os pontos fracos
+   * mostrarem quais graus escapam em contexto melódico.
+   */
+  function submitDictation(expected: string[]) {
+    const entered = dictationInput.value;
+    const { allCorrect } = gradeDictation(expected, entered);
+
+    selectedOptionId.value = dictationAnswerId(entered);
+    recordActivity();
+    score.value.total += 1;
+    expected.forEach((id, index) => recordItemAnswer(store, "dictation", id, entered[index]));
+
+    if (allCorrect) {
+      score.value.correct += 1;
+      streak.value += 1;
+      bestStreak.value = Math.max(bestStreak.value, streak.value);
+    } else {
+      streak.value = 0;
+    }
+  }
+
   /** Zera o placar (acertos/total) e o histórico por item só do tipo de quiz ativo. */
   function resetScore() {
     score.value.correct = 0;
@@ -407,6 +483,7 @@ export function useEarTrainingViewModel() {
     kind,
     question,
     selectedOptionId,
+    dictationInput,
     isAnswered,
     isCorrect,
     score,
@@ -427,6 +504,7 @@ export function useEarTrainingViewModel() {
     allItems,
 
     replay,
+    replayMelody,
     newQuestion,
     selectKind,
     selectDifficulty,
@@ -439,6 +517,9 @@ export function useEarTrainingViewModel() {
     selectChordVoicing,
     toggleVarySound,
     answer,
+    enterDegree,
+    deleteDegree,
+    clearDictation,
     resetScore,
     playYourAnswer,
     playCorrectAnswer,

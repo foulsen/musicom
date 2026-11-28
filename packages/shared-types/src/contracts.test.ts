@@ -9,6 +9,7 @@ import {
   learnSnapshotSchema,
   loginInputSchema,
   preferencesSnapshotSchema,
+  quizKindSchema,
   readingEnvelopeSchema,
   readingSnapshotSchema,
   registerInputSchema,
@@ -284,6 +285,23 @@ describe("preferences snapshot", () => {
     expect(preferencesSnapshotSchema.safeParse({ earTraining: { chordVoicing: "drop2" } }).success).toBe(false);
     expect(
       preferencesSnapshotSchema.safeParse({ earTraining: { customItems: { progression: ["I-V-vi-IV"] } } }).success,
+    ).toBe(true);
+  });
+
+  it("accepts the dictation quiz kind in custom sets, scores and item stats", () => {
+    expect(quizKindSchema.safeParse("dictation").success).toBe(true);
+    expect(quizKindSchema.safeParse("melody").success).toBe(false);
+    expect(
+      preferencesSnapshotSchema.safeParse({ earTraining: { customItems: { dictation: ["0", "4", "7", "11"] } } }).success,
+    ).toBe(true);
+    expect(
+      earTrainingSnapshotSchema.safeParse({
+        scores: { dictation: { correct: 1, total: 2 } },
+        streak: 0,
+        bestStreak: 0,
+        itemStats: { dictation: { "7": { correct: 1, total: 3 } } },
+        confusions: { dictation: { "7": { "5": 2 } } },
+      }).success,
     ).toBe(true);
   });
 
