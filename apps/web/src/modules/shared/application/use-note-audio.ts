@@ -2,7 +2,7 @@ import { storeToRefs } from "pinia";
 
 import type { Pitch } from "@music-workspace/music-theory";
 
-import { INSTRUMENT_PRESETS } from "./instrument-presets";
+import { INSTRUMENT_PRESETS, type InstrumentId } from "./instrument-presets";
 import { useAudioLatencyStore } from "./use-audio-latency-store";
 import { useAudioSettingsStore } from "./use-audio-settings-store";
 
@@ -139,6 +139,11 @@ function ensureNoiseBuffer(ctx: AudioContext): AudioBuffer {
   return sharedNoiseBuffer;
 }
 
+/** Opções de timbre comuns a todos os métodos de reprodução: `instrument` sobrescreve o ajuste global do usuário. */
+export interface PlaybackSoundOptions {
+  instrument?: InstrumentId;
+}
+
 export function useNoteAudio() {
   const settings = useAudioSettingsStore();
   const { masterVolume, instrument } = storeToRefs(settings);
@@ -152,10 +157,17 @@ export function useNoteAudio() {
    * que fecha ao longo do tempo e, opcionalmente, por uma ressonância de corpo fixa.
    * `duration` é o intervalo mínimo antes da próxima nota poder soar (arpejo/sequência) —
    * o decaimento natural do instrumento pode se estender além dela, como num instrumento
-   * real tocado sem abafar as cordas.
+   * real tocado sem abafar as cordas. `instrumentId` sobrescreve o instrumento global
+   * (ex.: "Variar som" do treino de ouvido).
    */
-  function scheduleNote(ctx: AudioContext, pitch: Pitch, startTime: number, duration = 0.5) {
-    const preset = INSTRUMENT_PRESETS[instrument.value];
+  function scheduleNote(
+    ctx: AudioContext,
+    pitch: Pitch,
+    startTime: number,
+    duration = 0.5,
+    instrumentId: InstrumentId = instrument.value,
+  ) {
+    const preset = INSTRUMENT_PRESETS[instrumentId];
     const frequency = pitch.frequency();
     const peakVolume = Math.max(masterVolume.value, 0.0001);
     const attackEnd = startTime + preset.attack;
@@ -254,13 +266,14 @@ export function useNoteAudio() {
   async function playTimeline(
     notes: TimedPitch[],
     clicks: TimedClick[] = [],
+    options: PlaybackSoundOptions = {},
   ): Promise<{ startTime: number; leadSeconds: number }> {
     const { ctx, warmup } = await ensureRunningContext();
     const leadSeconds = 0.1 + warmup;
     const startTime = ctx.currentTime + leadSeconds;
 
     notes.forEach(({ pitch, offsetSeconds, durationSeconds }) =>
-      scheduleNote(ctx, pitch, startTime + offsetSeconds, durationSeconds),
+      scheduleNote(ctx, pitch, startTime + offsetSeconds, durationSeconds, options.instrument),
     );
     clicks.forEach(({ offsetSeconds, accent }) => scheduleClick(ctx, startTime + offsetSeconds, accent));
 
@@ -284,26 +297,33 @@ export function useNoteAudio() {
     return ctx.currentTime - reported - calibrated;
   }
 
-  function play(pitch: Pitch) {
+  function play(pitch: Pitch, options: PlaybackSoundOptions = {}) {
     const ctx = ensureContext();
-    scheduleNote(ctx, pitch, ctx.currentTime);
+    scheduleNote(ctx, pitch, ctx.currentTime, undefined, options.instrument);
   }
 
   /** Toca várias alturas juntas; `strum` aplica um leve atraso entre elas (arpejo de violão). */
-  function playChord(pitches: Pitch[], options: { strum?: boolean } = {}) {
+  function playChord(pitches: Pitch[], options: PlaybackSoundOptions & { strum?: boolean } = {}) {
     const ctx = ensureContext();
     const stagger = options.strum ? 0.03 : 0;
 
-    pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * stagger));
+    pitches.forEach((pitch, index) =>
+      scheduleNote(ctx, pitch, ctx.currentTime + index * stagger, undefined, options.instrument),
+    );
   }
 
   /** Toca alturas em sequência (ex.: escala ascendente), uma após a outra. */
-  function playSequence(pitches: Pitch[], options: { gapSeconds?: number; duration?: number } = {}) {
+  function playSequence(
+    pitches: Pitch[],
+    options: PlaybackSoundOptions & { gapSeconds?: number; duration?: number } = {},
+  ) {
     const ctx = ensureContext();
     const gap = options.gapSeconds ?? 0.45;
     const duration = options.duration ?? gap * 0.9;
 
-    pitches.forEach((pitch, index) => scheduleNote(ctx, pitch, ctx.currentTime + index * gap, duration));
+    pitches.forEach((pitch, index) =>
+      scheduleNote(ctx, pitch, ctx.currentTime + index * gap, duration, options.instrument),
+    );
   }
 
   return { play, playChord, playSequence, playTimeline, perceivedAudioTime, masterVolume, instrument };

@@ -33,6 +33,7 @@ import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/applicat
 import type { QuizOption } from "@/modules/shared/application/quiz";
 
 import { itemWeight, pickWeighted, topConfusionId, type ItemStatsState } from "./item-stats";
+import type { QuestionSound } from "./question-sound";
 
 /** Oitavas possíveis de playback — sorteada por questão para o ouvido não ancorar em frequências absolutas. */
 const PLAYBACK_OCTAVES = [3, 4, 5];
@@ -158,6 +159,8 @@ export interface Question {
   descending?: boolean;
   /** Tônica da tonalidade do quiz de graus: base da cadência e de "ouvir sua resposta". */
   tonic?: Pitch;
+  /** Timbre e andamento sorteados ("Variar som"); ausente = som padrão do usuário. */
+  sound?: QuestionSound;
 }
 
 function randomRootNote(): Note {

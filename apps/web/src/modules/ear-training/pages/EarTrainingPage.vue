@@ -25,6 +25,8 @@ const {
   intervalPlaybackMode,
   intervalDirection,
   scaleDirection,
+  varySound,
+  activeSound,
   isPlaying,
   hasPlayedFirst,
   weakItems,
@@ -35,6 +37,7 @@ const {
   selectIntervalPlaybackMode,
   selectIntervalDirection,
   selectScaleDirection,
+  toggleVarySound,
   answer,
   resetScore,
   playYourAnswer,
@@ -196,6 +199,19 @@ useTypingGuardedKeydown(handleKeydown);
           {{ t(`earTraining.scaleDirections.${option}`) }}
         </chip-toggle-item>
       </chip-toggle-group>
+
+      <button
+        type="button"
+        class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        :class="varySound
+          ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
+          : 'border-border bg-card/40 text-muted-foreground hover:text-foreground'"
+        :aria-pressed="varySound"
+        :title="t('earTraining.varySoundHint')"
+        @click="toggleVarySound"
+      >
+        {{ t("earTraining.varySound") }}
+      </button>
     </div>
 
     <section class="space-y-5 rounded-xl border border-border bg-card/40 p-6">
@@ -258,6 +274,10 @@ useTypingGuardedKeydown(handleKeydown);
               {{ t("earTraining.listenCorrectAnswer") }}
             </button>
           </template>
+
+          <p v-if="activeSound" class="text-xs text-muted-foreground">
+            {{ t("earTraining.soundUsed", { instrument: t(`common.instruments.${activeSound.instrument}`), tempo: activeSound.tempo }) }}
+          </p>
         </div>
 
         <button

@@ -163,6 +163,7 @@ const preferences = defineAggregate<PreferencesSnapshot>({
         intervalPlaybackMode: ear.intervalPlaybackMode,
         intervalDirection: ear.intervalDirection,
         scaleDirection: ear.scaleDirection,
+        varySound: ear.varySound,
       },
       drills: {
         activeDeckId: drillsStore.activeDeckId,
@@ -190,6 +191,7 @@ const preferences = defineAggregate<PreferencesSnapshot>({
       ear.intervalPlaybackMode = data.earTraining.intervalPlaybackMode;
     if (data.earTraining?.intervalDirection) ear.intervalDirection = data.earTraining.intervalDirection;
     if (data.earTraining?.scaleDirection) ear.scaleDirection = data.earTraining.scaleDirection;
+    if (data.earTraining?.varySound !== undefined) ear.varySound = data.earTraining.varySound;
 
     const drillsStore = useDrillsStore(pinia);
     if (data.drills?.activeDeckId) drillsStore.activeDeckId = data.drills.activeDeckId;

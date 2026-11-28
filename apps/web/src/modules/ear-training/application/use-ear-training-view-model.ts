@@ -25,11 +25,12 @@ import {
   type QuizKind,
   type ScaleDirection,
 } from "./question-generators";
+import { pickQuestionSound, sequenceGapSeconds, type QuestionSound } from "./question-sound";
 import { useEarTrainingStore } from "./use-ear-training-store";
 
-/** Duração estimada do playback (ms), já que o composable de áudio não expõe fim/Promise. */
-function estimatePlaybackDurationMs(pitchCount: number, asChord: boolean): number {
-  return asChord ? 700 : pitchCount * 450 + 200;
+/** Duração estimada do playback (ms), já que o composable de áudio não expõe fim/Promise. `tempo` > 1 encurta a sequência. */
+function estimatePlaybackDurationMs(pitchCount: number, asChord: boolean, tempo = 1): number {
+  return asChord ? 700 : pitchCount * sequenceGapSeconds(tempo) * 1000 + 200;
 }
 
 /** Fundamental fixa do painel de pontos fracos: ouvir o item "puro", sem sorteio de tom. */
@@ -50,7 +51,7 @@ export interface WeakItemView {
 
 export function useEarTrainingViewModel() {
   const store = useEarTrainingStore();
-  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, intervalDirection, scaleDirection } =
+  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, intervalDirection, scaleDirection, varySound } =
     storeToRefs(store);
 
   const { playChord, playSequence, playTimeline } = useNoteAudio();
@@ -59,7 +60,13 @@ export function useEarTrainingViewModel() {
   const kind = ref<QuizKind>("interval");
 
   function freshQuestion(): Question {
-    return generateQuestion(kind.value, difficulty.value, { stats: store, intervalDirection: intervalDirection.value });
+    const generated = generateQuestion(kind.value, difficulty.value, {
+      stats: store,
+      intervalDirection: intervalDirection.value,
+    });
+
+    // Com "Variar som" desligado a questão não carrega som: tudo toca como sempre, no instrumento do usuário.
+    return varySound.value ? { ...generated, sound: pickQuestionSound() } : generated;
   }
 
   const question = ref(freshQuestion());
@@ -81,10 +88,11 @@ export function useEarTrainingViewModel() {
     return scores.value[kind.value];
   });
 
-  /** Contexto de playback além das alturas: direção do intervalo e tônica da cadência. */
+  /** Contexto de playback além das alturas: direção do intervalo, tônica da cadência e som sorteado. */
   interface PlayContext {
     descending?: boolean;
     tonic?: Pitch;
+    sound?: QuestionSound;
   }
 
   function playPitches(rawPitches: Pitch[], asChord: boolean, playedKind: QuizKind = kind.value, context: PlayContext = {}) {
@@ -93,12 +101,16 @@ export function useEarTrainingViewModel() {
     isPlaying.value = true;
     hasPlayedFirst.value = true;
 
+    // Sem som sorteado, `instrument` fica indefinido e o áudio usa o ajuste global; tempo 1 = andamento atual.
+    const tempo = context.sound?.tempo ?? 1;
+    const soundOptions = { instrument: context.sound?.instrument };
+
     let durationMs: number;
 
     if (playedKind === "scaleDegree" && context.tonic) {
       // Graus: cadência I–IV–V–I fixa o tom antes da nota-alvo.
-      const timeline = cadenceTimeline(context.tonic, rawPitches);
-      void playTimeline(timeline);
+      const timeline = cadenceTimeline(context.tonic, rawPitches, tempo);
+      void playTimeline(timeline, [], soundOptions);
       durationMs = timelineDurationMs(timeline) + 200;
     } else {
       // Escalas e intervalos são gerados ascendentes; a direção é aplicada só na hora de tocar,
@@ -108,12 +120,12 @@ export function useEarTrainingViewModel() {
       if (playedKind === "interval" && !asChord && context.descending) pitches = [...rawPitches].reverse();
 
       if (asChord) {
-        playChord(pitches, { strum: true });
+        playChord(pitches, { strum: true, ...soundOptions });
       } else {
-        playSequence(pitches);
+        playSequence(pitches, { gapSeconds: sequenceGapSeconds(tempo), ...soundOptions });
       }
 
-      durationMs = estimatePlaybackDurationMs(pitches.length, asChord);
+      durationMs = estimatePlaybackDurationMs(pitches.length, asChord, tempo);
     }
 
     playingTimeout = setTimeout(() => {
@@ -121,8 +133,12 @@ export function useEarTrainingViewModel() {
     }, durationMs);
   }
 
+  /** Som da questão — só vale com "Variar som" ligado, então desligar a opção volta ao som padrão na hora. */
+  const activeSound = computed(() => (varySound.value ? question.value.sound : undefined));
+
+  /** Repetir e comparar respostas usam o mesmo som da questão, para a comparação ser justa. */
   function questionContext(): PlayContext {
-    return { descending: question.value.descending, tonic: question.value.tonic };
+    return { descending: question.value.descending, tonic: question.value.tonic, sound: activeSound.value };
   }
 
   function isChordPlayback(playedKind: QuizKind, playback: Question["playback"]) {
@@ -236,6 +252,11 @@ export function useEarTrainingViewModel() {
     scaleDirection.value = next;
   }
 
+  /** Vale a partir da próxima questão; a atual segue com o som que já tem. */
+  function toggleVarySound() {
+    varySound.value = !varySound.value;
+  }
+
   function selectIntervalPlaybackMode(next: "harmonic" | "melodic") {
     intervalPlaybackMode.value = next;
   }
@@ -277,6 +298,8 @@ export function useEarTrainingViewModel() {
     intervalPlaybackMode,
     intervalDirection,
     scaleDirection,
+    varySound,
+    activeSound,
     isPlaying,
     hasPlayedFirst,
     weakItems,
@@ -288,6 +311,7 @@ export function useEarTrainingViewModel() {
     selectIntervalPlaybackMode,
     selectIntervalDirection,
     selectScaleDirection,
+    toggleVarySound,
     answer,
     resetScore,
     playYourAnswer,

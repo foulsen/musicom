@@ -36,6 +36,8 @@ export const useEarTrainingStore = defineStore("ear-training", {
     intervalDirection: "ascending" as IntervalDirection,
     /** Só se aplica ao quiz de escala: tocar subindo, descendo ou os dois. */
     scaleDirection: "ascending" as ScaleDirection,
+    /** Sorteia timbre e andamento a cada questão, para o ouvido não ancorar num som só. */
+    varySound: false,
   }),
   persist: true,
 });

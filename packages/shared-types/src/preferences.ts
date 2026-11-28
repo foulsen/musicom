@@ -39,6 +39,7 @@ export const preferencesSnapshotSchema = z.object({
       intervalPlaybackMode: intervalPlaybackModeSchema,
       intervalDirection: intervalDirectionSchema,
       scaleDirection: scaleDirectionSchema,
+      varySound: z.boolean(),
     })
     .partial()
     .optional(),

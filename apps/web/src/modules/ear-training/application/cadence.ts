@@ -23,21 +23,24 @@ export function cadenceChords(tonic: Pitch): Pitch[][] {
   return CADENCE_VOICINGS.map((voicing) => voicing.map((offset) => tonic.transpose(offset)));
 }
 
-/** Linha do tempo: cadência que estabelece o tom e, depois de uma pausa, as notas-alvo. */
-export function cadenceTimeline(tonic: Pitch, targets: readonly Pitch[]): TimedPitch[] {
+/**
+ * Linha do tempo: cadência que estabelece o tom e, depois de uma pausa, as notas-alvo.
+ * `tempo` é um fator de velocidade (1 = normal; > 1 mais rápido): divide todos os offsets e durações.
+ */
+export function cadenceTimeline(tonic: Pitch, targets: readonly Pitch[], tempo = 1): TimedPitch[] {
   const chords = cadenceChords(tonic).flatMap((chord, index) =>
     chord.map((pitch) => ({
       pitch,
-      offsetSeconds: index * CHORD_STEP_SECONDS,
-      durationSeconds: CHORD_DURATION_SECONDS,
+      offsetSeconds: (index * CHORD_STEP_SECONDS) / tempo,
+      durationSeconds: CHORD_DURATION_SECONDS / tempo,
     })),
   );
 
   const targetStart = CADENCE_VOICINGS.length * CHORD_STEP_SECONDS + TARGET_GAP_SECONDS;
   const notes = targets.map((pitch, index) => ({
     pitch,
-    offsetSeconds: targetStart + index * TARGET_DURATION_SECONDS,
-    durationSeconds: TARGET_DURATION_SECONDS,
+    offsetSeconds: (targetStart + index * TARGET_DURATION_SECONDS) / tempo,
+    durationSeconds: TARGET_DURATION_SECONDS / tempo,
   }));
 
   return [...chords, ...notes];

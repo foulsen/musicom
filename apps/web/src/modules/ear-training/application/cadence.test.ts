@@ -28,4 +28,29 @@ describe("cadence", () => {
     expect(last.offsetSeconds).toBeGreaterThan(chordsEnd);
     expect(timelineDurationMs(timeline)).toBe(Math.round((last.offsetSeconds + last.durationSeconds) * 1000));
   });
+
+  it("scales every offset and duration by the tempo factor", () => {
+    const target = tonic.transpose(4);
+    const normal = cadenceTimeline(tonic, [target]);
+    const fast = cadenceTimeline(tonic, [target], 2);
+
+    expect(fast).toHaveLength(normal.length);
+    normal.forEach((note, index) => {
+      expect(fast[index].pitch.frequency()).toBeCloseTo(note.pitch.frequency());
+      expect(fast[index].offsetSeconds).toBeCloseTo(note.offsetSeconds / 2);
+      expect(fast[index].durationSeconds).toBeCloseTo(note.durationSeconds / 2);
+    });
+    expect(timelineDurationMs(fast)).toBeCloseTo(timelineDurationMs(normal) / 2, -1);
+  });
+
+  it("keeps the original timing when no tempo is given", () => {
+    const target = tonic.transpose(4);
+
+    const explicit = cadenceTimeline(tonic, [target], 1);
+    const implicit = cadenceTimeline(tonic, [target]);
+
+    expect(explicit.map((n) => [n.offsetSeconds, n.durationSeconds])).toEqual(
+      implicit.map((n) => [n.offsetSeconds, n.durationSeconds]),
+    );
+  });
 });
