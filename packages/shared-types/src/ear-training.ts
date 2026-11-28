@@ -8,7 +8,7 @@ export const quizKindSchema = z.enum(["interval", "chordQuality", "scale", "scal
 export type QuizKind = z.infer<typeof quizKindSchema>;
 
 /** Stable domain id of a quiz item (semitones as string, or the chord/scale pattern name). */
-const itemIdSchema = z.string().min(1).max(64);
+export const itemIdSchema = z.string().min(1).max(64);
 
 /** Per-kind, per-item tally: `itemStats[kind][itemId]`. */
 export const itemStatsSchema = z.record(quizKindSchema, z.record(itemIdSchema, scoreSchema));

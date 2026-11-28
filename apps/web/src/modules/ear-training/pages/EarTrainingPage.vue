@@ -7,7 +7,13 @@ import { Play, RotateCcw } from "@lucide/vue";
 import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
-import type { Difficulty, IntervalDirection, QuizKind, ScaleDirection } from "../application/question-generators";
+import {
+  MIN_CUSTOM_ITEMS,
+  type Difficulty,
+  type IntervalDirection,
+  type QuizKind,
+  type ScaleDirection,
+} from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
@@ -30,10 +36,16 @@ const {
   isPlaying,
   hasPlayedFirst,
   weakItems,
+  customActive,
+  customItemIds,
+  allItems,
   replay,
   newQuestion,
   selectKind,
   selectDifficulty,
+  setCustomActive,
+  toggleCustomItem,
+  drillWeakItem,
   selectIntervalPlaybackMode,
   selectIntervalDirection,
   selectScaleDirection,
@@ -45,8 +57,14 @@ const {
   playItem,
 } = useEarTrainingViewModel();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { label } = useMusicTerms();
+
+/** Mesma regra de caixa do `AnswerOptions`: Title Case em inglês, só a primeira letra em pt. */
+const labelCaseClass = computed(() => (locale.value.startsWith("en") ? "capitalize" : "first-letter:uppercase"));
+
+/** Com o mínimo selecionado, os chips marcados não podem ser removidos (senão faltariam itens para as opções). */
+const atMinimumCustomItems = computed(() => customItemIds.value.length <= MIN_CUSTOM_ITEMS);
 
 const scorePercent = computed(() =>
   score.value.total === 0 ? null : Math.round((score.value.correct / score.value.total) * 100),
@@ -135,21 +153,39 @@ useTypingGuardedKeydown(handleKeydown);
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4">
-      <chip-toggle-group
-        :model-value="difficulty"
-        type="single"
-        :aria-label="t('earTraining.difficulty')"
-        @update:model-value="(value) => value && selectDifficulty(value as Difficulty)"
-      >
-        <chip-toggle-item
-          v-for="option in DIFFICULTIES"
-          :key="option"
-          :value="option"
-          class="px-3 py-1 text-xs"
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Em modo personalizado a dificuldade é ignorada: o grupo fica desabilitado e sem seleção. -->
+        <chip-toggle-group
+          :model-value="customActive ? '' : difficulty"
+          type="single"
+          :disabled="customActive"
+          :class="{ 'opacity-50': customActive }"
+          :aria-label="t('earTraining.difficulty')"
+          @update:model-value="(value) => value && selectDifficulty(value as Difficulty)"
         >
-          {{ t(`earTraining.difficulties.${option}`) }}
-        </chip-toggle-item>
-      </chip-toggle-group>
+          <chip-toggle-item
+            v-for="option in DIFFICULTIES"
+            :key="option"
+            :value="option"
+            class="px-3 py-1 text-xs"
+          >
+            {{ t(`earTraining.difficulties.${option}`) }}
+          </chip-toggle-item>
+        </chip-toggle-group>
+
+        <button
+          type="button"
+          class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="customActive
+            ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
+            : 'border-border bg-card/40 text-muted-foreground hover:text-foreground'"
+          :aria-pressed="customActive"
+          :title="t('earTraining.custom.hint')"
+          @click="setCustomActive(!customActive)"
+        >
+          {{ t("earTraining.custom.label") }}
+        </button>
+      </div>
 
       <chip-toggle-group
         v-if="kind === 'interval'"
@@ -212,6 +248,41 @@ useTypingGuardedKeydown(handleKeydown);
       >
         {{ t("earTraining.varySound") }}
       </button>
+    </div>
+
+    <div
+      v-if="customActive"
+      role="group"
+      :aria-label="t('earTraining.custom.panelLabel')"
+      class="space-y-2 rounded-xl border border-border bg-card/40 px-4 py-3"
+    >
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="item in allItems"
+          :key="item.id"
+          type="button"
+          class="rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="[
+            labelCaseClass,
+            customItemIds.includes(item.id)
+              ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
+              : 'border-border bg-card/40 text-muted-foreground hover:text-foreground',
+            customItemIds.includes(item.id) && atMinimumCustomItems ? 'cursor-not-allowed' : '',
+          ]"
+          :aria-pressed="customItemIds.includes(item.id)"
+          :aria-disabled="customItemIds.includes(item.id) && atMinimumCustomItems ? 'true' : undefined"
+          :title="customItemIds.includes(item.id) && atMinimumCustomItems
+            ? t('earTraining.custom.pickAtLeast', { min: MIN_CUSTOM_ITEMS })
+            : undefined"
+          @click="toggleCustomItem(item.id)"
+        >
+          {{ label(item.label) }}
+        </button>
+      </div>
+
+      <p class="text-xs text-muted-foreground" aria-live="polite">
+        {{ t("earTraining.custom.selected", { count: customItemIds.length, min: MIN_CUSTOM_ITEMS }) }}
+      </p>
     </div>
 
     <section class="space-y-5 rounded-xl border border-border bg-card/40 p-6">
@@ -325,7 +396,7 @@ useTypingGuardedKeydown(handleKeydown);
             </p>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
               class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium capitalize text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -344,6 +415,14 @@ useTypingGuardedKeydown(handleKeydown);
             >
               <play class="size-3.5" />
               {{ label(item.confusion.label) }}
+            </button>
+            <button
+              v-if="item.confusion"
+              type="button"
+              class="rounded-md bg-brand-soft px-2 py-1 text-xs font-medium text-brand-soft-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              @click="drillWeakItem(item.id)"
+            >
+              {{ t("earTraining.weakPoints.drillPair") }}
             </button>
           </div>
         </li>

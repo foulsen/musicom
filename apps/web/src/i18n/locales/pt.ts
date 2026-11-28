@@ -424,6 +424,13 @@ export const pt: MessageSchema = {
       scale: "Qual escala você ouviu?",
       scaleDegree: "Qual grau da tonalidade é a última nota?",
     },
+    custom: {
+      label: "Personalizado",
+      hint: "Treine só os itens que você escolher, ignorando a dificuldade.",
+      panelLabel: "Itens para treinar",
+      selected: "{count} selecionados · escolha pelo menos {min}",
+      pickAtLeast: "Escolha pelo menos {min}",
+    },
     weakPoints: {
       title: "Seus pontos fracos",
       hint: "As próximas perguntas dão mais peso a esses itens.",
@@ -431,6 +438,7 @@ export const pt: MessageSchema = {
       accuracy: "{percent}% de acerto ({correct}/{total})",
       confuses: "costuma confundir com {item}",
       listen: "Ouvir {item}",
+      drillPair: "Treinar este par",
     },
   },
   modeExplorer: {

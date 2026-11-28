@@ -164,6 +164,8 @@ const preferences = defineAggregate<PreferencesSnapshot>({
         intervalDirection: ear.intervalDirection,
         scaleDirection: ear.scaleDirection,
         varySound: ear.varySound,
+        customItems: ear.customItems,
+        customActive: ear.customActive,
       },
       drills: {
         activeDeckId: drillsStore.activeDeckId,
@@ -192,6 +194,9 @@ const preferences = defineAggregate<PreferencesSnapshot>({
     if (data.earTraining?.intervalDirection) ear.intervalDirection = data.earTraining.intervalDirection;
     if (data.earTraining?.scaleDirection) ear.scaleDirection = data.earTraining.scaleDirection;
     if (data.earTraining?.varySound !== undefined) ear.varySound = data.earTraining.varySound;
+    // Merge por tipo de quiz, como nos snapshots de progresso: o servidor vence só nos tipos que ele conhece.
+    if (data.earTraining?.customItems) ear.customItems = { ...ear.customItems, ...data.earTraining.customItems };
+    if (data.earTraining?.customActive) ear.customActive = { ...ear.customActive, ...data.earTraining.customActive };
 
     const drillsStore = useDrillsStore(pinia);
     if (data.drills?.activeDeckId) drillsStore.activeDeckId = data.drills.activeDeckId;

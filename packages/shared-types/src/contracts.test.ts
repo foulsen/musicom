@@ -268,6 +268,17 @@ describe("preferences snapshot", () => {
     expect(preferencesSnapshotSchema.safeParse({ drills: { noteIdLevel: "frets99" } }).success).toBe(false);
   });
 
+  it("accepts the ear-training custom item set per quiz kind, and rejects an unknown kind or empty id", () => {
+    expect(
+      preferencesSnapshotSchema.safeParse({
+        earTraining: { customItems: { interval: ["3", "4", "5", "7"] }, customActive: { interval: true } },
+      }).success,
+    ).toBe(true);
+    expect(preferencesSnapshotSchema.safeParse({ earTraining: { customItems: { melody: ["1"] } } }).success).toBe(false);
+    expect(preferencesSnapshotSchema.safeParse({ earTraining: { customItems: { interval: [""] } } }).success).toBe(false);
+    expect(preferencesSnapshotSchema.safeParse({ earTraining: { customActive: { scale: "yes" } } }).success).toBe(false);
+  });
+
   it("rejects an unknown theme", () => {
     expect(preferencesSnapshotSchema.safeParse({ theme: "sepia" }).success).toBe(false);
   });

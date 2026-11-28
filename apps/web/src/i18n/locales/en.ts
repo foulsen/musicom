@@ -424,6 +424,13 @@ export const en = {
       scale: "What scale do you hear?",
       scaleDegree: "Which degree of the key is the last note?",
     },
+    custom: {
+      label: "Custom",
+      hint: "Practice only the items you pick, ignoring the difficulty.",
+      panelLabel: "Items to practice",
+      selected: "{count} selected · pick at least {min}",
+      pickAtLeast: "Pick at least {min}",
+    },
     weakPoints: {
       title: "Your weak spots",
       hint: "Upcoming questions give these items extra weight.",
@@ -431,6 +438,7 @@ export const en = {
       accuracy: "{percent}% correct ({correct}/{total})",
       confuses: "often confused with {item}",
       listen: "Hear {item}",
+      drillPair: "Drill this pair",
     },
   },
   modeExplorer: {

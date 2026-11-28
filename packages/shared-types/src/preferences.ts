@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { itemIdSchema, quizKindSchema } from "./ear-training";
 import { syncEnvelopeSchema } from "./sync/envelope";
 
 /**
@@ -40,6 +41,9 @@ export const preferencesSnapshotSchema = z.object({
       intervalDirection: intervalDirectionSchema,
       scaleDirection: scaleDirectionSchema,
       varySound: z.boolean(),
+      // "Personalizar": conjunto de itens escolhido e se está ligado, por tipo de quiz.
+      customItems: z.record(quizKindSchema, z.array(itemIdSchema).max(32)),
+      customActive: z.record(quizKindSchema, z.boolean()),
     })
     .partial()
     .optional(),

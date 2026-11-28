@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { ItemStatsState } from "./item-stats";
 import {
+  MIN_CUSTOM_ITEMS,
+  allItemsForKind,
   generateQuestion,
+  itemIdsForDifficulty,
   orderScalePitches,
+  poolFor,
   pickItemAndDistractors,
   pitchesForOption,
   resolveIntervalDescending,
@@ -212,5 +216,85 @@ describe("interval direction", () => {
 
     expect(question.descending).toBe(true);
     expect(question.pitches[1].midi()).toBeGreaterThan(question.pitches[0].midi());
+  });
+});
+
+describe("custom item set", () => {
+  const entries: [number, number][] = [
+    [1, 1],
+    [2, 1],
+    [3, 2],
+    [4, 2],
+    [5, 3],
+    [6, 3],
+  ];
+  const ALL_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree"];
+
+  it("uses the difficulty pool when there are no custom ids", () => {
+    expect(poolFor(entries, String, "easy")).toEqual([1, 2]);
+    expect(poolFor(entries, String, "medium", [])).toEqual([1, 2, 3, 4]);
+  });
+
+  it("uses the custom items from the full pool, ignoring difficulty", () => {
+    expect(poolFor(entries, String, "easy", ["6", "1", "4", "5"])).toEqual([1, 4, 5, 6]);
+  });
+
+  it("falls back to the difficulty pool with fewer than the minimum valid ids", () => {
+    expect(MIN_CUSTOM_ITEMS).toBe(4);
+    expect(poolFor(entries, String, "easy", ["3", "4", "5"])).toEqual([1, 2]);
+  });
+
+  it("ignores unknown ids and counts only valid ones toward the minimum", () => {
+    expect(poolFor(entries, String, "easy", ["3", "4", "5", "99", "abc"])).toEqual([1, 2]);
+    expect(poolFor(entries, String, "easy", ["3", "4", "5", "6", "99"])).toEqual([3, 4, 5, 6]);
+  });
+
+  it("generates questions only from the custom set (hard-only items on easy)", () => {
+    const customItemIds = ["1", "6", "8", "11"];
+
+    for (let i = 0; i < 40; i++) {
+      const question = generateQuestion("interval", "easy", { customItemIds });
+
+      expect(question.options.map((option) => option.id).sort()).toEqual([...customItemIds].sort());
+    }
+  });
+
+  it("works for every quiz kind and falls back when the set is too small", () => {
+    for (const kind of ALL_KINDS) {
+      const customItemIds = allItemsForKind(kind)
+        .slice(-MIN_CUSTOM_ITEMS)
+        .map((item) => item.id);
+      const small = customItemIds.slice(0, 2);
+
+      for (let i = 0; i < 10; i++) {
+        const ids = generateQuestion(kind, "easy", { customItemIds }).options.map((option) => option.id);
+        expect(ids.sort()).toEqual([...customItemIds].sort());
+
+        const fallbackIds = generateQuestion(kind, "easy", { customItemIds: small }).options.map((option) => option.id);
+        expect(fallbackIds.sort()).toEqual([...itemIdsForDifficulty(kind, "easy")].sort());
+      }
+    }
+  });
+
+  it("allItemsForKind lists every item of every kind in pool order with a label", () => {
+    for (const kind of ALL_KINDS) {
+      const items = allItemsForKind(kind);
+      const hard = itemIdsForDifficulty(kind, "hard");
+
+      expect(items.length).toBeGreaterThanOrEqual(MIN_CUSTOM_ITEMS);
+      expect(items.map((item) => item.id)).toEqual(hard);
+      expect(new Set(items.map((item) => item.id)).size).toBe(items.length);
+      items.forEach((item) => expect(item.label).toBeTruthy());
+    }
+  });
+
+  it("itemIdsForDifficulty is cumulative and always has enough items", () => {
+    for (const kind of ALL_KINDS) {
+      const easy = itemIdsForDifficulty(kind, "easy");
+      const medium = itemIdsForDifficulty(kind, "medium");
+
+      expect(easy.length).toBeGreaterThanOrEqual(MIN_CUSTOM_ITEMS);
+      expect(medium).toEqual(expect.arrayContaining(easy));
+    }
   });
 });

@@ -38,6 +38,10 @@ export const useEarTrainingStore = defineStore("ear-training", {
     scaleDirection: "ascending" as ScaleDirection,
     /** Sorteia timbre e andamento a cada questão, para o ouvido não ancorar num som só. */
     varySound: false,
+    /** "Personalizar": ids escolhidos por tipo de quiz (mantidos mesmo com o modo desligado). */
+    customItems: {} as Partial<Record<QuizKind, string[]>>,
+    /** "Personalizar" ligado por tipo de quiz: o conjunto escolhido substitui o pool da dificuldade. */
+    customActive: {} as Partial<Record<QuizKind, boolean>>,
   }),
   persist: true,
 });

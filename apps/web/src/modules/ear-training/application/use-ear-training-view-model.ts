@@ -9,11 +9,15 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import type { TermLabel } from "@/modules/shared/application/music-terms";
 
+import { customSetForWeakItem } from "./custom-set";
 import { cadenceTimeline, timelineDurationMs } from "./cadence";
 import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
 import {
+  MIN_CUSTOM_ITEMS,
+  allItemsForKind,
   generateQuestion,
+  itemIdsForDifficulty,
   orderScalePitches,
   resolveIntervalDescending,
   labelForItem,
@@ -59,10 +63,24 @@ export function useEarTrainingViewModel() {
 
   const kind = ref<QuizKind>("interval");
 
+  /** Todos os itens do tipo ativo, para o seletor "Personalizar". */
+  const allItems = computed(() => allItemsForKind(kind.value));
+
+  /** Seleção do tipo ativo, só com ids que ainda existem (ids antigos/sincronizados desconhecidos são ignorados). */
+  const customItemIds = computed(() => {
+    const selected = new Set(store.customItems[kind.value] ?? []);
+
+    return allItems.value.map((item) => item.id).filter((id) => selected.has(id));
+  });
+
+  const customActive = computed(() => store.customActive[kind.value] === true);
+
   function freshQuestion(): Question {
     const generated = generateQuestion(kind.value, difficulty.value, {
       stats: store,
       intervalDirection: intervalDirection.value,
+      // Com "Personalizar" desligado a dificuldade manda, mesmo que haja uma seleção guardada.
+      customItemIds: customActive.value ? customItemIds.value : undefined,
     });
 
     // Com "Variar som" desligado a questão não carrega som: tudo toca como sempre, no instrumento do usuário.
@@ -239,6 +257,62 @@ export function useEarTrainingViewModel() {
     newQuestion();
   }
 
+  function storeCustomItems(forKind: QuizKind, ids: string[]) {
+    store.customItems = { ...store.customItems, [forKind]: ids };
+  }
+
+  /**
+   * Liga/desliga "Personalizar" no tipo ativo. Ao ligar com menos de `MIN_CUSTOM_ITEMS` itens escolhidos,
+   * parte do pool da dificuldade atual, para o modo já nascer utilizável.
+   */
+  function setCustomActive(active: boolean) {
+    if (customActive.value === active) return;
+
+    if (active && customItemIds.value.length < MIN_CUSTOM_ITEMS) {
+      storeCustomItems(kind.value, itemIdsForDifficulty(kind.value, difficulty.value));
+    }
+
+    store.customActive = { ...store.customActive, [kind.value]: active };
+    newQuestion();
+  }
+
+  /** Marca/desmarca um item. Com o modo ligado, não deixa cair abaixo do mínimo e re-sorteia a questão. */
+  function toggleCustomItem(id: string) {
+    const current = customItemIds.value;
+
+    if (current.includes(id)) {
+      if (customActive.value && current.length <= MIN_CUSTOM_ITEMS) return;
+
+      storeCustomItems(kind.value, current.filter((item) => item !== id));
+    } else {
+      const next = new Set([...current, id]);
+
+      storeCustomItems(kind.value, allItems.value.map((item) => item.id).filter((itemId) => next.has(itemId)));
+    }
+
+    // Com o modo desligado a seleção só é guardada: a questão atual não depende dela.
+    if (customActive.value) newQuestion();
+  }
+
+  /** Atalho dos pontos fracos: liga "Personalizar" com o item, sua confusão e os outros pontos fracos. */
+  function drillWeakItem(itemId: string) {
+    const weak = weakItems.value.find((item) => item.id === itemId);
+    if (!weak) return;
+
+    storeCustomItems(
+      kind.value,
+      customSetForWeakItem({
+        itemId,
+        confusionId: weak.confusion?.id,
+        otherWeakIds: weakItems.value.filter((item) => item.id !== itemId).map((item) => item.id),
+        poolIds: itemIdsForDifficulty(kind.value, difficulty.value),
+        validIds: allItems.value.map((item) => item.id),
+      }),
+    );
+    store.customActive = { ...store.customActive, [kind.value]: true };
+    newQuestion();
+  }
+
   /** Vale já para a questão atual: re-sorteia só a direção, sem trocar o intervalo. */
   function selectIntervalDirection(next: IntervalDirection) {
     intervalDirection.value = next;
@@ -303,11 +377,17 @@ export function useEarTrainingViewModel() {
     isPlaying,
     hasPlayedFirst,
     weakItems,
+    customActive,
+    customItemIds,
+    allItems,
 
     replay,
     newQuestion,
     selectKind,
     selectDifficulty,
+    setCustomActive,
+    toggleCustomItem,
+    drillWeakItem,
     selectIntervalPlaybackMode,
     selectIntervalDirection,
     selectScaleDirection,

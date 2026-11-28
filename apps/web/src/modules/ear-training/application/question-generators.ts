@@ -49,6 +49,30 @@ function poolForDifficulty<T>(entries: [T, number][], difficulty: Difficulty): T
   return entries.filter(([, rank]) => rank <= maxRank).map(([item]) => item);
 }
 
+/** Mínimo de itens de um conjunto personalizado: 1 resposta certa + 3 distratores distintos. */
+export const MIN_CUSTOM_ITEMS = 4;
+
+/**
+ * Pool de uma questão: o conjunto personalizado (itens do pool completo cujos ids foram escolhidos,
+ * ignorando a dificuldade) quando tem >= `MIN_CUSTOM_ITEMS` itens válidos; senão, o pool da dificuldade.
+ * Ids desconhecidos (ex.: salvos por outra versão) são ignorados em vez de quebrar o quiz.
+ */
+export function poolFor<T>(
+  entries: [T, number][],
+  idOf: (item: T) => string,
+  difficulty: Difficulty,
+  customItemIds?: readonly string[],
+): T[] {
+  if (customItemIds) {
+    const wanted = new Set(customItemIds);
+    const custom = entries.filter(([item]) => wanted.has(idOf(item))).map(([item]) => item);
+
+    if (custom.length >= MIN_CUSTOM_ITEMS) return custom;
+  }
+
+  return poolForDifficulty(entries, difficulty);
+}
+
 // Cada pool cresce por nível (fácil ⊂ médio ⊂ difícil); todo nível tem >= 4 itens
 // para garantir 3 distratores distintos + a resposta certa.
 const INTERVAL_SEMITONE_ENTRIES: [number, number][] = [
@@ -186,6 +210,8 @@ export interface GenerateOptions {
   random?: () => number;
   /** Só para intervalos: direção do intervalo melódico. */
   intervalDirection?: IntervalDirection;
+  /** Ids escolhidos em "Personalizar": com >= `MIN_CUSTOM_ITEMS` válidos, substituem o pool da dificuldade. */
+  customItemIds?: readonly string[];
 }
 
 /**
@@ -217,7 +243,7 @@ export function pickItemAndDistractors<T>(
 }
 
 function generateIntervalQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
-  const pool = poolForDifficulty(INTERVAL_SEMITONE_ENTRIES, difficulty);
+  const pool = poolFor(INTERVAL_SEMITONE_ENTRIES, String, difficulty, generate.customItemIds);
   const root = randomRootNote();
   const { correct: semitones, distractors } = pickItemAndDistractors(pool, String, "interval", generate);
 
@@ -236,7 +262,7 @@ function generateIntervalQuestion(difficulty: Difficulty, generate: GenerateOpti
 }
 
 function generateChordQualityQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
-  const pool = poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty);
+  const pool = poolFor(CHORD_QUALITY_ENTRIES, (item) => item.name, difficulty, generate.customItemIds);
   const root = randomRootNote();
   const { correct: pattern, distractors } = pickItemAndDistractors(
     pool,
@@ -263,7 +289,7 @@ function generateChordQualityQuestion(difficulty: Difficulty, generate: Generate
 }
 
 function generateScaleQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
-  const pool = poolForDifficulty(SCALE_ENTRIES, difficulty);
+  const pool = poolFor(SCALE_ENTRIES, (item) => item.name, difficulty, generate.customItemIds);
   const root = randomRootNote();
   const { correct: pattern, distractors } = pickItemAndDistractors(pool, (item) => item.name, "scale", generate);
 
@@ -285,7 +311,7 @@ function generateScaleQuestion(difficulty: Difficulty, generate: GenerateOptions
 }
 
 function generateScaleDegreeQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
-  const pool = poolForDifficulty(SCALE_DEGREE_ENTRIES, difficulty);
+  const pool = poolFor(SCALE_DEGREE_ENTRIES, String, difficulty, generate.customItemIds);
   const tonic = Pitch.from(randomRootNote().value, randomChoice(SCALE_DEGREE_TONIC_OCTAVES));
   const { correct: semitones, distractors } = pickItemAndDistractors(pool, String, "scaleDegree", generate);
 
@@ -337,6 +363,29 @@ export function labelForItem(kind: QuizKind, id: string): TermLabel {
   if (kind === "scaleDegree") return scaleDegreeLabel(Number(id));
 
   return scaleLabel(id);
+}
+
+/** Ids estáveis de todos os itens de um tipo, na ordem do pool (fácil → difícil). */
+function entryIdsForKind(kind: QuizKind): string[] {
+  if (kind === "interval") return INTERVAL_SEMITONE_ENTRIES.map(([semitones]) => semitones.toString());
+  if (kind === "scaleDegree") return SCALE_DEGREE_ENTRIES.map(([semitones]) => semitones.toString());
+  if (kind === "chordQuality") return CHORD_QUALITY_ENTRIES.map(([pattern]) => pattern.name);
+
+  return SCALE_ENTRIES.map(([pattern]) => pattern.name);
+}
+
+/** Todos os itens de um tipo com seu rótulo — a lista do seletor "Personalizar". */
+export function allItemsForKind(kind: QuizKind): { id: string; label: TermLabel }[] {
+  return entryIdsForKind(kind).map((id) => ({ id, label: labelForItem(kind, id) }));
+}
+
+/** Ids do pool de uma dificuldade — o ponto de partida do conjunto personalizado. */
+export function itemIdsForDifficulty(kind: QuizKind, difficulty: Difficulty): string[] {
+  if (kind === "interval") return poolForDifficulty(INTERVAL_SEMITONE_ENTRIES, difficulty).map(String);
+  if (kind === "scaleDegree") return poolForDifficulty(SCALE_DEGREE_ENTRIES, difficulty).map(String);
+  if (kind === "chordQuality") return poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty).map((item) => item.name);
+
+  return poolForDifficulty(SCALE_ENTRIES, difficulty).map((item) => item.name);
 }
 
 /** Pitches de um item a partir de uma fundamental — base de `pitchesForOption` e do painel de pontos fracos. */
