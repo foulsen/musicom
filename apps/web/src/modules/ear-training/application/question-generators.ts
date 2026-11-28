@@ -222,6 +222,21 @@ function generateScaleQuestion(difficulty: Difficulty, generate: GenerateOptions
   };
 }
 
+export type ScaleDirection = "ascending" | "descending" | "both";
+
+/**
+ * Ordena a escala (gerada sempre ascendente, tônica a tônica) conforme a direção escolhida.
+ * "both" sobe e desce sem repetir a tônica aguda.
+ */
+export function orderScalePitches<T>(ascending: readonly T[], direction: ScaleDirection): T[] {
+  const descending = [...ascending].reverse();
+
+  if (direction === "descending") return descending;
+  if (direction === "both") return [...ascending, ...descending.slice(1)];
+
+  return [...ascending];
+}
+
 export function generateQuestion(
   kind: QuizKind,
   difficulty: Difficulty = "medium",

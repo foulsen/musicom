@@ -395,6 +395,8 @@ export const pt: MessageSchema = {
     intervalPlaybackMode: "Modo de playback",
     melodic: "Melódico",
     harmonic: "Harmônico",
+    scaleDirection: "Direção da escala",
+    scaleDirections: { ascending: "Ascendente", descending: "Descendente", both: "Ambas" },
     clickPlayHint: "1-4 para responder, R para repetir, Enter/Espaço para avançar.",
     firstPlayHint: "Clique em ▶ para ouvir a primeira questão.",
     listenYourAnswer: "Ouvir sua resposta",

@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import type { ItemStatsState } from "./item-stats";
-import { generateQuestion, pickItemAndDistractors, type QuizKind } from "./question-generators";
+import { generateQuestion, orderScalePitches, pickItemAndDistractors, type QuizKind } from "./question-generators";
+
+describe("orderScalePitches", () => {
+  const up = [1, 2, 3, 4];
+
+  it("keeps ascending order", () => expect(orderScalePitches(up, "ascending")).toEqual([1, 2, 3, 4]));
+  it("reverses for descending", () => expect(orderScalePitches(up, "descending")).toEqual([4, 3, 2, 1]));
+  it("goes up and back down without repeating the top", () =>
+    expect(orderScalePitches(up, "both")).toEqual([1, 2, 3, 4, 3, 2, 1]));
+});
 
 const KINDS: QuizKind[] = ["interval", "chordQuality", "scale"];
 const ITERATIONS = 30;

@@ -7,7 +7,7 @@ import { Play, RotateCcw } from "@lucide/vue";
 import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
-import type { Difficulty, QuizKind } from "../application/question-generators";
+import type { Difficulty, QuizKind, ScaleDirection } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
@@ -23,6 +23,7 @@ const {
   streak,
   difficulty,
   intervalPlaybackMode,
+  scaleDirection,
   isPlaying,
   hasPlayedFirst,
   weakItems,
@@ -31,6 +32,7 @@ const {
   selectKind,
   selectDifficulty,
   selectIntervalPlaybackMode,
+  selectScaleDirection,
   answer,
   resetScore,
   playYourAnswer,
@@ -156,6 +158,23 @@ useTypingGuardedKeydown(handleKeydown);
         </chip-toggle-item>
         <chip-toggle-item value="harmonic" class="px-3 py-1 text-xs">
           {{ t("earTraining.harmonic") }}
+        </chip-toggle-item>
+      </chip-toggle-group>
+
+      <chip-toggle-group
+        v-if="kind === 'scale'"
+        :model-value="scaleDirection"
+        type="single"
+        :aria-label="t('earTraining.scaleDirection')"
+        @update:model-value="(value) => value && selectScaleDirection(value as ScaleDirection)"
+      >
+        <chip-toggle-item
+          v-for="option in (['ascending', 'descending', 'both'] as const)"
+          :key="option"
+          :value="option"
+          class="px-3 py-1 text-xs"
+        >
+          {{ t(`earTraining.scaleDirections.${option}`) }}
         </chip-toggle-item>
       </chip-toggle-group>
     </div>

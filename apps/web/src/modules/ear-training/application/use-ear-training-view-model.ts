@@ -13,11 +13,13 @@ import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
 import {
   generateQuestion,
+  orderScalePitches,
   labelForItem,
   pitchesForItem,
   pitchesForOption,
   type Difficulty,
   type QuizKind,
+  type ScaleDirection,
 } from "./question-generators";
 import { useEarTrainingStore } from "./use-ear-training-store";
 
@@ -44,7 +46,7 @@ export interface WeakItemView {
 
 export function useEarTrainingViewModel() {
   const store = useEarTrainingStore();
-  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode } = storeToRefs(store);
+  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, scaleDirection } = storeToRefs(store);
 
   const { playChord, playSequence } = useNoteAudio();
   const { recordActivity } = useStudyActivity();
@@ -64,7 +66,11 @@ export function useEarTrainingViewModel() {
   /** Placar do tipo de quiz ativo (cada tipo persiste o seu, não um total global). */
   const score = computed(() => scores.value[kind.value]);
 
-  function playPitches(pitches: Pitch[], asChord: boolean) {
+  function playPitches(rawPitches: Pitch[], asChord: boolean, playedKind: QuizKind = kind.value) {
+    // Escalas são geradas ascendentes; a direção é aplicada só na hora de tocar,
+    // para que a tônica (`pitches[0]`) continue sendo a referência de "ouvir sua resposta".
+    const pitches = playedKind === "scale" ? orderScalePitches(rawPitches, scaleDirection.value) : rawPitches;
+
     if (playingTimeout) clearTimeout(playingTimeout);
 
     isPlaying.value = true;
@@ -176,6 +182,10 @@ export function useEarTrainingViewModel() {
     newQuestion();
   }
 
+  function selectScaleDirection(next: ScaleDirection) {
+    scaleDirection.value = next;
+  }
+
   function selectIntervalPlaybackMode(next: "harmonic" | "melodic") {
     intervalPlaybackMode.value = next;
   }
@@ -215,6 +225,7 @@ export function useEarTrainingViewModel() {
     bestStreak,
     difficulty,
     intervalPlaybackMode,
+    scaleDirection,
     isPlaying,
     hasPlayedFirst,
     weakItems,
@@ -224,6 +235,7 @@ export function useEarTrainingViewModel() {
     selectKind,
     selectDifficulty,
     selectIntervalPlaybackMode,
+    selectScaleDirection,
     answer,
     resetScore,
     playYourAnswer,

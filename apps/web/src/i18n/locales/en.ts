@@ -395,6 +395,8 @@ export const en = {
     intervalPlaybackMode: "Interval playback",
     melodic: "Melodic",
     harmonic: "Harmonic",
+    scaleDirection: "Scale direction",
+    scaleDirections: { ascending: "Ascending", descending: "Descending", both: "Both" },
     clickPlayHint: "1-4 to answer, R to replay, Enter/Space for next.",
     firstPlayHint: "Click ▶ to hear the first question.",
     listenYourAnswer: "Hear your answer",
