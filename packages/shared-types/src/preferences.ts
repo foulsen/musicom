@@ -12,6 +12,8 @@ export const difficultySchema = z.enum(["easy", "medium", "hard"]);
 export const deckIdSchema = z.enum(["intervals", "intervalNames", "chordFormulas", "chordSpelling"]);
 export const noteIdLevelSchema = z.enum(["frets3", "frets5", "frets7", "frets12"]);
 export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
+export const intervalDirectionSchema = z.enum(["ascending", "descending", "mixed"]);
+export const scaleDirectionSchema = z.enum(["ascending", "descending", "both"]);
 export const themeSchema = z.enum(["light", "dark", "system"]);
 
 /**
@@ -35,6 +37,8 @@ export const preferencesSnapshotSchema = z.object({
     .object({
       difficulty: difficultySchema,
       intervalPlaybackMode: intervalPlaybackModeSchema,
+      intervalDirection: intervalDirectionSchema,
+      scaleDirection: scaleDirectionSchema,
     })
     .partial()
     .optional(),

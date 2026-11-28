@@ -158,7 +158,12 @@ const preferences = defineAggregate<PreferencesSnapshot>({
       locale: currentLocale(),
       theme: useThemeStore(pinia).mode,
       audio: { masterVolume: audio.masterVolume, instrument: audio.instrument },
-      earTraining: { difficulty: ear.difficulty, intervalPlaybackMode: ear.intervalPlaybackMode },
+      earTraining: {
+        difficulty: ear.difficulty,
+        intervalPlaybackMode: ear.intervalPlaybackMode,
+        intervalDirection: ear.intervalDirection,
+        scaleDirection: ear.scaleDirection,
+      },
       drills: {
         activeDeckId: drillsStore.activeDeckId,
         fretboardNaturalsOnly: drillsStore.fretboardNaturalsOnly,
@@ -183,6 +188,8 @@ const preferences = defineAggregate<PreferencesSnapshot>({
     if (data.earTraining?.difficulty) ear.difficulty = data.earTraining.difficulty;
     if (data.earTraining?.intervalPlaybackMode)
       ear.intervalPlaybackMode = data.earTraining.intervalPlaybackMode;
+    if (data.earTraining?.intervalDirection) ear.intervalDirection = data.earTraining.intervalDirection;
+    if (data.earTraining?.scaleDirection) ear.scaleDirection = data.earTraining.scaleDirection;
 
     const drillsStore = useDrillsStore(pinia);
     if (data.drills?.activeDeckId) drillsStore.activeDeckId = data.drills.activeDeckId;

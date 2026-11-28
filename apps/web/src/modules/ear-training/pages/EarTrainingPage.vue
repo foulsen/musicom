@@ -7,7 +7,7 @@ import { Play, RotateCcw } from "@lucide/vue";
 import { MIN_WEAK_ATTEMPTS } from "../application/item-stats";
 import { useEarTrainingViewModel } from "../application/use-ear-training-view-model";
 import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
-import type { Difficulty, QuizKind, ScaleDirection } from "../application/question-generators";
+import type { Difficulty, IntervalDirection, QuizKind, ScaleDirection } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
 import { useMusicTerms } from "@/modules/shared/application/music-terms";
@@ -23,6 +23,7 @@ const {
   streak,
   difficulty,
   intervalPlaybackMode,
+  intervalDirection,
   scaleDirection,
   isPlaying,
   hasPlayedFirst,
@@ -32,6 +33,7 @@ const {
   selectKind,
   selectDifficulty,
   selectIntervalPlaybackMode,
+  selectIntervalDirection,
   selectScaleDirection,
   answer,
   resetScore,
@@ -162,6 +164,23 @@ useTypingGuardedKeydown(handleKeydown);
       </chip-toggle-group>
 
       <chip-toggle-group
+        v-if="kind === 'interval' && intervalPlaybackMode === 'melodic'"
+        :model-value="intervalDirection"
+        type="single"
+        :aria-label="t('earTraining.intervalDirection')"
+        @update:model-value="(value) => value && selectIntervalDirection(value as IntervalDirection)"
+      >
+        <chip-toggle-item
+          v-for="option in (['ascending', 'descending', 'mixed'] as const)"
+          :key="option"
+          :value="option"
+          class="px-3 py-1 text-xs"
+        >
+          {{ t(`earTraining.intervalDirections.${option}`) }}
+        </chip-toggle-item>
+      </chip-toggle-group>
+
+      <chip-toggle-group
         v-if="kind === 'scale'"
         :model-value="scaleDirection"
         type="single"
@@ -196,6 +215,10 @@ useTypingGuardedKeydown(handleKeydown);
           <play class="size-5" :class="{ 'animate-pulse': isPlaying }" />
           {{ hasPlayedFirst ? t("earTraining.playAgain") : t("earTraining.play") }}
         </button>
+
+        <p v-if="kind === 'scaleDegree'" class="text-xs text-muted-foreground">
+          {{ t("earTraining.cadenceHint") }}
+        </p>
 
         <p v-if="hasPlayedFirst && !isAnswered" class="text-xs text-muted-foreground">
           {{ t("earTraining.clickPlayHint") }}

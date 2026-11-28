@@ -380,7 +380,7 @@ export const en = {
   },
   earTraining: {
     title: "Ear Training Studio",
-    subtitle: "Listen and pick the right answer — intervals, chord qualities and scales.",
+    subtitle: "Listen and pick the right answer — intervals, chord qualities, scales and scale degrees.",
     quizType: "Quiz type",
     play: "Play",
     playAgain: "Play again",
@@ -397,6 +397,9 @@ export const en = {
     harmonic: "Harmonic",
     scaleDirection: "Scale direction",
     scaleDirections: { ascending: "Ascending", descending: "Descending", both: "Both" },
+    intervalDirection: "Interval direction",
+    intervalDirections: { ascending: "Ascending", descending: "Descending", mixed: "Mixed" },
+    cadenceHint: "A I–IV–V–I cadence sets the key; then a single note plays.",
     clickPlayHint: "1-4 to answer, R to replay, Enter/Space for next.",
     firstPlayHint: "Click ▶ to hear the first question.",
     listenYourAnswer: "Hear your answer",
@@ -405,6 +408,7 @@ export const en = {
       interval: "Intervals",
       chordQuality: "Chord Quality",
       scale: "Scales",
+      scaleDegree: "Scale Degrees",
     },
     difficulties: {
       easy: "Easy",
@@ -415,6 +419,7 @@ export const en = {
       interval: "What interval do you hear?",
       chordQuality: "What chord quality do you hear?",
       scale: "What scale do you hear?",
+      scaleDegree: "Which degree of the key is the last note?",
     },
     weakPoints: {
       title: "Your weak spots",

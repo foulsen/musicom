@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
 import type { ConfusionsByKind, ItemStatsByKind } from "./item-stats";
-import type { Difficulty, QuizKind, ScaleDirection } from "./question-generators";
+import type { Difficulty, IntervalDirection, QuizKind, ScaleDirection } from "./question-generators";
 
 export type IntervalPlaybackMode = "harmonic" | "melodic";
 
@@ -21,6 +21,7 @@ export const useEarTrainingStore = defineStore("ear-training", {
       interval: emptyScore(),
       chordQuality: emptyScore(),
       scale: emptyScore(),
+      scaleDegree: emptyScore(),
     } as Record<QuizKind, QuizScore>,
     /** Acertos por item (`itemStats[tipo][id]`) — base do sampling adaptativo e dos pontos fracos. */
     itemStats: {} as ItemStatsByKind,
@@ -31,6 +32,8 @@ export const useEarTrainingStore = defineStore("ear-training", {
     difficulty: "medium" as Difficulty,
     /** Só se aplica ao quiz de intervalo: tocar as duas notas juntas ou em sequência. */
     intervalPlaybackMode: "melodic" as IntervalPlaybackMode,
+    /** Só no intervalo melódico: subindo, descendo ou sorteado por questão. */
+    intervalDirection: "ascending" as IntervalDirection,
     /** Só se aplica ao quiz de escala: tocar subindo, descendo ou os dois. */
     scaleDirection: "ascending" as ScaleDirection,
   }),

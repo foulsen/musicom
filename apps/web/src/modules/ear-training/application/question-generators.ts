@@ -94,14 +94,70 @@ const SCALE_ENTRIES: [ScalePattern, number][] = [
   [PHRYGIAN_SCALE_PATTERN, 3],
 ];
 
-export type QuizKind = "interval" | "chordQuality" | "scale";
+/**
+ * Graus da escala (semitons a partir da tônica) ouvidos dentro de uma tonalidade maior.
+ * Fácil: notas estáveis da tônica + 4; médio: completa a escala maior; difícil: cromáticos.
+ */
+const SCALE_DEGREE_ENTRIES: [number, number][] = [
+  [0, 1],
+  [4, 1],
+  [5, 1],
+  [7, 1],
+  [2, 2],
+  [9, 2],
+  [11, 2],
+  [1, 3],
+  [3, 3],
+  [6, 3],
+  [8, 3],
+  [10, 3],
+];
+
+/** Rótulo do grau pelo id (semitons): notação de grau, igual em qualquer idioma. */
+const SCALE_DEGREE_LABELS: Record<number, string> = {
+  0: "1",
+  1: "♭2",
+  2: "2",
+  3: "♭3",
+  4: "3",
+  5: "4",
+  6: "♯4",
+  7: "5",
+  8: "♭6",
+  9: "6",
+  10: "♭7",
+  11: "7",
+};
+
+/** Oitavas da tônica no quiz de graus (o baixo da cadência fica uma oitava abaixo). */
+const SCALE_DEGREE_TONIC_OCTAVES = [3, 4];
+
+export function scaleDegreeLabel(semitones: number): TermLabel {
+  return SCALE_DEGREE_LABELS[semitones] ?? semitones.toString();
+}
+
+export type QuizKind = "interval" | "chordQuality" | "scale" | "scaleDegree";
+
+/** Direção do intervalo melódico; "mixed" sorteia por questão. */
+export type IntervalDirection = "ascending" | "descending" | "mixed";
+
+export function resolveIntervalDescending(direction: IntervalDirection, random: () => number = Math.random): boolean {
+  if (direction === "mixed") return random() < 0.5;
+
+  return direction === "descending";
+}
 
 export interface Question {
   kind: QuizKind;
   correctId: string;
   options: QuizOption[];
+  /** Sempre ascendentes a partir da fundamental (ou só a nota-alvo, no quiz de graus). */
   pitches: Pitch[];
-  playback: "chord" | "sequence";
+  playback: "chord" | "sequence" | "cadence";
+  /** Intervalo melódico tocado de cima para baixo (aplicado só na hora de tocar). */
+  descending?: boolean;
+  /** Tônica da tonalidade do quiz de graus: base da cadência e de "ouvir sua resposta". */
+  tonic?: Pitch;
 }
 
 function randomRootNote(): Note {
@@ -125,6 +181,8 @@ export interface GenerateOptions {
   stats?: ItemStatsState;
   /** Aleatoriedade [0, 1) do sorteio ponderado — injetável para testes. */
   random?: () => number;
+  /** Só para intervalos: direção do intervalo melódico. */
+  intervalDirection?: IntervalDirection;
 }
 
 /**
@@ -170,6 +228,7 @@ function generateIntervalQuestion(difficulty: Difficulty, generate: GenerateOpti
     options,
     pitches: pitchesFor(root, randomChoice(PLAYBACK_OCTAVES), [0, semitones]),
     playback: "sequence",
+    descending: resolveIntervalDescending(generate.intervalDirection ?? "ascending"),
   };
 }
 
@@ -222,6 +281,25 @@ function generateScaleQuestion(difficulty: Difficulty, generate: GenerateOptions
   };
 }
 
+function generateScaleDegreeQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
+  const pool = poolForDifficulty(SCALE_DEGREE_ENTRIES, difficulty);
+  const tonic = Pitch.from(randomRootNote().value, randomChoice(SCALE_DEGREE_TONIC_OCTAVES));
+  const { correct: semitones, distractors } = pickItemAndDistractors(pool, String, "scaleDegree", generate);
+
+  const options = shuffle(
+    [semitones, ...distractors].map((value) => ({ id: value.toString(), label: scaleDegreeLabel(value) })),
+  );
+
+  return {
+    kind: "scaleDegree",
+    correctId: semitones.toString(),
+    options,
+    pitches: [tonic.transpose(semitones)],
+    playback: "cadence",
+    tonic,
+  };
+}
+
 export type ScaleDirection = "ascending" | "descending" | "both";
 
 /**
@@ -244,6 +322,7 @@ export function generateQuestion(
 ): Question {
   if (kind === "chordQuality") return generateChordQualityQuestion(difficulty, options);
   if (kind === "scale") return generateScaleQuestion(difficulty, options);
+  if (kind === "scaleDegree") return generateScaleDegreeQuestion(difficulty, options);
 
   return generateIntervalQuestion(difficulty, options);
 }
@@ -252,6 +331,7 @@ export function generateQuestion(
 export function labelForItem(kind: QuizKind, id: string): TermLabel {
   if (kind === "interval") return intervalLabel(Number(id));
   if (kind === "chordQuality") return chordQualityLabel(id);
+  if (kind === "scaleDegree") return scaleDegreeLabel(Number(id));
 
   return scaleLabel(id);
 }
@@ -260,6 +340,11 @@ export function labelForItem(kind: QuizKind, id: string): TermLabel {
 export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[] | null {
   if (kind === "interval") {
     return [root, root.transpose(Number(id))];
+  }
+
+  // `root` é a tônica: a resposta é só a nota-alvo (a cadência vem do playback).
+  if (kind === "scaleDegree") {
+    return [root.transpose(Number(id))];
   }
 
   if (kind === "chordQuality") {
@@ -281,5 +366,5 @@ export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[]
  * feedback de erro. Reusa a mesma fundamental (`question.pitches[0]`) da questão.
  */
 export function pitchesForOption(question: Question, optionId: string): Pitch[] {
-  return pitchesForItem(question.kind, optionId, question.pitches[0]) ?? question.pitches;
+  return pitchesForItem(question.kind, optionId, question.tonic ?? question.pitches[0]) ?? question.pitches;
 }

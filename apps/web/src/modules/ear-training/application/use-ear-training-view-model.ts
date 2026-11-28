@@ -9,15 +9,19 @@ import { useNoteAudio } from "@/modules/shared/application/use-note-audio";
 
 import type { TermLabel } from "@/modules/shared/application/music-terms";
 
+import { cadenceTimeline, timelineDurationMs } from "./cadence";
 import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
 import {
   generateQuestion,
   orderScalePitches,
+  resolveIntervalDescending,
   labelForItem,
   pitchesForItem,
   pitchesForOption,
   type Difficulty,
+  type IntervalDirection,
+  type Question,
   type QuizKind,
   type ScaleDirection,
 } from "./question-generators";
@@ -46,13 +50,19 @@ export interface WeakItemView {
 
 export function useEarTrainingViewModel() {
   const store = useEarTrainingStore();
-  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, scaleDirection } = storeToRefs(store);
+  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, intervalDirection, scaleDirection } =
+    storeToRefs(store);
 
-  const { playChord, playSequence } = useNoteAudio();
+  const { playChord, playSequence, playTimeline } = useNoteAudio();
   const { recordActivity } = useStudyActivity();
 
   const kind = ref<QuizKind>("interval");
-  const question = ref(generateQuestion(kind.value, difficulty.value, { stats: store }));
+
+  function freshQuestion(): Question {
+    return generateQuestion(kind.value, difficulty.value, { stats: store, intervalDirection: intervalDirection.value });
+  }
+
+  const question = ref(freshQuestion());
   const selectedOptionId = ref<string | null>(null);
 
   /** Liga durante o playback (estimado) para animar o botão Play; nunca tocou = estado inicial silencioso. */
@@ -64,30 +74,58 @@ export function useEarTrainingViewModel() {
   const isCorrect = computed(() => selectedOptionId.value === question.value.correctId);
 
   /** Placar do tipo de quiz ativo (cada tipo persiste o seu, não um total global). */
-  const score = computed(() => scores.value[kind.value]);
+  const score = computed(() => {
+    // Placar salvo antes de um tipo de quiz existir não tem a chave dele.
+    scores.value[kind.value] ??= { correct: 0, total: 0 };
 
-  function playPitches(rawPitches: Pitch[], asChord: boolean, playedKind: QuizKind = kind.value) {
-    // Escalas são geradas ascendentes; a direção é aplicada só na hora de tocar,
-    // para que a tônica (`pitches[0]`) continue sendo a referência de "ouvir sua resposta".
-    const pitches = playedKind === "scale" ? orderScalePitches(rawPitches, scaleDirection.value) : rawPitches;
+    return scores.value[kind.value];
+  });
 
+  /** Contexto de playback além das alturas: direção do intervalo e tônica da cadência. */
+  interface PlayContext {
+    descending?: boolean;
+    tonic?: Pitch;
+  }
+
+  function playPitches(rawPitches: Pitch[], asChord: boolean, playedKind: QuizKind = kind.value, context: PlayContext = {}) {
     if (playingTimeout) clearTimeout(playingTimeout);
 
     isPlaying.value = true;
     hasPlayedFirst.value = true;
 
-    if (asChord) {
-      playChord(pitches, { strum: true });
+    let durationMs: number;
+
+    if (playedKind === "scaleDegree" && context.tonic) {
+      // Graus: cadência I–IV–V–I fixa o tom antes da nota-alvo.
+      const timeline = cadenceTimeline(context.tonic, rawPitches);
+      void playTimeline(timeline);
+      durationMs = timelineDurationMs(timeline) + 200;
     } else {
-      playSequence(pitches);
+      // Escalas e intervalos são gerados ascendentes; a direção é aplicada só na hora de tocar,
+      // para que a fundamental (`pitches[0]`) continue sendo a referência de "ouvir sua resposta".
+      let pitches = rawPitches;
+      if (playedKind === "scale") pitches = orderScalePitches(rawPitches, scaleDirection.value);
+      if (playedKind === "interval" && !asChord && context.descending) pitches = [...rawPitches].reverse();
+
+      if (asChord) {
+        playChord(pitches, { strum: true });
+      } else {
+        playSequence(pitches);
+      }
+
+      durationMs = estimatePlaybackDurationMs(pitches.length, asChord);
     }
 
     playingTimeout = setTimeout(() => {
       isPlaying.value = false;
-    }, estimatePlaybackDurationMs(pitches.length, asChord));
+    }, durationMs);
   }
 
-  function isChordPlayback(playedKind: QuizKind, playback: "chord" | "sequence") {
+  function questionContext(): PlayContext {
+    return { descending: question.value.descending, tonic: question.value.tonic };
+  }
+
+  function isChordPlayback(playedKind: QuizKind, playback: Question["playback"]) {
     return playback === "chord" || (playedKind === "interval" && intervalPlaybackMode.value === "harmonic");
   }
 
@@ -97,12 +135,12 @@ export function useEarTrainingViewModel() {
 
   /** Intervalo tocado junto (harmônico) quando o usuário escolhe esse modo; o resto segue o playback da questão. */
   function replay() {
-    playPitches(question.value.pitches, asChordPlayback());
+    playPitches(question.value.pitches, asChordPlayback(), question.value.kind, questionContext());
   }
 
   /** Reouve a opção escolhida ou a correta, para comparar após errar (não altera o placar). */
   function playOption(optionId: string) {
-    playPitches(pitchesForOption(question.value, optionId), asChordPlayback());
+    playPitches(pitchesForOption(question.value, optionId), asChordPlayback(), question.value.kind, questionContext());
   }
 
   function playYourAnswer() {
@@ -134,7 +172,10 @@ export function useEarTrainingViewModel() {
     const pitches = pitchesForItem(kind.value, itemId, WEAK_ITEM_ROOT());
     if (!pitches) return;
 
-    playPitches(pitches, isChordPlayback(kind.value, kind.value === "chordQuality" ? "chord" : "sequence"));
+    playPitches(pitches, isChordPlayback(kind.value, kind.value === "chordQuality" ? "chord" : "sequence"), kind.value, {
+      descending: intervalDirection.value === "descending",
+      tonic: WEAK_ITEM_ROOT(),
+    });
   }
 
   onUnmounted(() => {
@@ -152,7 +193,7 @@ export function useEarTrainingViewModel() {
     if (config.kind) kind.value = config.kind;
     if (config.difficulty) difficulty.value = config.difficulty;
     if (config.kind || config.difficulty) {
-      question.value = generateQuestion(kind.value, difficulty.value, { stats: store });
+      question.value = freshQuestion();
       selectedOptionId.value = null;
     }
 
@@ -163,7 +204,7 @@ export function useEarTrainingViewModel() {
   });
 
   function newQuestion() {
-    question.value = generateQuestion(kind.value, difficulty.value, { stats: store });
+    question.value = freshQuestion();
     selectedOptionId.value = null;
     replay();
   }
@@ -180,6 +221,15 @@ export function useEarTrainingViewModel() {
 
     difficulty.value = next;
     newQuestion();
+  }
+
+  /** Vale já para a questão atual: re-sorteia só a direção, sem trocar o intervalo. */
+  function selectIntervalDirection(next: IntervalDirection) {
+    intervalDirection.value = next;
+
+    if (question.value.kind === "interval") {
+      question.value = { ...question.value, descending: resolveIntervalDescending(next) };
+    }
   }
 
   function selectScaleDirection(next: ScaleDirection) {
@@ -225,6 +275,7 @@ export function useEarTrainingViewModel() {
     bestStreak,
     difficulty,
     intervalPlaybackMode,
+    intervalDirection,
     scaleDirection,
     isPlaying,
     hasPlayedFirst,
@@ -235,6 +286,7 @@ export function useEarTrainingViewModel() {
     selectKind,
     selectDifficulty,
     selectIntervalPlaybackMode,
+    selectIntervalDirection,
     selectScaleDirection,
     answer,
     resetScore,
