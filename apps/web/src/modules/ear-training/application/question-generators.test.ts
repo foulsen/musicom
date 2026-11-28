@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 
+import { Pitch } from "@music-workspace/music-theory";
+
 import type { ItemStatsState } from "./item-stats";
+import { progressionChords } from "./progression";
 import {
   MIN_CUSTOM_ITEMS,
   allItemsForKind,
   generateQuestion,
+  invertPitches,
   itemIdsForDifficulty,
   orderScalePitches,
   poolFor,
   pickItemAndDistractors,
   pitchesForOption,
+  resolveChordInversion,
   resolveIntervalDescending,
   type QuizKind,
 } from "./question-generators";
@@ -203,6 +208,110 @@ describe("scale degree questions", () => {
   });
 });
 
+describe("progression questions", () => {
+  it.each(["easy", "medium", "hard"] as const)("returns 4 distinct options with the correct id present (%s)", (difficulty) => {
+    for (let i = 0; i < 30; i++) {
+      const question = generateQuestion("progression", difficulty);
+
+      expect(question.options).toHaveLength(4);
+      expect(new Set(question.options.map((option) => option.id)).size).toBe(4);
+      expect(question.options.map((option) => option.id)).toContain(question.correctId);
+    }
+  });
+
+  it("labels options with the literal roman-numeral string while ids stay ASCII", () => {
+    const question = generateQuestion("progression", "hard");
+
+    question.options.forEach((option) => {
+      expect(typeof option.label).toBe("string");
+      expect(option.id).toMatch(/^[A-Za-z-]+$/);
+    });
+    expect(allItemsForKind("progression").find((item) => item.id === "I-V-vi-IV")?.label).toBe("I–V–vi–IV");
+  });
+
+  it("plays in the question tonic and rebuilds any option in that same key", () => {
+    const question = generateQuestion("progression", "medium");
+
+    expect(question.playback).toBe("progression");
+    expect(question.tonic).toBeDefined();
+    expect(question.pitches).toEqual([question.tonic]);
+
+    const option = question.options[0].id;
+    const expected = progressionChords(option, question.tonic!)!.flat();
+
+    expect(pitchesForOption(question, option).map((pitch) => pitch.midi())).toEqual(expected.map((pitch) => pitch.midi()));
+  });
+
+  it("keeps easy questions on the easy pool", () => {
+    const easy = itemIdsForDifficulty("progression", "easy");
+
+    for (let i = 0; i < 20; i++) {
+      generateQuestion("progression", "easy").options.forEach((option) => expect(easy).toContain(option.id));
+    }
+  });
+});
+
+describe("chord inversions", () => {
+  const C4 = Pitch.from("C", 4);
+  const triad = [C4, C4.transpose(4), C4.transpose(7)];
+  const seventh = [...triad, C4.transpose(11)];
+  const midis = (pitches: Pitch[]) => pitches.map((pitch) => pitch.midi());
+
+  it("moves the lowest k tones up an octave and keeps pitches strictly ascending", () => {
+    expect(midis(invertPitches(triad, 0))).toEqual([60, 64, 67]);
+    expect(midis(invertPitches(triad, 1))).toEqual([64, 67, 72]);
+    expect(midis(invertPitches(triad, 2))).toEqual([67, 72, 76]);
+    expect(midis(invertPitches(seventh, 3))).toEqual([71, 72, 76, 79]);
+
+    for (const chord of [triad, seventh]) {
+      for (let k = 0; k < chord.length; k++) {
+        const result = midis(invertPitches(chord, k));
+
+        result.slice(1).forEach((midi, index) => expect(midi).toBeGreaterThan(result[index]));
+      }
+    }
+  });
+
+  it("clamps the inversion to the chord size", () => {
+    expect(midis(invertPitches(triad, 3))).toEqual(midis(invertPitches(triad, 2)));
+    expect(midis(invertPitches(triad, -1))).toEqual(midis(triad));
+  });
+
+  it("resolves the inversion from the voicing preference", () => {
+    expect(resolveChordInversion("root", 4)).toBe(0);
+    expect(resolveChordInversion("inversions", 3, () => 0)).toBe(0);
+    expect(resolveChordInversion("inversions", 3, () => 0.999)).toBe(2);
+  });
+
+  it("stores an inversion within range with the inversions voicing", () => {
+    const seen = new Set<number>();
+
+    for (let i = 0; i < 200; i++) {
+      const question = generateQuestion("chordQuality", "hard", { chordVoicing: "inversions" });
+
+      expect(question.inversion).toBeGreaterThanOrEqual(0);
+      expect(question.inversion).toBeLessThanOrEqual(question.pitches.length - 1);
+      seen.add(question.inversion!);
+    }
+
+    expect(seen.size).toBeGreaterThan(1);
+  });
+
+  it("stays in root position by default", () => {
+    for (let i = 0; i < 30; i++) {
+      expect(generateQuestion("chordQuality", "hard").inversion).toBe(0);
+      expect(generateQuestion("chordQuality", "hard", { chordVoicing: "root" }).inversion).toBe(0);
+    }
+  });
+
+  it("rebuilds an option's chord in root position on the question root, so playback applies the same inversion", () => {
+    const question = generateQuestion("chordQuality", "hard", { chordVoicing: "inversions" });
+    const option = pitchesForOption(question, question.options[0].id);
+
+    expect(option[0].midi()).toBe(question.pitches[0].midi());
+  });
+});
+
 describe("interval direction", () => {
   it("resolves fixed directions and splits mixed by the random source", () => {
     expect(resolveIntervalDescending("ascending")).toBe(false);
@@ -228,7 +337,7 @@ describe("custom item set", () => {
     [5, 3],
     [6, 3],
   ];
-  const ALL_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree"];
+  const ALL_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree", "progression"];
 
   it("uses the difficulty pool when there are no custom ids", () => {
     expect(poolFor(entries, String, "easy")).toEqual([1, 2]);

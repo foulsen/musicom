@@ -163,6 +163,7 @@ const preferences = defineAggregate<PreferencesSnapshot>({
         intervalPlaybackMode: ear.intervalPlaybackMode,
         intervalDirection: ear.intervalDirection,
         scaleDirection: ear.scaleDirection,
+        chordVoicing: ear.chordVoicing,
         varySound: ear.varySound,
         customItems: ear.customItems,
         customActive: ear.customActive,
@@ -193,6 +194,7 @@ const preferences = defineAggregate<PreferencesSnapshot>({
       ear.intervalPlaybackMode = data.earTraining.intervalPlaybackMode;
     if (data.earTraining?.intervalDirection) ear.intervalDirection = data.earTraining.intervalDirection;
     if (data.earTraining?.scaleDirection) ear.scaleDirection = data.earTraining.scaleDirection;
+    if (data.earTraining?.chordVoicing) ear.chordVoicing = data.earTraining.chordVoicing;
     if (data.earTraining?.varySound !== undefined) ear.varySound = data.earTraining.varySound;
     // Merge por tipo de quiz, como nos snapshots de progresso: o servidor vence só nos tipos que ele conhece.
     if (data.earTraining?.customItems) ear.customItems = { ...ear.customItems, ...data.earTraining.customItems };

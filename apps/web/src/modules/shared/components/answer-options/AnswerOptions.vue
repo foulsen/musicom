@@ -23,6 +23,7 @@ const { label } = useMusicTerms();
  * (Title Case) é o visual de sempre; em pt, só a primeira letra — "Sétima da dominante", não "Da".
  */
 const labelCaseClass = computed(() => (locale.value.startsWith("en") ? "capitalize" : "first-letter:uppercase"));
+// Rótulos literais (graus, algarismos romanos como "ii–V–I") ficam como estão: a caixa deles tem significado.
 
 function stateClass(option: QuizOption, correctId: string, selectedId: string | null): string {
   if (!selectedId) {
@@ -67,7 +68,7 @@ function handleClick(optionId: string) {
         aria-hidden="true"
         class="mr-2 inline-flex size-5 items-center justify-center rounded border border-current/30 align-middle text-[10px] font-semibold opacity-70"
       >{{ index + 1 }}</span>
-      <span class="inline-block" :class="labelCaseClass">{{ label(option.label) }}</span>
+      <span class="inline-block" :class="typeof option.label === 'string' ? '' : labelCaseClass">{{ label(option.label) }}</span>
     </button>
   </div>
 </template>

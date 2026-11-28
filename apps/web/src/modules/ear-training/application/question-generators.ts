@@ -33,6 +33,7 @@ import { randomChoice, sampleDistinct, shuffle } from "@/modules/shared/applicat
 import type { QuizOption } from "@/modules/shared/application/quiz";
 
 import { itemWeight, pickWeighted, topConfusionId, type ItemStatsState } from "./item-stats";
+import { PROGRESSION_ENTRIES, progressionChords, progressionItem } from "./progression";
 import type { QuestionSound } from "./question-sound";
 
 /** Oitavas possíveis de playback — sorteada por questão para o ouvido não ancorar em frequências absolutas. */
@@ -161,7 +162,32 @@ export function scaleDegreeLabel(semitones: number): TermLabel {
   return SCALE_DEGREE_LABELS[semitones] ?? semitones.toString();
 }
 
-export type QuizKind = "interval" | "chordQuality" | "scale" | "scaleDegree";
+/** Oitavas da tônica no quiz de progressões (o baixo de cada acorde fica uma oitava abaixo). */
+const PROGRESSION_TONIC_OCTAVES = [3, 4];
+
+export type QuizKind = "interval" | "chordQuality" | "scale" | "scaleDegree" | "progression";
+
+/** Voicing dos acordes do quiz de qualidade: sempre fundamental ou com inversão sorteada por questão. */
+export type ChordVoicing = "root" | "inversions";
+
+/**
+ * Inversão `k` de um acorde: as `k` notas mais graves sobem uma oitava. `k` é limitado a [0, n-1]
+ * (n = tamanho do acorde). Um acorde cabe em menos de uma oitava, então a ordem segue estritamente ascendente.
+ */
+export function invertPitches(pitches: readonly Pitch[], inversion: number): Pitch[] {
+  const k = Math.max(0, Math.min(Math.floor(inversion), pitches.length - 1));
+
+  return [...pitches.slice(k), ...pitches.slice(0, k).map((pitch) => pitch.transpose(12))];
+}
+
+/** Inversão sorteada em [0, tamanho-1] com "inversions"; sempre 0 (fundamental) com "root". */
+export function resolveChordInversion(
+  voicing: ChordVoicing,
+  chordSize: number,
+  random: () => number = Math.random,
+): number {
+  return voicing === "inversions" ? Math.floor(random() * chordSize) : 0;
+}
 
 /** Direção do intervalo melódico; "mixed" sorteia por questão. */
 export type IntervalDirection = "ascending" | "descending" | "mixed";
@@ -178,10 +204,12 @@ export interface Question {
   options: QuizOption[];
   /** Sempre ascendentes a partir da fundamental (ou só a nota-alvo, no quiz de graus). */
   pitches: Pitch[];
-  playback: "chord" | "sequence" | "cadence";
+  playback: "chord" | "sequence" | "cadence" | "progression";
   /** Intervalo melódico tocado de cima para baixo (aplicado só na hora de tocar). */
   descending?: boolean;
-  /** Tônica da tonalidade do quiz de graus: base da cadência e de "ouvir sua resposta". */
+  /** Qualidade de acorde: inversão tocada (0 = fundamental). `pitches` continua em posição fundamental, com a raiz em `pitches[0]`. */
+  inversion?: number;
+  /** Tônica da tonalidade (graus e progressões): base da cadência/progressão e de "ouvir sua resposta". */
   tonic?: Pitch;
   /** Timbre e andamento sorteados ("Variar som"); ausente = som padrão do usuário. */
   sound?: QuestionSound;
@@ -212,6 +240,8 @@ export interface GenerateOptions {
   intervalDirection?: IntervalDirection;
   /** Ids escolhidos em "Personalizar": com >= `MIN_CUSTOM_ITEMS` válidos, substituem o pool da dificuldade. */
   customItemIds?: readonly string[];
+  /** Só para qualidade de acorde: fundamental ou inversões sorteadas. */
+  chordVoicing?: ChordVoicing;
 }
 
 /**
@@ -285,6 +315,7 @@ function generateChordQualityQuestion(difficulty: Difficulty, generate: Generate
       pattern.degrees.map((degree) => degree.semitones()),
     ),
     playback: "chord",
+    inversion: resolveChordInversion(generate.chordVoicing ?? "root", pattern.degrees.length, generate.random),
   };
 }
 
@@ -329,6 +360,24 @@ function generateScaleDegreeQuestion(difficulty: Difficulty, generate: GenerateO
   };
 }
 
+function generateProgressionQuestion(difficulty: Difficulty, generate: GenerateOptions): Question {
+  const pool = poolFor(PROGRESSION_ENTRIES, (item) => item.id, difficulty, generate.customItemIds);
+  const tonic = Pitch.from(randomRootNote().value, randomChoice(PROGRESSION_TONIC_OCTAVES));
+  const { correct, distractors } = pickItemAndDistractors(pool, (item) => item.id, "progression", generate);
+
+  const options = shuffle([correct, ...distractors].map((item) => ({ id: item.id, label: item.label })));
+
+  return {
+    kind: "progression",
+    correctId: correct.id,
+    options,
+    // O som vem da progressão do id, na tônica; `pitches` só guarda a tônica como referência.
+    pitches: [tonic],
+    playback: "progression",
+    tonic,
+  };
+}
+
 export type ScaleDirection = "ascending" | "descending" | "both";
 
 /**
@@ -352,6 +401,7 @@ export function generateQuestion(
   if (kind === "chordQuality") return generateChordQualityQuestion(difficulty, options);
   if (kind === "scale") return generateScaleQuestion(difficulty, options);
   if (kind === "scaleDegree") return generateScaleDegreeQuestion(difficulty, options);
+  if (kind === "progression") return generateProgressionQuestion(difficulty, options);
 
   return generateIntervalQuestion(difficulty, options);
 }
@@ -361,6 +411,7 @@ export function labelForItem(kind: QuizKind, id: string): TermLabel {
   if (kind === "interval") return intervalLabel(Number(id));
   if (kind === "chordQuality") return chordQualityLabel(id);
   if (kind === "scaleDegree") return scaleDegreeLabel(Number(id));
+  if (kind === "progression") return progressionItem(id)?.label ?? id;
 
   return scaleLabel(id);
 }
@@ -370,6 +421,7 @@ function entryIdsForKind(kind: QuizKind): string[] {
   if (kind === "interval") return INTERVAL_SEMITONE_ENTRIES.map(([semitones]) => semitones.toString());
   if (kind === "scaleDegree") return SCALE_DEGREE_ENTRIES.map(([semitones]) => semitones.toString());
   if (kind === "chordQuality") return CHORD_QUALITY_ENTRIES.map(([pattern]) => pattern.name);
+  if (kind === "progression") return PROGRESSION_ENTRIES.map(([item]) => item.id);
 
   return SCALE_ENTRIES.map(([pattern]) => pattern.name);
 }
@@ -384,6 +436,7 @@ export function itemIdsForDifficulty(kind: QuizKind, difficulty: Difficulty): st
   if (kind === "interval") return poolForDifficulty(INTERVAL_SEMITONE_ENTRIES, difficulty).map(String);
   if (kind === "scaleDegree") return poolForDifficulty(SCALE_DEGREE_ENTRIES, difficulty).map(String);
   if (kind === "chordQuality") return poolForDifficulty(CHORD_QUALITY_ENTRIES, difficulty).map((item) => item.name);
+  if (kind === "progression") return poolForDifficulty(PROGRESSION_ENTRIES, difficulty).map((item) => item.id);
 
   return poolForDifficulty(SCALE_ENTRIES, difficulty).map((item) => item.name);
 }
@@ -397,6 +450,11 @@ export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[]
   // `root` é a tônica: a resposta é só a nota-alvo (a cadência vem do playback).
   if (kind === "scaleDegree") {
     return [root.transpose(Number(id))];
+  }
+
+  // `root` é a tônica: todas as notas da progressão (baixo + tríade de cada acorde), em ordem de execução.
+  if (kind === "progression") {
+    return progressionChords(id, root)?.flat() ?? null;
   }
 
   if (kind === "chordQuality") {
@@ -415,7 +473,8 @@ export function pitchesForItem(kind: QuizKind, id: string, root: Pitch): Pitch[]
 /**
  * Reconstrói as pitches de uma opção específica (não necessariamente a tocada
  * originalmente) para permitir "ouvir sua resposta" vs "ouvir a correta" no
- * feedback de erro. Reusa a mesma fundamental (`question.pitches[0]`) da questão.
+ * feedback de erro. Reusa a mesma fundamental (`question.pitches[0]`) ou tônica da questão,
+ * sempre em posição fundamental — a inversão da questão é aplicada na hora de tocar.
  */
 export function pitchesForOption(question: Question, optionId: string): Pitch[] {
   return pitchesForItem(question.kind, optionId, question.tonic ?? question.pitches[0]) ?? question.pitches;

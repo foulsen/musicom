@@ -2,7 +2,7 @@ import type { LocationQuery, RouteLocationRaw } from "vue-router";
 
 import type { Difficulty, QuizKind } from "./question-generators";
 
-export const QUIZ_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree"];
+export const QUIZ_KINDS: QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree", "progression"];
 export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 /** Configuração pedida pela query `?quiz=<tipo>&difficulty=<nível>` — campos ausentes ou inválidos ficam de fora. */

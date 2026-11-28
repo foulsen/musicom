@@ -133,7 +133,7 @@ const LINK_CLASS =
             :key="`${item.kind}-${item.id}`"
             class="flex flex-wrap items-baseline justify-between gap-x-3 text-sm"
           >
-            <span class="font-medium capitalize text-foreground">
+            <span class="font-medium text-foreground" :class="{ capitalize: typeof item.label !== 'string' }">
               {{ label(item.label) }}
               <span class="text-xs font-normal normal-case text-muted-foreground">· {{ t(`earTraining.kinds.${item.kind}`) }}</span>
             </span>

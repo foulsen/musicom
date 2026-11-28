@@ -13,16 +13,20 @@ import { customSetForWeakItem } from "./custom-set";
 import { cadenceTimeline, timelineDurationMs } from "./cadence";
 import { parseEarTrainingQuery } from "./ear-training-link";
 import { clearItemStats, recordItemAnswer, weakestItems } from "./item-stats";
+import { progressionTimeline } from "./progression";
 import {
   MIN_CUSTOM_ITEMS,
   allItemsForKind,
   generateQuestion,
+  invertPitches,
   itemIdsForDifficulty,
   orderScalePitches,
+  resolveChordInversion,
   resolveIntervalDescending,
   labelForItem,
   pitchesForItem,
   pitchesForOption,
+  type ChordVoicing,
   type Difficulty,
   type IntervalDirection,
   type Question,
@@ -55,8 +59,17 @@ export interface WeakItemView {
 
 export function useEarTrainingViewModel() {
   const store = useEarTrainingStore();
-  const { scores, streak, bestStreak, difficulty, intervalPlaybackMode, intervalDirection, scaleDirection, varySound } =
-    storeToRefs(store);
+  const {
+    scores,
+    streak,
+    bestStreak,
+    difficulty,
+    intervalPlaybackMode,
+    intervalDirection,
+    scaleDirection,
+    chordVoicing,
+    varySound,
+  } = storeToRefs(store);
 
   const { playChord, playSequence, playTimeline } = useNoteAudio();
   const { recordActivity } = useStudyActivity();
@@ -79,6 +92,7 @@ export function useEarTrainingViewModel() {
     const generated = generateQuestion(kind.value, difficulty.value, {
       stats: store,
       intervalDirection: intervalDirection.value,
+      chordVoicing: chordVoicing.value,
       // Com "Personalizar" desligado a dificuldade manda, mesmo que haja uma seleção guardada.
       customItemIds: customActive.value ? customItemIds.value : undefined,
     });
@@ -106,10 +120,14 @@ export function useEarTrainingViewModel() {
     return scores.value[kind.value];
   });
 
-  /** Contexto de playback além das alturas: direção do intervalo, tônica da cadência e som sorteado. */
+  /** Contexto de playback além das alturas: direção do intervalo, inversão do acorde, tônica, item e som sorteado. */
   interface PlayContext {
     descending?: boolean;
+    /** Inversão do acorde (0 = fundamental); as pitches chegam sempre em posição fundamental. */
+    inversion?: number;
     tonic?: Pitch;
+    /** Id do item tocado — a progressão é montada pelo id, não pelas pitches. */
+    itemId?: string;
     sound?: QuestionSound;
   }
 
@@ -130,12 +148,18 @@ export function useEarTrainingViewModel() {
       const timeline = cadenceTimeline(context.tonic, rawPitches, tempo);
       void playTimeline(timeline, [], soundOptions);
       durationMs = timelineDurationMs(timeline) + 200;
+    } else if (playedKind === "progression" && context.tonic && context.itemId) {
+      // Progressões: acordes em sequência na tonalidade da questão, sem cadência prévia.
+      const timeline = progressionTimeline(context.itemId, context.tonic, tempo);
+      void playTimeline(timeline, [], soundOptions);
+      durationMs = timelineDurationMs(timeline) + 200;
     } else {
       // Escalas e intervalos são gerados ascendentes; a direção é aplicada só na hora de tocar,
       // para que a fundamental (`pitches[0]`) continue sendo a referência de "ouvir sua resposta".
       let pitches = rawPitches;
       if (playedKind === "scale") pitches = orderScalePitches(rawPitches, scaleDirection.value);
       if (playedKind === "interval" && !asChord && context.descending) pitches = [...rawPitches].reverse();
+      if (playedKind === "chordQuality" && context.inversion) pitches = invertPitches(rawPitches, context.inversion);
 
       if (asChord) {
         playChord(pitches, { strum: true, ...soundOptions });
@@ -156,7 +180,13 @@ export function useEarTrainingViewModel() {
 
   /** Repetir e comparar respostas usam o mesmo som da questão, para a comparação ser justa. */
   function questionContext(): PlayContext {
-    return { descending: question.value.descending, tonic: question.value.tonic, sound: activeSound.value };
+    return {
+      descending: question.value.descending,
+      inversion: question.value.inversion,
+      tonic: question.value.tonic,
+      itemId: question.value.correctId,
+      sound: activeSound.value,
+    };
   }
 
   function isChordPlayback(playedKind: QuizKind, playback: Question["playback"]) {
@@ -174,7 +204,11 @@ export function useEarTrainingViewModel() {
 
   /** Reouve a opção escolhida ou a correta, para comparar após errar (não altera o placar). */
   function playOption(optionId: string) {
-    playPitches(pitchesForOption(question.value, optionId), asChordPlayback(), question.value.kind, questionContext());
+    // Mesma inversão e raiz da questão (limitada ao tamanho do acorde da opção por `invertPitches`).
+    playPitches(pitchesForOption(question.value, optionId), asChordPlayback(), question.value.kind, {
+      ...questionContext(),
+      itemId: optionId,
+    });
   }
 
   function playYourAnswer() {
@@ -209,6 +243,7 @@ export function useEarTrainingViewModel() {
     playPitches(pitches, isChordPlayback(kind.value, kind.value === "chordQuality" ? "chord" : "sequence"), kind.value, {
       descending: intervalDirection.value === "descending",
       tonic: WEAK_ITEM_ROOT(),
+      itemId,
     });
   }
 
@@ -326,6 +361,15 @@ export function useEarTrainingViewModel() {
     scaleDirection.value = next;
   }
 
+  /** Vale já para a questão atual: re-sorteia só a inversão, sem trocar o acorde. */
+  function selectChordVoicing(next: ChordVoicing) {
+    chordVoicing.value = next;
+
+    if (question.value.kind === "chordQuality") {
+      question.value = { ...question.value, inversion: resolveChordInversion(next, question.value.pitches.length) };
+    }
+  }
+
   /** Vale a partir da próxima questão; a atual segue com o som que já tem. */
   function toggleVarySound() {
     varySound.value = !varySound.value;
@@ -372,6 +416,7 @@ export function useEarTrainingViewModel() {
     intervalPlaybackMode,
     intervalDirection,
     scaleDirection,
+    chordVoicing,
     varySound,
     activeSound,
     isPlaying,
@@ -391,6 +436,7 @@ export function useEarTrainingViewModel() {
     selectIntervalPlaybackMode,
     selectIntervalDirection,
     selectScaleDirection,
+    selectChordVoicing,
     toggleVarySound,
     answer,
     resetScore,

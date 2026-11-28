@@ -15,6 +15,7 @@ export const noteIdLevelSchema = z.enum(["frets3", "frets5", "frets7", "frets12"
 export const intervalPlaybackModeSchema = z.enum(["harmonic", "melodic"]);
 export const intervalDirectionSchema = z.enum(["ascending", "descending", "mixed"]);
 export const scaleDirectionSchema = z.enum(["ascending", "descending", "both"]);
+export const chordVoicingSchema = z.enum(["root", "inversions"]);
 export const themeSchema = z.enum(["light", "dark", "system"]);
 
 /**
@@ -40,6 +41,7 @@ export const preferencesSnapshotSchema = z.object({
       intervalPlaybackMode: intervalPlaybackModeSchema,
       intervalDirection: intervalDirectionSchema,
       scaleDirection: scaleDirectionSchema,
+      chordVoicing: chordVoicingSchema,
       varySound: z.boolean(),
       // "Personalizar": conjunto de itens escolhido e se está ligado, por tipo de quiz.
       customItems: z.record(quizKindSchema, z.array(itemIdSchema).max(32)),

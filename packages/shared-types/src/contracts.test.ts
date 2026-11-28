@@ -279,6 +279,14 @@ describe("preferences snapshot", () => {
     expect(preferencesSnapshotSchema.safeParse({ earTraining: { customActive: { scale: "yes" } } }).success).toBe(false);
   });
 
+  it("accepts the chord voicing preference and the progression quiz kind, and rejects an unknown voicing", () => {
+    expect(preferencesSnapshotSchema.safeParse({ earTraining: { chordVoicing: "inversions" } }).success).toBe(true);
+    expect(preferencesSnapshotSchema.safeParse({ earTraining: { chordVoicing: "drop2" } }).success).toBe(false);
+    expect(
+      preferencesSnapshotSchema.safeParse({ earTraining: { customItems: { progression: ["I-V-vi-IV"] } } }).success,
+    ).toBe(true);
+  });
+
   it("rejects an unknown theme", () => {
     expect(preferencesSnapshotSchema.safeParse({ theme: "sepia" }).success).toBe(false);
   });

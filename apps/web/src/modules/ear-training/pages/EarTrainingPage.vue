@@ -9,6 +9,7 @@ import { useEarTrainingViewModel } from "../application/use-ear-training-view-mo
 import { DIFFICULTIES, QUIZ_KINDS } from "../application/ear-training-link";
 import {
   MIN_CUSTOM_ITEMS,
+  type ChordVoicing,
   type Difficulty,
   type IntervalDirection,
   type QuizKind,
@@ -16,7 +17,7 @@ import {
 } from "../application/question-generators";
 import { AnswerOptions } from "@/modules/shared/components/answer-options";
 import { ChipToggleGroup, ChipToggleItem } from "@/modules/shared/components/chip-toggle-group";
-import { useMusicTerms } from "@/modules/shared/application/music-terms";
+import { useMusicTerms, type TermLabel } from "@/modules/shared/application/music-terms";
 import { useTypingGuardedKeydown } from "@/modules/shared/application/use-typing-guarded-keydown";
 
 const {
@@ -31,6 +32,7 @@ const {
   intervalPlaybackMode,
   intervalDirection,
   scaleDirection,
+  chordVoicing,
   varySound,
   activeSound,
   isPlaying,
@@ -49,6 +51,7 @@ const {
   selectIntervalPlaybackMode,
   selectIntervalDirection,
   selectScaleDirection,
+  selectChordVoicing,
   toggleVarySound,
   answer,
   resetScore,
@@ -62,6 +65,11 @@ const { label } = useMusicTerms();
 
 /** Mesma regra de caixa do `AnswerOptions`: Title Case em inglês, só a primeira letra em pt. */
 const labelCaseClass = computed(() => (locale.value.startsWith("en") ? "capitalize" : "first-letter:uppercase"));
+
+/** Rótulos literais (algarismos romanos, graus) não passam pela regra de caixa: "ii–V–I" não vira "Ii–V–I". */
+function caseClass(termLabel: TermLabel): string {
+  return typeof termLabel === "string" ? "" : labelCaseClass.value;
+}
 
 /** Com o mínimo selecionado, os chips marcados não podem ser removidos (senão faltariam itens para as opções). */
 const atMinimumCustomItems = computed(() => customItemIds.value.length <= MIN_CUSTOM_ITEMS);
@@ -236,6 +244,23 @@ useTypingGuardedKeydown(handleKeydown);
         </chip-toggle-item>
       </chip-toggle-group>
 
+      <chip-toggle-group
+        v-if="kind === 'chordQuality'"
+        :model-value="chordVoicing"
+        type="single"
+        :aria-label="t('earTraining.chordVoicing')"
+        @update:model-value="(value) => value && selectChordVoicing(value as ChordVoicing)"
+      >
+        <chip-toggle-item
+          v-for="option in (['root', 'inversions'] as const)"
+          :key="option"
+          :value="option"
+          class="px-3 py-1 text-xs"
+        >
+          {{ t(`earTraining.chordVoicings.${option}`) }}
+        </chip-toggle-item>
+      </chip-toggle-group>
+
       <button
         type="button"
         class="rounded-md border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -263,7 +288,7 @@ useTypingGuardedKeydown(handleKeydown);
           type="button"
           class="rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :class="[
-            labelCaseClass,
+            caseClass(item.label),
             customItemIds.includes(item.id)
               ? 'border-brand-soft bg-brand-soft text-brand-soft-foreground'
               : 'border-border bg-card/40 text-muted-foreground hover:text-foreground',
@@ -385,7 +410,7 @@ useTypingGuardedKeydown(handleKeydown);
           class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border border-border px-4 py-3"
         >
           <div class="space-y-0.5">
-            <p class="text-sm font-medium capitalize text-foreground">
+            <p class="text-sm font-medium text-foreground" :class="caseClass(item.label)">
               {{ label(item.label) }}
             </p>
             <p class="text-xs text-muted-foreground">
@@ -399,7 +424,8 @@ useTypingGuardedKeydown(handleKeydown);
           <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium capitalize text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              :class="caseClass(item.label)"
               :aria-label="t('earTraining.weakPoints.listen', { item: label(item.label) })"
               @click="playItem(item.id)"
             >
@@ -409,7 +435,8 @@ useTypingGuardedKeydown(handleKeydown);
             <button
               v-if="item.confusion"
               type="button"
-              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium capitalize text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              class="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              :class="caseClass(item.confusion.label)"
               :aria-label="t('earTraining.weakPoints.listen', { item: label(item.confusion.label) })"
               @click="playItem(item.confusion.id)"
             >

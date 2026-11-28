@@ -3,7 +3,7 @@ import type { QuizKind } from "@/modules/ear-training/application/question-gener
 import type { StringAccuracy } from "@/modules/drills/application/note-id-sampling";
 
 /** Tipos de quiz do Treino de Ouvido, na ordem em que desempatam. */
-const EAR_KINDS: readonly QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree"];
+const EAR_KINDS: readonly QuizKind[] = ["interval", "chordQuality", "scale", "scaleDegree", "progression"];
 
 /** Quantos pontos fracos de ouvido o painel "Hoje" lista. */
 export const TODAY_WEAK_EAR_LIMIT = 3;

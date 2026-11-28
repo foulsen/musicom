@@ -380,7 +380,7 @@ export const pt: MessageSchema = {
   },
   earTraining: {
     title: "Treino de Ouvido",
-    subtitle: "Ouça e escolha a resposta certa — intervalos, qualidades de acorde, escalas e graus.",
+    subtitle: "Ouça e escolha a resposta certa — intervalos, qualidades de acorde, escalas, graus e progressões.",
     quizType: "Tipo de quiz",
     play: "Tocar",
     playAgain: "Ouvir de novo",
@@ -400,6 +400,8 @@ export const pt: MessageSchema = {
     soundUsed: "Som: {instrument} · {tempo}×",
     scaleDirection: "Direção da escala",
     scaleDirections: { ascending: "Ascendente", descending: "Descendente", both: "Ambas" },
+    chordVoicing: "Voicing do acorde",
+    chordVoicings: { root: "Fundamental", inversions: "Inversões" },
     intervalDirection: "Direção do intervalo",
     intervalDirections: { ascending: "Ascendente", descending: "Descendente", mixed: "Misto" },
     cadenceHint: "Uma cadência I–IV–V–I define o tom; depois toca uma nota só.",
@@ -412,6 +414,7 @@ export const pt: MessageSchema = {
       chordQuality: "Qualidade de Acorde",
       scale: "Escalas",
       scaleDegree: "Graus",
+      progression: "Progressões",
     },
     difficulties: {
       easy: "Fácil",
@@ -423,6 +426,7 @@ export const pt: MessageSchema = {
       chordQuality: "Qual qualidade de acorde você ouviu?",
       scale: "Qual escala você ouviu?",
       scaleDegree: "Qual grau da tonalidade é a última nota?",
+      progression: "Qual progressão você ouviu?",
     },
     custom: {
       label: "Personalizado",
